@@ -1,3 +1,4 @@
+import { resolveApiUrl, API_BASE_URL } from '../config/apiBase.js';
 /**
  * Servicio de favoritos
  * Maneja las llamadas API para gestionar favoritos del usuario
@@ -5,7 +6,6 @@
 
 import { getToken } from './authService';
 
-const API_BASE_URL = ''; // Usar proxy de Vite
 
 /**
  * Obtiene los favoritos del usuario autenticado
@@ -19,7 +19,7 @@ export async function getFavorites() {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/favorites`, {
+    const response = await fetch(resolveApiUrl('/api/favorites'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ export async function saveFavorites(favorites) {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/favorites`, {
+    const response = await fetch(resolveApiUrl('/api/favorites'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ export async function updateEquipoFavorito(equipoId, action) {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/favorites/equipos`, {
+    const response = await fetch(resolveApiUrl('/api/favorites/equipos'), {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ export async function updateLigaFavorita(ligaId, action) {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/favorites/ligas`, {
+    const response = await fetch(resolveApiUrl('/api/favorites/ligas'), {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

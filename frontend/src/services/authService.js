@@ -3,7 +3,7 @@
  * Maneja las llamadas API para login y registro
  */
 
-const API_BASE_URL = ''; // Usar proxy de Vite
+import { resolveApiUrl } from '../config/apiBase.js';
 
 const AUTH_USER_SNAPSHOT_KEY = 'auth_user_snapshot';
 
@@ -14,7 +14,7 @@ const AUTH_USER_SNAPSHOT_KEY = 'auth_user_snapshot';
  */
 export async function register(payload) {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+    const response = await fetch(resolveApiUrl('/api/auth/register'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ export async function register(payload) {
  */
 export async function login(email, password) {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    const response = await fetch(resolveApiUrl('/api/auth/login'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export async function getSession() {
     throw new Error('No hay token de autenticación');
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/auth/session`, {
+  const response = await fetch(resolveApiUrl('/api/auth/session'), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -176,7 +176,7 @@ export async function acceptLegalNotice() {
     throw new Error('No hay token de autenticación');
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/auth/accept-legal`, {
+  const response = await fetch(resolveApiUrl('/api/auth/accept-legal'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ export async function acceptLegalNotice() {
 export async function requestPasswordReset(email) {
   let response;
   try {
-    response = await fetch(`${API_BASE_URL}/api/auth/request-password-reset`, {
+    response = await fetch(resolveApiUrl('/api/auth/request-password-reset'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -231,7 +231,7 @@ export async function requestPasswordReset(email) {
  * Verifica si un token de recuperación es válido.
  */
 export async function verifyResetToken(token) {
-  const response = await fetch(`${API_BASE_URL}/api/auth/verify-reset-token`, {
+  const response = await fetch(resolveApiUrl('/api/auth/verify-reset-token'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token }),
@@ -248,7 +248,7 @@ export async function verifyResetToken(token) {
  * Restablece la contraseña con token de recuperación.
  */
 export async function resetPassword(token, newPassword) {
-  const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+  const response = await fetch(resolveApiUrl('/api/auth/reset-password'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token, newPassword }),

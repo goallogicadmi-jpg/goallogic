@@ -1,3 +1,4 @@
+import { resolveApiUrl, API_BASE_URL } from '../config/apiBase.js';
 /**
  * Servicio para la Comunidad - Fase 1
  * 
@@ -6,7 +7,6 @@
 
 import { getToken } from './authService';
 
-const API_BASE_URL = ''; // Usar proxy de Vite
 
 /**
  * Obtener contador de notificaciones (comentarios nuevos en posts del usuario)
@@ -20,7 +20,7 @@ export async function getNotificationCount() {
       return 0;
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/community/notifications/count`, {
+    const response = await fetch(resolveApiUrl('/api/community/notifications/count'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ export async function deletePost(postId) {
     throw new Error('Debes iniciar sesión');
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/community/posts/${postId}`, {
+  const response = await fetch(resolveApiUrl(`/api/community/posts/${postId}`), {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ export async function deleteComment(postId, commentId) {
   }
 
   const response = await fetch(
-    `${API_BASE_URL}/api/community/posts/${postId}/comments/${commentId}`,
+    resolveApiUrl(`/api/community/posts/${postId}/comments/${commentId}`),
     {
       method: 'DELETE',
       headers: {
@@ -108,7 +108,7 @@ export async function getHotIndicator() {
       return false;
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/community/hot-indicator`, {
+    const response = await fetch(resolveApiUrl('/api/community/hot-indicator'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -81,18 +81,20 @@ app.use((req, res, next) => {
 
 const stripeWebhook = require('./routes/stripeWebhook');
 
+const CORS_EXTRA = (process.env.CORS_EXTRA_ORIGINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 const CORS_PROD_ORIGINS = [
   'https://goal-logic.com',
   'https://www.goal-logic.com',
+  ...CORS_EXTRA,
 ];
 const CORS_DEV_ORIGINS = [
   ...CORS_PROD_ORIGINS,
   'http://localhost:5173',
   'http://localhost:3000',
-  ...(process.env.CORS_EXTRA_ORIGINS || '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean),
 ];
 
 // Middleware: gzip (brotli suele ir en Nginx/Cloudflare frente a Node)

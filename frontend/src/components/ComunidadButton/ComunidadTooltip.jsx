@@ -5,6 +5,7 @@ import { getToken } from '../../services/authService';
 import { useCommunityLiveFeed } from '../../hooks/useCommunityLiveFeed';
 import { useCommunityGamification } from '../../hooks/useCommunityGamification';
 import { getCommunityPreferences, updateCommunityPreference } from '../../services/communityPreferencesService';
+import { resolveApiUrl } from '../../config/apiBase.js';
 import './ComunidadTooltip.css';
 
 /**
@@ -158,7 +159,7 @@ const ComunidadTooltip = ({ isVisible, onClose, buttonRef, onMouseEnter, onMouse
         if (!token) return;
 
         // Buscar en posts (título o texto)
-        const response = await fetch(`/api/community/posts?sort=recent&limit=50`, {
+        const response = await fetch(resolveApiUrl('/api/community/posts?sort=recent&limit=50'), {
           headers: {
             'Authorization': `Bearer ${token}`,
           },

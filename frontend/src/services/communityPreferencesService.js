@@ -1,3 +1,4 @@
+import { resolveApiUrl, API_BASE_URL } from '../config/apiBase.js';
 /**
  * Servicio para Preferencias de Comunidad - Fase 3
  * 

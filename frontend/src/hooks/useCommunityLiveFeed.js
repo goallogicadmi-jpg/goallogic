@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useUser } from '../context/UserContext';
 import { getToken } from '../services/authService';
+import { resolveApiUrl } from '../config/apiBase.js';
 
 /**
  * Hook para Live Feed de Comunidad - Fase 3
@@ -53,7 +54,7 @@ export function useCommunityLiveFeed() {
       // Obtener posts recientes (últimos 5 minutos)
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
       
-      const response = await fetch(`/api/community/posts?sort=recent&limit=10`, {
+      const response = await fetch(resolveApiUrl('/api/community/posts?sort=recent&limit=10'), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

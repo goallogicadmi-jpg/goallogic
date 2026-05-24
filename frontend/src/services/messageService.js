@@ -1,9 +1,9 @@
+import { resolveApiUrl, API_BASE_URL } from '../config/apiBase.js';
 /**
  * Servicio para interactuar con la API de mensajería
  * Maneja el envío, recepción y gestión de mensajes
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 /**
  * Obtener el token de autenticación desde localStorage
@@ -27,7 +27,7 @@ const fetchWithAuth = async (url, options = {}) => {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${url}`, {
+  const response = await fetch(resolveApiUrl(url), {
     ...options,
     headers
   });

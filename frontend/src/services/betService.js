@@ -1,3 +1,4 @@
+import { resolveApiUrl, resolveApiUrlObject } from '../config/apiBase.js';
 /**
  * Servicio de apuestas
  * Maneja las llamadas API para crear y obtener apuestas
@@ -5,7 +6,6 @@
 
 import { getToken } from './authService';
 
-const API_BASE_URL = ''; // Usar proxy de Vite
 
 /**
  * Crea una nueva apuesta
@@ -20,7 +20,7 @@ export async function createBet(betData) {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/bets`, {
+    const response = await fetch(resolveApiUrl('/api/bets'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ export async function getBets(page = 1, limit = 20, filters = {}) {
     }
 
     // Construir URL con parámetros de paginación y filtros
-    const url = new URL(`${API_BASE_URL}/api/bets`, window.location.origin);
+    const url = resolveApiUrlObject('/api/bets');
     url.searchParams.append('page', page.toString());
     url.searchParams.append('limit', limit.toString());
 
@@ -136,7 +136,7 @@ export async function updateBet(betId, betData) {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/bets/${betId}`, {
+    const response = await fetch(resolveApiUrl(`/api/bets/${betId}`), {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -171,7 +171,7 @@ export async function deleteBet(betId) {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/bets/${betId}`, {
+    const response = await fetch(resolveApiUrl(`/api/bets/${betId}`), {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -204,7 +204,7 @@ export async function getBetStats() {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/bets/stats`, {
+    const response = await fetch(resolveApiUrl('/api/bets/stats'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -237,7 +237,7 @@ export async function getProfitTimeline() {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/bets/profit-timeline`, {
+    const response = await fetch(resolveApiUrl('/api/bets/profit-timeline'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

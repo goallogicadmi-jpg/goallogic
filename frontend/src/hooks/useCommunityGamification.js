@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useUser } from '../context/UserContext';
 import { getToken } from '../services/authService';
+import { resolveApiUrl } from '../config/apiBase.js';
 
 /**
  * Hook para Gamificación de Comunidad - Fase 3
@@ -36,7 +37,7 @@ export function useCommunityGamification() {
       if (!token) return;
 
       // Obtener estadísticas del usuario
-      const response = await fetch(`/api/community/user-stats?userId=${user.id}`, {
+      const response = await fetch(resolveApiUrl(`/api/community/user-stats?userId=${user.id}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

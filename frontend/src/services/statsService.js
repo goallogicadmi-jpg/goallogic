@@ -1,3 +1,4 @@
+import { resolveApiUrl, API_BASE_URL } from '../config/apiBase.js';
 /**
  * Servicio de estadísticas
  * Maneja las llamadas API para obtener estadísticas avanzadas del usuario
@@ -5,7 +6,6 @@
 
 import { getToken } from './authService';
 
-const API_BASE_URL = ''; // Usar proxy de Vite
 
 /**
  * Obtiene estadísticas de profit del usuario
@@ -19,7 +19,7 @@ export async function getProfitStats() {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/stats/profit`, {
+    const response = await fetch(resolveApiUrl('/api/stats/profit'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export async function getLigaStats() {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/stats/ligas`, {
+    const response = await fetch(resolveApiUrl('/api/stats/ligas'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export async function getEquipoStats() {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/stats/equipos`, {
+    const response = await fetch(resolveApiUrl('/api/stats/equipos'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

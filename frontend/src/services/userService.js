@@ -1,3 +1,4 @@
+import { resolveApiUrl, API_BASE_URL } from '../config/apiBase.js';
 /**
  * Servicio de usuario
  * Maneja las llamadas API para obtener el perfil completo del usuario
@@ -5,7 +6,6 @@
 
 import { getToken } from './authService';
 
-const API_BASE_URL = ''; // Usar proxy de Vite
 
 /**
  * Obtiene el perfil completo del usuario autenticado
@@ -20,7 +20,7 @@ export async function getUserProfile() {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+    const response = await fetch(resolveApiUrl('/api/auth/me'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

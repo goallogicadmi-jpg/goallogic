@@ -1,3 +1,4 @@
+import { resolveApiUrl, API_BASE_URL } from '../config/apiBase.js';
 /**
  * Servicio del simulador de apuestas
  * Maneja las llamadas API para el simulador de apuestas
@@ -5,7 +6,6 @@
 
 import { getToken } from './authService';
 
-const API_BASE_URL = ''; // Usar proxy de Vite
 
 /**
  * Obtiene el estado del simulador del usuario autenticado
@@ -19,7 +19,7 @@ export async function getSimulatorState() {
 
   let response;
   try {
-    response = await fetch(`${API_BASE_URL}/api/simulator`, {
+    response = await fetch(resolveApiUrl('/api/simulator'), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ export async function saveSimulatorState(simulatorState) {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/simulator`, {
+    const response = await fetch(resolveApiUrl('/api/simulator'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ export async function addSimulatorBet(apuesta) {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/simulator/apuesta`, {
+    const response = await fetch(resolveApiUrl('/api/simulator/apuesta'), {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -143,7 +143,7 @@ export async function deleteSimulatorBet(apuestaId) {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/simulator/apuesta/${apuestaId}`, {
+    const response = await fetch(resolveApiUrl(`/api/simulator/apuesta/${apuestaId}`), {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
