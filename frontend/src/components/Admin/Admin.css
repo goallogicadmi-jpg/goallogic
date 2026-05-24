@@ -1,0 +1,365 @@
+/* ============================================
+   ESTILOS PARA PANEL DE ADMINISTRACIÓN
+   ============================================ */
+
+.admin-enviar-mensaje,
+.admin-mensajes-enviados {
+  background: var(--bg-secondary, #1A1A1A);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.admin-section-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color, #1F2630);
+}
+
+.admin-section-header h2 {
+  color: var(--text-primary, #FFFFFF);
+  font-size: 24px;
+  margin: 0 0 8px 0;
+}
+
+.admin-section-header p {
+  color: var(--text-secondary, #B3B8C2);
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Formularios */
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-form-group label {
+  color: var(--text-primary, #FFFFFF);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.admin-input,
+.admin-textarea {
+  background: var(--bg-tertiary, #252525);
+  border: 1px solid var(--border-color, #1F2630);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: var(--text-primary, #FFFFFF);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.admin-input:focus,
+.admin-textarea:focus {
+  outline: none;
+  border-color: var(--accent-color, #F28A00);
+}
+
+.admin-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.admin-hint {
+  color: var(--text-secondary, #B3B8C2);
+  font-size: 12px;
+}
+
+.admin-form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.admin-btn-primary,
+.admin-btn-secondary {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.admin-btn-primary {
+  background: var(--accent-color, #F28A00);
+  color: #FFFFFF;
+}
+
+.admin-btn-primary:hover:not(:disabled) {
+  background: #E67A00;
+  transform: translateY(-1px);
+}
+
+.admin-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-btn-secondary {
+  background: var(--bg-tertiary, #252525);
+  color: var(--text-primary, #FFFFFF);
+  border: 1px solid var(--border-color, #1F2630);
+}
+
+.admin-btn-secondary:hover:not(:disabled) {
+  background: var(--bg-quaternary, #2A2A2A);
+}
+
+.admin-btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Estados */
+.admin-success {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #4CAF50;
+}
+
+.admin-error {
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #F44336;
+}
+
+.admin-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--text-secondary, #B3B8C2);
+  gap: 12px;
+}
+
+.admin-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--bg-secondary, #1A1A1A);
+  border-top-color: var(--accent-color, #F28A00);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.admin-btn-retry {
+  padding: 8px 16px;
+  background: var(--accent-color, #F28A00);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: auto;
+}
+
+.admin-btn-retry:hover {
+  background: #E67A00;
+}
+
+/* Estadísticas */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.admin-stat-card {
+  background: var(--bg-tertiary, #252525);
+  border: 1px solid var(--border-color, #1F2630);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.admin-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary, #FFFFFF);
+  margin-bottom: 4px;
+}
+
+.admin-stat-value.admin-stat-read {
+  color: #4CAF50;
+}
+
+.admin-stat-value.admin-stat-unread {
+  color: #F44336;
+}
+
+.admin-stat-label {
+  font-size: 12px;
+  color: var(--text-secondary, #B3B8C2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Lista de mensajes */
+.admin-mensajes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-mensaje-item {
+  background: var(--bg-tertiary, #252525);
+  border: 1px solid var(--border-color, #1F2630);
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-mensaje-item:hover {
+  background: var(--bg-quaternary, #2A2A2A);
+  border-color: var(--accent-color, #F28A00);
+}
+
+.admin-mensaje-item.admin-mensaje-selected {
+  border-color: var(--accent-color, #F28A00);
+  background: var(--bg-quaternary, #2A2A2A);
+}
+
+.admin-mensaje-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
+.admin-mensaje-header h4 {
+  color: var(--text-primary, #FFFFFF);
+  font-size: 16px;
+  margin: 0;
+  flex: 1;
+}
+
+.admin-mensaje-status {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.admin-mensaje-status.admin-mensaje-leido {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.admin-mensaje-status.admin-mensaje-no-leido {
+  background: rgba(244, 67, 54, 0.1);
+  color: #F44336;
+}
+
+.admin-mensaje-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-secondary, #B3B8C2);
+}
+
+.admin-mensaje-preview {
+  color: var(--text-secondary, #B3B8C2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.admin-mensaje-email {
+  color: var(--text-secondary, #B3B8C2);
+  font-size: 12px;
+}
+
+/* Vista detallada */
+.admin-mensaje-detail {
+  background: var(--bg-tertiary, #252525);
+  border: 1px solid var(--border-color, #1F2630);
+  border-radius: 8px;
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.admin-mensaje-detail-header {
+  position: relative;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color, #1F2630);
+}
+
+.admin-mensaje-close-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary, #B3B8C2);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.admin-mensaje-close-btn:hover {
+  background: var(--bg-quaternary, #2A2A2A);
+  color: var(--text-primary, #FFFFFF);
+}
+
+.admin-mensaje-detail-header h3 {
+  color: var(--text-primary, #FFFFFF);
+  font-size: 20px;
+  margin: 0 0 12px 0;
+}
+
+.admin-mensaje-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-secondary, #B3B8C2);
+}
+
+.admin-mensaje-detail-content {
+  color: var(--text-primary, #FFFFFF);
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.admin-empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary, #B3B8C2);
+}

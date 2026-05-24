@@ -1,0 +1,422 @@
+/* ======================================================
+   ESTILOS PARA COMUNIDAD TOOLTIP - FASE 2
+   ====================================================== */
+
+.comunidad-tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  background: var(--bg-card, #1A1A1A);
+  border: 1px solid var(--border-color, #2A313D);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 999; /* Menor que NotificationBell (1000) para no interferir */
+  animation: tooltipSlideDown 0.2s ease-out;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  max-height: 600px;
+  overflow: hidden;
+}
+
+/* Contenedor con scroll interno */
+.comunidad-dropdown-content {
+  padding: 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  max-height: 500px;
+}
+
+/* Scrollbar personalizado */
+.comunidad-dropdown-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comunidad-dropdown-content::-webkit-scrollbar-track {
+  background: var(--bg-secondary, #0D0D0D);
+  border-radius: 3px;
+}
+
+.comunidad-dropdown-content::-webkit-scrollbar-thumb {
+  background: var(--border-color, #2A313D);
+  border-radius: 3px;
+}
+
+.comunidad-dropdown-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted, #7A8190);
+}
+
+/* Ajustar posición en pantallas pequeñas */
+@media (max-width: 768px) {
+  .comunidad-tooltip {
+    left: auto;
+    right: 0;
+    transform: none;
+    width: calc(100vw - 24px);
+    max-width: 320px;
+  }
+  
+  .comunidad-tooltip::before,
+  .comunidad-tooltip::after {
+    left: auto;
+    right: 20px;
+    transform: none;
+  }
+}
+
+@keyframes tooltipSlideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Flecha del tooltip */
+.comunidad-tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--border-color, #2A313D);
+}
+
+.comunidad-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--bg-card, #1A1A1A);
+}
+
+/* Secciones del tooltip */
+.comunidad-tooltip-section {
+  margin-bottom: 16px;
+}
+
+.comunidad-tooltip-section:last-child {
+  margin-bottom: 0;
+}
+
+.comunidad-tooltip-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #B3B8C2);
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Preview del último post */
+.comunidad-tooltip-post-preview {
+  padding: 12px;
+  background: rgba(79, 195, 247, 0.05);
+  border: 1px solid rgba(79, 195, 247, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.comunidad-tooltip-post-preview:hover {
+  background: rgba(79, 195, 247, 0.1);
+  border-color: rgba(79, 195, 247, 0.4);
+}
+
+.comunidad-tooltip-post-preview:focus {
+  outline: 2px solid var(--accent-orange, #F28A00);
+  outline-offset: 2px;
+}
+
+.comunidad-tooltip-post-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #FFFFFF);
+  margin-bottom: 4px;
+}
+
+.comunidad-tooltip-post-date {
+  font-size: 12px;
+  color: var(--text-muted, #7A8190);
+}
+
+.comunidad-tooltip-empty {
+  padding: 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted, #7A8190);
+  font-style: italic;
+}
+
+.comunidad-tooltip-loading {
+  padding: 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted, #7A8190);
+}
+
+/* Búsqueda */
+.comunidad-tooltip-search {
+  position: relative;
+}
+
+.comunidad-tooltip-search-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-secondary, #0D0D0D);
+  border: 1px solid var(--border-color, #2A313D);
+  border-radius: 6px;
+  color: var(--text-primary, #FFFFFF);
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.comunidad-tooltip-search-input:focus {
+  outline: none;
+  border-color: var(--accent-orange, #F28A00);
+  box-shadow: 0 0 0 2px rgba(242, 138, 0, 0.2);
+}
+
+.comunidad-tooltip-search-input::placeholder {
+  color: var(--text-muted, #7A8190);
+}
+
+/* Resultados de búsqueda */
+.comunidad-tooltip-search-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-card, #1A1A1A);
+  border: 1px solid var(--border-color, #2A313D);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1001;
+}
+
+.comunidad-tooltip-search-result {
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-size: 13px;
+  color: var(--text-primary, #FFFFFF);
+  border-bottom: 1px solid var(--border-color, #2A313D);
+}
+
+.comunidad-tooltip-search-result:last-child {
+  border-bottom: none;
+}
+
+.comunidad-tooltip-search-result:hover,
+.comunidad-tooltip-search-result:focus {
+  background: rgba(79, 195, 247, 0.1);
+  outline: none;
+}
+
+/* Acciones */
+.comunidad-tooltip-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color, #2A313D);
+}
+
+.comunidad-tooltip-action-btn {
+  padding: 10px 16px;
+  background: rgba(79, 195, 247, 0.1);
+  border: 1px solid rgba(79, 195, 247, 0.3);
+  border-radius: 6px;
+  color: var(--text-primary, #FFFFFF);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.comunidad-tooltip-action-btn:hover {
+  background: rgba(79, 195, 247, 0.2);
+  border-color: rgba(79, 195, 247, 0.5);
+}
+
+.comunidad-tooltip-action-btn:active {
+  transform: scale(0.98);
+}
+
+.comunidad-tooltip-action-btn:focus {
+  outline: 2px solid var(--accent-orange, #F28A00);
+  outline-offset: 2px;
+}
+
+.comunidad-tooltip-action-contextual {
+  background: rgba(242, 138, 0, 0.1);
+  border-color: rgba(242, 138, 0, 0.3);
+}
+
+.comunidad-tooltip-action-contextual:hover {
+  background: rgba(242, 138, 0, 0.2);
+  border-color: rgba(242, 138, 0, 0.5);
+}
+
+.comunidad-tooltip-action-secondary {
+  background: transparent;
+  border-color: var(--border-color, #2A313D);
+}
+
+.comunidad-tooltip-action-secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Atajos de teclado */
+.comunidad-tooltip-shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color, #2A313D);
+  font-size: 10px;
+  color: var(--text-muted, #7A8190);
+}
+
+.comunidad-tooltip-shortcuts span {
+  display: block;
+}
+
+/* ======================================================
+   FASE 3: LIVE FEED, GAMIFICACIÓN Y FOOTER
+   ====================================================== */
+
+/* Live Feed Indicator */
+.comunidad-live-indicator {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.comunidad-live-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #EF4444;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.comunidad-live-dot {
+  width: 8px;
+  height: 8px;
+  background: #EF4444;
+  border-radius: 50%;
+  animation: livePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+.comunidad-live-activity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-secondary, #B3B8C2);
+}
+
+.comunidad-live-activity span {
+  display: block;
+}
+
+/* Achievement Badge */
+.comunidad-achievement-badge {
+  background: rgba(242, 138, 0, 0.1);
+  border: 1px solid rgba(242, 138, 0, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.comunidad-achievement-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.comunidad-achievement-emoji {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.comunidad-achievement-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #FFFFFF);
+  margin-bottom: 2px;
+}
+
+.comunidad-achievement-desc {
+  font-size: 11px;
+  color: var(--text-muted, #7A8190);
+}
+
+/* Footer del dropdown */
+.comunidad-dropdown-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-color, #2A313D);
+  background: var(--bg-secondary, #0D0D0D);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comunidad-preference-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.comunidad-preference-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted, #7A8190);
+  cursor: pointer;
+  user-select: none;
+}
+
+.comunidad-preference-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent-orange, #F28A00);
+}

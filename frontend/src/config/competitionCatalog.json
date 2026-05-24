@@ -1,0 +1,605 @@
+[
+  {
+    "id": 140,
+    "name": "La Liga",
+    "country": "Spain",
+    "logo": "https://media.api-sports.io/football/leagues/140.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 1,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 39,
+    "name": "Premier League",
+    "country": "England",
+    "logo": "https://media.api-sports.io/football/leagues/39.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 2,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 135,
+    "name": "Serie A",
+    "country": "Italy",
+    "logo": "https://media.api-sports.io/football/leagues/135.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 3,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 78,
+    "name": "Bundesliga",
+    "country": "Germany",
+    "logo": "https://media.api-sports.io/football/leagues/78.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 4,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 61,
+    "name": "Ligue 1",
+    "country": "France",
+    "logo": "https://media.api-sports.io/football/leagues/61.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 5,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 88,
+    "name": "Eredivisie",
+    "country": "Netherlands",
+    "logo": "https://media.api-sports.io/football/leagues/88.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 6,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 94,
+    "name": "Primeira Liga",
+    "country": "Portugal",
+    "logo": "https://media.api-sports.io/football/leagues/94.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 7,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 203,
+    "name": "Super Lig",
+    "country": "Turkey",
+    "logo": "https://media.api-sports.io/football/leagues/203.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 8,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 235,
+    "name": "Premier Liga",
+    "shortName": "Premier Liga",
+    "country": "Russia",
+    "logo": "https://media.api-sports.io/football/leagues/235.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 8.5,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 239,
+    "name": "Liga BetPlay Dimayor",
+    "shortName": "BetPlay Dimayor",
+    "country": "Colombia",
+    "logo": "https://media.api-sports.io/football/leagues/239.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 9,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true,
+      "hasPredictions": true
+    }
+  },
+  {
+    "id": 71,
+    "name": "Brasileirão Serie A",
+    "country": "Brazil",
+    "logo": "https://media.api-sports.io/football/leagues/71.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 10,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 72,
+    "name": "Brasileirão Serie B",
+    "country": "Brazil",
+    "logo": "https://media.api-sports.io/football/leagues/72.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 11,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 262,
+    "name": "Liga MX",
+    "country": "Mexico",
+    "logo": "https://media.api-sports.io/football/leagues/262.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 12,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 253,
+    "name": "MLS",
+    "country": "USA",
+    "logo": "https://media.api-sports.io/football/leagues/253.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 13,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 141,
+    "name": "LaLiga Hypermotion",
+    "country": "Spain",
+    "logo": "https://media.api-sports.io/football/leagues/141.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 14,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 40,
+    "name": "Championship",
+    "country": "England",
+    "logo": "https://media.api-sports.io/football/leagues/40.png",
+    "domain": "club",
+    "type": "League",
+    "format": "league",
+    "participantType": "club",
+    "priority": 15,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": false
+    }
+  },
+  {
+    "id": 2,
+    "name": "UEFA Champions League",
+    "country": "World",
+    "logo": "https://media.api-sports.io/football/leagues/2.png",
+    "domain": "club",
+    "type": "Cup",
+    "format": "league_phase",
+    "participantType": "club",
+    "priority": 16,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": false,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 13,
+    "name": "Copa Libertadores",
+    "country": "World",
+    "logo": "https://media.api-sports.io/football/leagues/13.png",
+    "domain": "club",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "club",
+    "priority": 17,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": false,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 11,
+    "name": "Copa Sudamericana",
+    "country": "World",
+    "logo": "https://media.api-sports.io/football/leagues/11.png",
+    "domain": "club",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "club",
+    "priority": 18,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": false,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 848,
+    "name": "UEFA Europa League",
+    "country": "World",
+    "logo": "https://media.api-sports.io/football/leagues/848.png",
+    "domain": "club",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "club",
+    "priority": 19,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": false,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 849,
+    "name": "UEFA Conference League",
+    "country": "World",
+    "logo": "https://media.api-sports.io/football/leagues/849.png",
+    "domain": "club",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "club",
+    "priority": 20,
+    "seasonMode": "european_split",
+    "features": {
+      "hasTransfers": true,
+      "hasInjuries": true,
+      "hasLeagueStats": false,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 1,
+    "name": "World Cup",
+    "country": "World",
+    "logo": "/competition-logos/world-cup.svg",
+    "domain": "selection",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "national_team",
+    "priority": 1,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": false,
+      "hasInjuries": false,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 9,
+    "name": "Copa America",
+    "country": "South America",
+    "logo": "https://media.api-sports.io/football/leagues/9.png",
+    "domain": "selection",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "national_team",
+    "priority": 2,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": false,
+      "hasInjuries": false,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 4,
+    "name": "Euro Championship",
+    "country": "Europe",
+    "logo": "https://media.api-sports.io/football/leagues/4.png",
+    "domain": "selection",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "national_team",
+    "priority": 3,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": false,
+      "hasInjuries": false,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 5,
+    "name": "UEFA Nations League",
+    "country": "Europe",
+    "logo": "https://media.api-sports.io/football/leagues/5.png",
+    "domain": "selection",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "national_team",
+    "priority": 4,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": false,
+      "hasInjuries": false,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 6,
+    "name": "Africa Cup of Nations",
+    "country": "Africa",
+    "logo": "https://media.api-sports.io/football/leagues/6.png",
+    "domain": "selection",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "national_team",
+    "priority": 5,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": false,
+      "hasInjuries": false,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 7,
+    "name": "Asian Cup",
+    "country": "Asia",
+    "logo": "https://media.api-sports.io/football/leagues/7.png",
+    "domain": "selection",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "national_team",
+    "priority": 6,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": false,
+      "hasInjuries": false,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 22,
+    "name": "CONCACAF Gold Cup",
+    "country": "CONCACAF",
+    "logo": "https://media.api-sports.io/football/leagues/22.png",
+    "domain": "selection",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "national_team",
+    "priority": 7,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": false,
+      "hasInjuries": false,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 19,
+    "name": "African Nations Championship",
+    "country": "Africa",
+    "logo": "https://media.api-sports.io/football/leagues/19.png",
+    "domain": "selection",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "national_team",
+    "priority": 8,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": false,
+      "hasInjuries": false,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  },
+  {
+    "id": 536,
+    "name": "CONCACAF Nations League",
+    "country": "CONCACAF",
+    "logo": "https://media.api-sports.io/football/leagues/536.png",
+    "domain": "selection",
+    "type": "Cup",
+    "format": "group_and_knockout",
+    "participantType": "national_team",
+    "priority": 9,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": false,
+      "hasInjuries": false,
+      "hasLeagueStats": true,
+      "hasSquad": true,
+      "hasStandings": true,
+      "hasKnockout": true
+    }
+  }
+]

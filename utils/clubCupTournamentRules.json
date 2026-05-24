@@ -1,0 +1,62 @@
+{
+  "default": {
+    "visibleGroupTypes": ["group"],
+    "groupNaming": "letter",
+    "classification": {
+      "mode": "top_two",
+      "directPositions": [1, 2],
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  },
+  "11": {
+    "groupNaming": "letter",
+    "visibleGroupTypes": ["group"],
+    "classification": {
+      "mode": "top_two",
+      "directPositions": [1, 2],
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  },
+  "13": {
+    "groupNaming": "letter",
+    "visibleGroupTypes": ["group"],
+    "classification": {
+      "mode": "top_two",
+      "directPositions": [1, 2],
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  },
+  "848": {
+    "groupNaming": "letter",
+    "visibleGroupTypes": ["group"],
+    "classification": {
+      "mode": "top_two",
+      "directPositions": [1, 2],
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  },
+  "849": {
+    "groupNaming": "letter",
+    "visibleGroupTypes": ["group"],
+    "classification": {
+      "mode": "top_two",
+      "directPositions": [1, 2],
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  }
+}

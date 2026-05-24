@@ -1,0 +1,26 @@
+[2026-05-20T00:35:31.746Z] 📌 [EQUIPOS/DETALLE] TeamId: 794, LeagueId inicial: 11
+[2026-05-20T00:35:31.762Z] 📌 [EQUIPOS/DETALLE] TeamId: 435, LeagueId inicial: 11
+[2026-05-20T00:35:31.917Z] 📊 [EQUIPOS/DETALLE] FixturesRaw length: 5
+[2026-05-20T00:35:31.918Z] 📡 [EQUIPOS/DETALLE] Obteniendo estadísticas detalladas de 5 partidos recientes...
+[2026-05-20T00:35:31.919Z] 📊 [EQUIPOS/DETALLE] FixturesRaw length: 5
+[2026-05-20T00:35:31.920Z] 📡 [EQUIPOS/DETALLE] Obteniendo estadísticas detalladas de 5 partidos recientes...
+[2026-05-20T00:35:34.171Z] ✅ [EQUIPOS/DETALLE] Estadísticas de partidos: 5 partidos procesados
+[2026-05-20T00:35:34.172Z] 📊 [EQUIPOS/DETALLE] Promedios: tirosAlArco=6.8, tirosEnContra=3.0, xG=1.42, xGA=0.53
+[2026-05-20T00:35:34.174Z] ✅ [EQUIPOS/DETALLE] Estadísticas de partidos: 5 partidos procesados
+[2026-05-20T00:35:34.174Z] 📊 [EQUIPOS/DETALLE] Promedios: tirosAlArco=5.8, tirosEnContra=2.6, xG=1.38, xGA=0.63
+[2026-05-20T00:35:34.478Z] 📌 [EQUIPOS/DETALLE] Season obtenida de API: 2026 para liga 11
+[2026-05-20T00:35:34.479Z] 📌 [EQUIPOS/DETALLE] Season final: 2026, LeagueId final: 11
+[2026-05-20T00:35:34.480Z] 📡 [EQUIPOS/DETALLE] Solicitando estadísticas: team=435&league=11&season=2026
+[2026-05-20T00:35:34.481Z] 📌 [EQUIPOS/DETALLE] Season obtenida de API: 2026 para liga 11
+[2026-05-20T00:35:34.481Z] 📌 [EQUIPOS/DETALLE] Season final: 2026, LeagueId final: 11
+[2026-05-20T00:35:34.481Z] 📡 [EQUIPOS/DETALLE] Solicitando estadísticas: team=794&league=11&season=2026
+[2026-05-20T00:35:34.585Z] ✅ [EQUIPOS/DETALLE] Estadísticas obtenidas: Sí
+[2026-05-20T00:35:34.586Z] 📊 [EQUIPOS/DETALLE] Estructura: tiene goals=true, tiene fixtures=true
+[2026-05-20T00:35:34.586Z] 📊 [EQUIPOS/DETALLE] Keys de estadisticas: league, team, form, fixtures, goals, biggest, clean_sheet, failed_to_score, penalty, lineups, cards
+[2026-05-20T00:35:34.587Z] 📡 [EQUIPOS/DETALLE] Solicitando standings: league=11&season=2026
+[2026-05-20T00:35:34.588Z] ✅ [EQUIPOS/DETALLE] Estadísticas obtenidas: Sí
+[2026-05-20T00:35:34.589Z] 📊 [EQUIPOS/DETALLE] Estructura: tiene goals=true, tiene fixtures=true
+[2026-05-20T00:35:34.590Z] 📊 [EQUIPOS/DETALLE] Keys de estadisticas: league, team, form, fixtures, goals, biggest, clean_sheet, failed_to_score, penalty, lineups, cards
+[2026-05-20T00:35:34.591Z] 📡 [EQUIPOS/DETALLE] Solicitando standings: league=11&season=2026
+[2026-05-20T00:35:34.698Z] ⚠️ [EQUIPOS/DETALLE] Equipo 794 no encontrado en standings
+[2026-05-20T00:35:34.708Z] ⚠️ [EQUIPOS/DETALLE] Equipo 435 no encontrado en standings

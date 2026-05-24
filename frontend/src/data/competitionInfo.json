@@ -1,0 +1,118 @@
+{
+  "source": "Información editorial (mock temporal)",
+  "updatedAt": "2026-05-01",
+  "default": {
+    "country": "Internacional",
+    "format": "Liga de todos contra todos",
+    "teams": 20,
+    "pointsSystem": "3 puntos por victoria, 1 por empate, 0 por derrota",
+    "tiebreakers": [
+      "Puntos",
+      "Diferencia de goles",
+      "Goles a favor",
+      "Enfrentamiento directo"
+    ],
+    "internationalSpots": ["Copa continental (1º-4º)", "Copa secundaria (5º-6º)"],
+    "promotion": 3,
+    "relegation": 3,
+    "calendar": "Agosto - Mayo",
+    "description": "Competición profesional con formato de liga regular. Los equipos se enfrentan en ida y vuelta; al cierre de la temporada se definen títulos, cupos internacionales y plazas de descenso según la tabla acumulada."
+  },
+  "39": {
+    "country": "Inglaterra",
+    "format": "Liga de todos contra todos (38 jornadas)",
+    "teams": 20,
+    "pointsSystem": "3 puntos por victoria, 1 por empate, 0 por derrota",
+    "tiebreakers": [
+      "Puntos",
+      "Diferencia de goles",
+      "Goles a favor",
+      "Goles en visitante",
+      "Enfrentamiento directo"
+    ],
+    "internationalSpots": [
+      "UEFA Champions League (Top 4)",
+      "UEFA Europa League (5º)",
+      "UEFA Conference League (6º o copa doméstica)"
+    ],
+    "promotion": 3,
+    "relegation": 3,
+    "calendar": "Agosto - Mayo",
+    "description": "La Premier League es la máxima categoría del fútbol inglés. Con 20 clubes y un calendario exigente, combina ritmo físico, intensidad táctica y una de las aficiones más globales del deporte."
+  },
+  "140": {
+    "country": "España",
+    "format": "Liga de todos contra todos (38 jornadas)",
+    "teams": 20,
+    "pointsSystem": "3 puntos por victoria, 1 por empate, 0 por derrota",
+    "tiebreakers": [
+      "Puntos",
+      "Enfrentamiento directo (puntos, DG, GF)",
+      "Diferencia de goles",
+      "Goles a favor"
+    ],
+    "internationalSpots": [
+      "UEFA Champions League (Top 4)",
+      "UEFA Europa League (5º)",
+      "UEFA Conference League (6º)"
+    ],
+    "promotion": 3,
+    "relegation": 3,
+    "calendar": "Agosto - Mayo",
+    "description": "La Liga española destaca por el talento técnico y la rivalidad histórica entre los grandes clubes. El campeón obtiene el título nacional y las plazas europeas se reparten según la clasificación final."
+  },
+  "1": {
+    "country": "Mundial (varios países sede)",
+    "format": "Fase de grupos + eliminatoria directa",
+    "teams": 48,
+    "pointsSystem": "3 puntos por victoria, 1 por empate, 0 por derrota (fase de grupos)",
+    "tiebreakers": [
+      "Puntos",
+      "Diferencia de goles",
+      "Goles a favor",
+      "Fair play",
+      "Sorteo"
+    ],
+    "internationalSpots": [],
+    "promotion": null,
+    "relegation": null,
+    "calendar": "Noviembre - Julio (ciclo FIFA)",
+    "description": "La Copa Mundial de la FIFA es el torneo internacional más importante de selecciones. Tras la fase de grupos, los clasificados disputan octavos, cuartos, semifinales y la gran final por el título mundial."
+  },
+  "4": {
+    "country": "Europa (sedes rotativas)",
+    "format": "Fase de grupos + eliminatoria directa",
+    "teams": 24,
+    "pointsSystem": "3 puntos por victoria, 1 por empate, 0 por derrota (fase de grupos)",
+    "tiebreakers": [
+      "Puntos",
+      "Diferencia de goles",
+      "Goles a favor",
+      "Enfrentamiento directo",
+      "Fair play"
+    ],
+    "internationalSpots": [],
+    "promotion": null,
+    "relegation": null,
+    "calendar": "Junio - Julio (cada 4 años)",
+    "description": "La UEFA Euro reúne a las mejores selecciones europeas. El campeón se consagra en un torneo corto e intenso con fase de grupos y eliminatorias a partido único en sedes del continente."
+  },
+  "9": {
+    "country": "América (sedes CONMEBOL)",
+    "format": "Fase de grupos + eliminatoria directa",
+    "teams": 16,
+    "pointsSystem": "3 puntos por victoria, 1 por empate, 0 por derrota (fase de grupos)",
+    "tiebreakers": [
+      "Puntos",
+      "Diferencia de goles",
+      "Goles a favor",
+      "Enfrentamiento directo",
+      "Fair play"
+    ],
+    "internationalSpots": [],
+    "promotion": null,
+    "relegation": null,
+    "calendar": "Junio - Julio (cada 4 años)",
+    "description": "La Copa América es el torneo continental de selecciones de CONMEBOL, con invitados frecuentes de otras confederaciones. Mezcla tradición, rivalidad regional y fútbol de alto voltaje en un formato de grupos y eliminatorias."
+  }
+}

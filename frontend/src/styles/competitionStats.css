@@ -1,0 +1,56 @@
+/* Overrides locales para EstadisticasAvanzadas dentro del tab de competición */
+.competition-stats-advanced-wrap {
+  margin-top: var(--spacing-md, 16px);
+  padding: 16px;
+  background: #121212;
+  border-radius: 12px;
+  border: 1px solid rgba(79, 195, 247, 0.15);
+  overflow-x: auto;
+}
+
+.competition-stats-advanced-wrap h2 {
+  color: #ffffff;
+  font-size: 1.1rem;
+  margin: 0 0 8px;
+}
+
+.competition-stats-advanced-wrap > p {
+  color: #b0bec5 !important;
+}
+
+.competition-stats-advanced-wrap table {
+  min-width: 900px;
+}
+
+.competition-stats-advanced-wrap thead tr {
+  background: rgba(79, 195, 247, 0.2) !important;
+}
+
+.competition-stats-advanced-wrap th {
+  background: rgba(79, 195, 247, 0.2) !important;
+  color: #4fc3f7 !important;
+  border-bottom: 1px solid #2a2a2a !important;
+}
+
+.competition-stats-advanced-wrap tbody tr {
+  background: #1a1a1a !important;
+}
+
+.competition-stats-advanced-wrap tbody tr:nth-child(even) {
+  background: #121212 !important;
+}
+
+.competition-stats-advanced-wrap td {
+  color: #ffffff !important;
+  border-bottom: 1px solid #2a2a2a !important;
+}
+
+.competition-stats-advanced-wrap div[style*='#f8f9fa'] {
+  background: #1a1a1a !important;
+  border: 1px solid rgba(79, 195, 247, 0.15) !important;
+}
+
+.competition-stats-advanced-wrap div[style*='#f8f9fa'] h4,
+.competition-stats-advanced-wrap div[style*='#f8f9fa'] li {
+  color: #b0bec5 !important;
+}

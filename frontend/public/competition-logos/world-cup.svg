@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Copa del Mundo">
+  <defs>
+    <linearGradient id="wc-gold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f5d76e"/>
+      <stop offset="100%" stop-color="#c9a227"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="#1b5e20" stroke="#f5d76e" stroke-width="4"/>
+  <path fill="url(#wc-gold)" d="M60 22c-10 8-22 10-30 8 2 14 10 24 22 28v22c0 4 3.6 8 8 8s8-4 8-8V58c12-4 20-14 22-28-8 2-20 0-30-8z"/>
+  <ellipse cx="60" cy="98" rx="22" ry="6" fill="#0d3d12"/>
+  <text x="60" y="52" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="700" fill="#fff">FIFA</text>
+</svg>

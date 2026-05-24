@@ -1,0 +1,15 @@
+PASO G — Monitoreo externo (sin código en el repo)
+==================================================
+
+1) UptimeRobot (https://uptimerobot.com) o BetterStack (https://betterstack.com)
+
+2) Crear monitores HTTPS:
+   - URL principal: https://goal-logic.com
+   - Health check: https://goal-logic.com/api/health
+   Intervalo recomendado: 5 minutos en la página principal; 1 minuto en /api/health.
+
+3) Alertas: configurar notificación por email o Telegram en el panel del proveedor cuando el monitor falle (código distinto de 200 o timeout).
+
+4) Opcional: monitor adicional para https://www.goal-logic.com si usas redirección o canonical distinto.
+
+5) El backend expone GET /api/health con { status, uptime, timestamp } para probes ligeros.

@@ -1,0 +1,129 @@
+{
+  "default": {
+    "visibleGroupTypes": ["group", "league_group"],
+    "classification": {
+      "mode": "top_two",
+      "directPositions": [1, 2],
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  },
+  "1": {
+    "groupNaming": "letter",
+    "visibleGroupTypes": ["group"],
+    "classification": {
+      "mode": "top_two_best_third",
+      "directPositions": [1, 2],
+      "bestThirdPosition": 3,
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "bestThird", "label": "Mejor 3°" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  },
+  "4": {
+    "excludeGroupLabels": ["Ranking of third-placed teams"],
+    "groupNaming": "letter",
+    "visibleGroupTypes": ["group"],
+    "classification": {
+      "mode": "top_two_best_third",
+      "directPositions": [1, 2],
+      "bestThirdPosition": 3,
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "bestThird", "label": "Mejor 3°" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  },
+  "5": {
+    "groupNaming": "uefa_nations_league",
+    "visibleGroupTypes": ["league_group"],
+    "classification": {
+      "mode": "description",
+      "legend": [
+        { "type": "playoffs", "label": "Playoffs" },
+        { "type": "promotion", "label": "Promoción" },
+        { "type": "relegationPlayoff", "label": "Play-out" },
+        { "type": "relegation", "label": "Descenso" }
+      ]
+    }
+  },
+  "6": {
+    "excludeGroupLabels": ["Ranking of third-placed teams"],
+    "groupNaming": "letter",
+    "visibleGroupTypes": ["group"],
+    "classification": {
+      "mode": "top_two_best_third",
+      "directPositions": [1, 2],
+      "bestThirdPosition": 3,
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "bestThird", "label": "Mejor 3°" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  },
+  "7": {
+    "excludeGroupLabels": ["Ranking of third-placed teams"],
+    "groupNaming": "letter",
+    "visibleGroupTypes": ["group"],
+    "classification": {
+      "mode": "top_two_best_third",
+      "directPositions": [1, 2],
+      "bestThirdPosition": 3,
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "bestThird", "label": "Mejor 3°" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  },
+  "9": {
+    "groupNaming": "letter",
+    "visibleGroupTypes": ["group"],
+    "classification": {
+      "mode": "top_two",
+      "directPositions": [1, 2],
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  },
+  "19": {
+    "groupNaming": "letter_from_long_name",
+    "visibleGroupTypes": ["group"],
+    "classification": {
+      "mode": "top_two",
+      "directPositions": [1, 2],
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  },
+  "22": {
+    "groupNaming": "letter",
+    "visibleGroupTypes": ["group"],
+    "classification": {
+      "mode": "top_two",
+      "directPositions": [1, 2],
+      "legend": [
+        { "type": "direct", "label": "Clasificado" },
+        { "type": "eliminated", "label": "Eliminado" }
+      ]
+    }
+  },
+  "536": {
+    "groupNaming": "concacaf_nations_league",
+    "visibleGroupTypes": ["league_group"],
+    "classification": {
+      "mode": "none",
+      "legend": []
+    }
+  }
+}

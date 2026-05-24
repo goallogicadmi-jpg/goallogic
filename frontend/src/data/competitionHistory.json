@@ -1,0 +1,528 @@
+{
+  "source": "Historial de torneo (mock temporal)",
+  "updatedAt": "2026-05-18",
+  "byLeagueId": {
+    "1": [
+      {
+        "year": 2022,
+        "championId": 26,
+        "championName": "Argentina",
+        "championFlag": "https://media.api-sports.io/flags/ar.svg",
+        "runnerUpId": 2,
+        "runnerUpName": "France",
+        "runnerUpFlag": "https://media.api-sports.io/flags/fr.svg",
+        "finalScore": "3-3 (4-2 pen.)"
+      },
+      {
+        "year": 2018,
+        "championId": 2,
+        "championName": "France",
+        "championFlag": "https://media.api-sports.io/flags/fr.svg",
+        "runnerUpId": 3,
+        "runnerUpName": "Croatia",
+        "runnerUpFlag": "https://media.api-sports.io/flags/hr.svg",
+        "finalScore": "4-2"
+      },
+      {
+        "year": 2014,
+        "championId": 16,
+        "championName": "Germany",
+        "championFlag": "https://media.api-sports.io/flags/de.svg",
+        "runnerUpId": 26,
+        "runnerUpName": "Argentina",
+        "runnerUpFlag": "https://media.api-sports.io/flags/ar.svg",
+        "finalScore": "1-0"
+      },
+      {
+        "year": 2010,
+        "championId": 9,
+        "championName": "Spain",
+        "championFlag": "https://media.api-sports.io/flags/es.svg",
+        "runnerUpId": 14,
+        "runnerUpName": "Netherlands",
+        "runnerUpFlag": "https://media.api-sports.io/flags/nl.svg",
+        "finalScore": "1-0"
+      },
+      {
+        "year": 2006,
+        "championId": 27,
+        "championName": "Italy",
+        "championFlag": "https://media.api-sports.io/flags/it.svg",
+        "runnerUpId": 2,
+        "runnerUpName": "France",
+        "runnerUpFlag": "https://media.api-sports.io/flags/fr.svg",
+        "finalScore": "1-1 (5-3 pen.)"
+      }
+    ],
+    "4": [
+      {
+        "year": 2024,
+        "championId": 9,
+        "championName": "Spain",
+        "championFlag": "https://media.api-sports.io/flags/es.svg",
+        "runnerUpId": 10,
+        "runnerUpName": "England",
+        "runnerUpFlag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "finalScore": "2-1"
+      },
+      {
+        "year": 2020,
+        "championId": 27,
+        "championName": "Italy",
+        "championFlag": "https://media.api-sports.io/flags/it.svg",
+        "runnerUpId": 10,
+        "runnerUpName": "England",
+        "runnerUpFlag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "finalScore": "1-1 (3-2 pen.)"
+      },
+      {
+        "year": 2016,
+        "championId": 25,
+        "championName": "Portugal",
+        "championFlag": "https://media.api-sports.io/flags/pt.svg",
+        "runnerUpId": 2,
+        "runnerUpName": "France",
+        "runnerUpFlag": "https://media.api-sports.io/flags/fr.svg",
+        "finalScore": "1-0"
+      },
+      {
+        "year": 2012,
+        "championId": 9,
+        "championName": "Spain",
+        "championFlag": "https://media.api-sports.io/flags/es.svg",
+        "runnerUpId": 27,
+        "runnerUpName": "Italy",
+        "runnerUpFlag": "https://media.api-sports.io/flags/it.svg",
+        "finalScore": "4-0"
+      },
+      {
+        "year": 2008,
+        "championId": 9,
+        "championName": "Spain",
+        "championFlag": "https://media.api-sports.io/flags/es.svg",
+        "runnerUpId": 16,
+        "runnerUpName": "Germany",
+        "runnerUpFlag": "https://media.api-sports.io/flags/de.svg",
+        "finalScore": "1-0"
+      }
+    ],
+    "9": [
+      {
+        "year": 2024,
+        "championId": 26,
+        "championName": "Argentina",
+        "championFlag": "https://media.api-sports.io/flags/ar.svg",
+        "runnerUpId": 6,
+        "runnerUpName": "Brazil",
+        "runnerUpFlag": "https://media.api-sports.io/flags/br.svg",
+        "finalScore": "1-0"
+      },
+      {
+        "year": 2021,
+        "championId": 26,
+        "championName": "Argentina",
+        "championFlag": "https://media.api-sports.io/flags/ar.svg",
+        "runnerUpId": 6,
+        "runnerUpName": "Brazil",
+        "runnerUpFlag": "https://media.api-sports.io/flags/br.svg",
+        "finalScore": "1-0"
+      },
+      {
+        "year": 2019,
+        "championId": 6,
+        "championName": "Brazil",
+        "championFlag": "https://media.api-sports.io/flags/br.svg",
+        "runnerUpId": 22,
+        "runnerUpName": "Peru",
+        "runnerUpFlag": "https://media.api-sports.io/flags/pe.svg",
+        "finalScore": "3-1"
+      },
+      {
+        "year": 2016,
+        "championId": 11,
+        "championName": "Chile",
+        "championFlag": "https://media.api-sports.io/flags/cl.svg",
+        "runnerUpId": 26,
+        "runnerUpName": "Argentina",
+        "runnerUpFlag": "https://media.api-sports.io/flags/ar.svg",
+        "finalScore": "0-0 (4-2 pen.)"
+      },
+      {
+        "year": 2015,
+        "championId": 11,
+        "championName": "Chile",
+        "championFlag": "https://media.api-sports.io/flags/cl.svg",
+        "runnerUpId": 26,
+        "runnerUpName": "Argentina",
+        "runnerUpFlag": "https://media.api-sports.io/flags/ar.svg",
+        "finalScore": "0-0 (4-1 pen.)"
+      }
+    ],
+    "5": [
+      {
+        "year": 2023,
+        "championId": 9,
+        "championName": "Spain",
+        "championFlag": "https://media.api-sports.io/flags/es.svg",
+        "runnerUpId": 14,
+        "runnerUpName": "Croatia",
+        "runnerUpFlag": "https://media.api-sports.io/flags/hr.svg",
+        "finalScore": "0-0 (5-4 pen.)"
+      },
+      {
+        "year": 2021,
+        "championId": 2,
+        "championName": "France",
+        "championFlag": "https://media.api-sports.io/flags/fr.svg",
+        "runnerUpId": 9,
+        "runnerUpName": "Spain",
+        "runnerUpFlag": "https://media.api-sports.io/flags/es.svg",
+        "finalScore": "2-1"
+      },
+      {
+        "year": 2019,
+        "championId": 25,
+        "championName": "Portugal",
+        "championFlag": "https://media.api-sports.io/flags/pt.svg",
+        "runnerUpId": 14,
+        "runnerUpName": "Netherlands",
+        "runnerUpFlag": "https://media.api-sports.io/flags/nl.svg",
+        "finalScore": "1-0"
+      }
+    ],
+    "6": [
+      {
+        "year": 2025,
+        "championId": 14,
+        "championName": "Morocco",
+        "championFlag": "https://media.api-sports.io/flags/ma.svg",
+        "runnerUpId": 13,
+        "runnerUpName": "Senegal",
+        "runnerUpFlag": "https://media.api-sports.io/flags/sn.svg",
+        "finalScore": "3-0"
+      },
+      {
+        "year": 2023,
+        "championId": 28,
+        "championName": "Ivory Coast",
+        "championFlag": "https://media.api-sports.io/flags/ci.svg",
+        "runnerUpId": 77,
+        "runnerUpName": "Nigeria",
+        "runnerUpFlag": "https://media.api-sports.io/flags/ng.svg",
+        "finalScore": "2-1"
+      },
+      {
+        "year": 2021,
+        "championId": 13,
+        "championName": "Senegal",
+        "championFlag": "https://media.api-sports.io/flags/sn.svg",
+        "runnerUpId": 32,
+        "runnerUpName": "Egypt",
+        "runnerUpFlag": "https://media.api-sports.io/flags/eg.svg",
+        "finalScore": "0-0 (4-2 pen.)"
+      },
+      {
+        "year": 2019,
+        "championId": 18,
+        "championName": "Algeria",
+        "championFlag": "https://media.api-sports.io/flags/dz.svg",
+        "runnerUpId": 13,
+        "runnerUpName": "Senegal",
+        "runnerUpFlag": "https://media.api-sports.io/flags/sn.svg",
+        "finalScore": "1-0"
+      },
+      {
+        "year": 2017,
+        "championId": 31,
+        "championName": "Cameroon",
+        "championFlag": "https://media.api-sports.io/flags/cm.svg",
+        "runnerUpId": 32,
+        "runnerUpName": "Egypt",
+        "runnerUpFlag": "https://media.api-sports.io/flags/eg.svg",
+        "finalScore": "2-1"
+      },
+      {
+        "year": 2015,
+        "championId": 28,
+        "championName": "Ivory Coast",
+        "championFlag": "https://media.api-sports.io/flags/ci.svg",
+        "runnerUpId": 44,
+        "runnerUpName": "Ghana",
+        "runnerUpFlag": "https://media.api-sports.io/flags/gh.svg",
+        "finalScore": "0-0 (9-8 pen.)"
+      }
+    ],
+    "7": [
+      {
+        "year": 2023,
+        "championId": 1569,
+        "championName": "Qatar",
+        "championFlag": "https://media.api-sports.io/flags/qa.svg",
+        "runnerUpId": 7,
+        "runnerUpName": "Jordan",
+        "runnerUpFlag": "https://media.api-sports.io/flags/jo.svg",
+        "finalScore": "3-1"
+      },
+      {
+        "year": 2019,
+        "championId": 1569,
+        "championName": "Qatar",
+        "championFlag": "https://media.api-sports.io/flags/qa.svg",
+        "runnerUpId": 20,
+        "runnerUpName": "Japan",
+        "runnerUpFlag": "https://media.api-sports.io/flags/jp.svg",
+        "finalScore": "3-1"
+      },
+      {
+        "year": 2015,
+        "championId": 36,
+        "championName": "Australia",
+        "championFlag": "https://media.api-sports.io/flags/au.svg",
+        "runnerUpId": 17,
+        "runnerUpName": "South Korea",
+        "runnerUpFlag": "https://media.api-sports.io/flags/kr.svg",
+        "finalScore": "2-1"
+      },
+      {
+        "year": 2011,
+        "championId": 20,
+        "championName": "Japan",
+        "championFlag": "https://media.api-sports.io/flags/jp.svg",
+        "runnerUpId": 36,
+        "runnerUpName": "Australia",
+        "runnerUpFlag": "https://media.api-sports.io/flags/au.svg",
+        "finalScore": "1-0"
+      },
+      {
+        "year": 2007,
+        "championId": 16,
+        "championName": "Iraq",
+        "championFlag": "https://media.api-sports.io/flags/iq.svg",
+        "runnerUpId": 21,
+        "runnerUpName": "Saudi Arabia",
+        "runnerUpFlag": "https://media.api-sports.io/flags/sa.svg",
+        "finalScore": "1-0"
+      }
+    ],
+    "22": [
+      {
+        "year": 2023,
+        "championId": 23,
+        "championName": "Mexico",
+        "championFlag": "https://media.api-sports.io/flags/mx.svg",
+        "runnerUpId": 14,
+        "runnerUpName": "Panama",
+        "runnerUpFlag": "https://media.api-sports.io/flags/pa.svg",
+        "finalScore": "1-0"
+      },
+      {
+        "year": 2021,
+        "championId": 17,
+        "championName": "USA",
+        "championFlag": "https://media.api-sports.io/flags/us.svg",
+        "runnerUpId": 23,
+        "runnerUpName": "Mexico",
+        "runnerUpFlag": "https://media.api-sports.io/flags/mx.svg",
+        "finalScore": "1-0"
+      },
+      {
+        "year": 2019,
+        "championId": 23,
+        "championName": "Mexico",
+        "championFlag": "https://media.api-sports.io/flags/mx.svg",
+        "runnerUpId": 17,
+        "runnerUpName": "USA",
+        "runnerUpFlag": "https://media.api-sports.io/flags/us.svg",
+        "finalScore": "1-0"
+      },
+      {
+        "year": 2017,
+        "championId": 17,
+        "championName": "USA",
+        "championFlag": "https://media.api-sports.io/flags/us.svg",
+        "runnerUpId": 23,
+        "runnerUpName": "Jamaica",
+        "runnerUpFlag": "https://media.api-sports.io/flags/jm.svg",
+        "finalScore": "2-1"
+      },
+      {
+        "year": 2015,
+        "championId": 23,
+        "championName": "Mexico",
+        "championFlag": "https://media.api-sports.io/flags/mx.svg",
+        "runnerUpId": 17,
+        "runnerUpName": "USA",
+        "runnerUpFlag": "https://media.api-sports.io/flags/us.svg",
+        "finalScore": "3-1"
+      }
+    ],
+    "19": [
+      {
+        "year": 2022,
+        "championId": 18,
+        "championName": "Algeria",
+        "championFlag": "https://media.api-sports.io/flags/dz.svg",
+        "runnerUpId": 13,
+        "runnerUpName": "Senegal",
+        "runnerUpFlag": "https://media.api-sports.io/flags/sn.svg",
+        "finalScore": "2-1"
+      },
+      {
+        "year": 2020,
+        "championId": 14,
+        "championName": "Morocco",
+        "championFlag": "https://media.api-sports.io/flags/ma.svg",
+        "runnerUpId": 18,
+        "runnerUpName": "Mali",
+        "runnerUpFlag": "https://media.api-sports.io/flags/ml.svg",
+        "finalScore": "2-0"
+      },
+      {
+        "year": 2018,
+        "championId": 14,
+        "championName": "Morocco",
+        "championFlag": "https://media.api-sports.io/flags/ma.svg",
+        "runnerUpId": 77,
+        "runnerUpName": "Nigeria",
+        "runnerUpFlag": "https://media.api-sports.io/flags/ng.svg",
+        "finalScore": "4-0"
+      }
+    ],
+    "536": [
+      {
+        "year": 2024,
+        "championId": 17,
+        "championName": "USA",
+        "championFlag": "https://media.api-sports.io/flags/us.svg",
+        "runnerUpId": 23,
+        "runnerUpName": "Mexico",
+        "runnerUpFlag": "https://media.api-sports.io/flags/mx.svg",
+        "finalScore": "2-0"
+      },
+      {
+        "year": 2023,
+        "championId": 17,
+        "championName": "USA",
+        "championFlag": "https://media.api-sports.io/flags/us.svg",
+        "runnerUpId": 23,
+        "runnerUpName": "Mexico",
+        "runnerUpFlag": "https://media.api-sports.io/flags/mx.svg",
+        "finalScore": "2-0"
+      },
+      {
+        "year": 2022,
+        "championId": 17,
+        "championName": "USA",
+        "championFlag": "https://media.api-sports.io/flags/us.svg",
+        "runnerUpId": 23,
+        "runnerUpName": "Mexico",
+        "runnerUpFlag": "https://media.api-sports.io/flags/mx.svg",
+        "finalScore": "3-2"
+      }
+    ],
+    "39": [
+      {
+        "year": 2024,
+        "championId": 50,
+        "championName": "Manchester City",
+        "championFlag": "https://media.api-sports.io/football/teams/50.png",
+        "runnerUpId": 42,
+        "runnerUpName": "Arsenal",
+        "runnerUpFlag": "https://media.api-sports.io/football/teams/42.png",
+        "finalScore": "Liga (91 pts)"
+      },
+      {
+        "year": 2023,
+        "championId": 50,
+        "championName": "Manchester City",
+        "championFlag": "https://media.api-sports.io/football/teams/50.png",
+        "runnerUpId": 42,
+        "runnerUpName": "Arsenal",
+        "runnerUpFlag": "https://media.api-sports.io/football/teams/42.png",
+        "finalScore": "Liga (89 pts)"
+      },
+      {
+        "year": 2022,
+        "championId": 50,
+        "championName": "Manchester City",
+        "championFlag": "https://media.api-sports.io/football/teams/50.png",
+        "runnerUpId": 40,
+        "runnerUpName": "Liverpool",
+        "runnerUpFlag": "https://media.api-sports.io/football/teams/40.png",
+        "finalScore": "Liga (93 pts)"
+      },
+      {
+        "year": 2021,
+        "championId": 50,
+        "championName": "Manchester City",
+        "championFlag": "https://media.api-sports.io/football/teams/50.png",
+        "runnerUpId": 33,
+        "runnerUpName": "Manchester United",
+        "runnerUpFlag": "https://media.api-sports.io/football/teams/33.png",
+        "finalScore": "Liga (86 pts)"
+      },
+      {
+        "year": 2020,
+        "championId": 40,
+        "championName": "Liverpool",
+        "championFlag": "https://media.api-sports.io/football/teams/40.png",
+        "runnerUpId": 50,
+        "runnerUpName": "Manchester City",
+        "runnerUpFlag": "https://media.api-sports.io/football/teams/50.png",
+        "finalScore": "Liga (99 pts)"
+      }
+    ],
+    "140": [
+      {
+        "year": 2024,
+        "championId": 541,
+        "championName": "Real Madrid",
+        "championFlag": "https://media.api-sports.io/football/teams/541.png",
+        "runnerUpId": 529,
+        "runnerUpName": "Barcelona",
+        "runnerUpFlag": "https://media.api-sports.io/football/teams/529.png",
+        "finalScore": "Liga (95 pts)"
+      },
+      {
+        "year": 2023,
+        "championId": 541,
+        "championName": "Real Madrid",
+        "championFlag": "https://media.api-sports.io/football/teams/541.png",
+        "runnerUpId": 529,
+        "runnerUpName": "Barcelona",
+        "runnerUpFlag": "https://media.api-sports.io/football/teams/529.png",
+        "finalScore": "Liga (78 pts)"
+      },
+      {
+        "year": 2022,
+        "championId": 541,
+        "championName": "Real Madrid",
+        "championFlag": "https://media.api-sports.io/football/teams/541.png",
+        "runnerUpId": 529,
+        "runnerUpName": "Barcelona",
+        "runnerUpFlag": "https://media.api-sports.io/football/teams/529.png",
+        "finalScore": "Liga (86 pts)"
+      },
+      {
+        "year": 2021,
+        "championId": 530,
+        "championName": "Atletico Madrid",
+        "championFlag": "https://media.api-sports.io/football/teams/530.png",
+        "runnerUpId": 541,
+        "runnerUpName": "Real Madrid",
+        "runnerUpFlag": "https://media.api-sports.io/football/teams/541.png",
+        "finalScore": "Liga (86 pts)"
+      },
+      {
+        "year": 2020,
+        "championId": 541,
+        "championName": "Real Madrid",
+        "championFlag": "https://media.api-sports.io/football/teams/541.png",
+        "runnerUpId": 529,
+        "runnerUpName": "Barcelona",
+        "runnerUpFlag": "https://media.api-sports.io/football/teams/529.png",
+        "finalScore": "Liga (87 pts)"
+      }
+    ]
+  }
+}

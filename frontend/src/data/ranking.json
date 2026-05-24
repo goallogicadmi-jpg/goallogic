@@ -1,0 +1,31 @@
+{
+  "updatedAt": "2026-05-01",
+  "source": "FIFA Ranking (mock temporal)",
+  "ranking": [
+    { "position": 1, "teamId": 26, "teamName": "Argentina", "points": 1855, "confederation": "CONMEBOL", "flag": "https://media.api-sports.io/flags/ar.svg" },
+    { "position": 2, "teamId": 2, "teamName": "France", "points": 1840, "confederation": "UEFA", "flag": "https://media.api-sports.io/flags/fr.svg" },
+    { "position": 3, "teamId": 6, "teamName": "Brazil", "points": 1810, "confederation": "CONMEBOL", "flag": "https://media.api-sports.io/flags/br.svg" },
+    { "position": 4, "teamId": 9, "teamName": "Spain", "points": 1795, "confederation": "UEFA", "flag": "https://media.api-sports.io/flags/es.svg" },
+    { "position": 5, "teamId": 10, "teamName": "England", "points": 1788, "confederation": "UEFA", "flag": "https://media.api-sports.io/flags/gb-eng.svg" },
+    { "position": 6, "teamId": 1, "teamName": "Belgium", "points": 1765, "confederation": "UEFA", "flag": "https://media.api-sports.io/flags/be.svg" },
+    { "position": 7, "teamId": 25, "teamName": "Portugal", "points": 1758, "confederation": "UEFA", "flag": "https://media.api-sports.io/flags/pt.svg" },
+    { "position": 8, "teamId": 21, "teamName": "Netherlands", "points": 1742, "confederation": "UEFA", "flag": "https://media.api-sports.io/flags/nl.svg" },
+    { "position": 9, "teamId": 27, "teamName": "Colombia", "points": 1720, "confederation": "CONMEBOL", "flag": "https://media.api-sports.io/flags/co.svg" },
+    { "position": 10, "teamId": 12, "teamName": "Italy", "points": 1715, "confederation": "UEFA", "flag": "https://media.api-sports.io/flags/it.svg" },
+    { "position": 11, "teamId": 3, "teamName": "Croatia", "points": 1708, "confederation": "UEFA", "flag": "https://media.api-sports.io/flags/hr.svg" },
+    { "position": 12, "teamId": 16, "teamName": "Germany", "points": 1702, "confederation": "UEFA", "flag": "https://media.api-sports.io/flags/de.svg" },
+    { "position": 13, "teamId": 22, "teamName": "Uruguay", "points": 1695, "confederation": "CONMEBOL", "flag": "https://media.api-sports.io/flags/uy.svg" },
+    { "position": 14, "teamId": 14, "teamName": "Morocco", "points": 1688, "confederation": "CAF", "flag": "https://media.api-sports.io/flags/ma.svg" },
+    { "position": 15, "teamId": 23, "teamName": "Mexico", "points": 1675, "confederation": "CONCACAF", "flag": "https://media.api-sports.io/flags/mx.svg" },
+    { "position": 16, "teamId": 15, "teamName": "Switzerland", "points": 1668, "confederation": "UEFA", "flag": "https://media.api-sports.io/flags/ch.svg" },
+    { "position": 17, "teamId": 24, "teamName": "USA", "points": 1660, "confederation": "CONCACAF", "flag": "https://media.api-sports.io/flags/us.svg" },
+    { "position": 18, "teamId": 20, "teamName": "Japan", "points": 1652, "confederation": "AFC", "flag": "https://media.api-sports.io/flags/jp.svg" },
+    { "position": 19, "teamId": 13, "teamName": "Senegal", "points": 1645, "confederation": "CAF", "flag": "https://media.api-sports.io/flags/sn.svg" },
+    { "position": 20, "teamId": 5, "teamName": "Iran", "points": 1638, "confederation": "AFC", "flag": "https://media.api-sports.io/flags/ir.svg" },
+    { "position": 21, "teamId": 17, "teamName": "South Korea", "points": 1630, "confederation": "AFC", "flag": "https://media.api-sports.io/flags/kr.svg" },
+    { "position": 22, "teamId": 8, "teamName": "Denmark", "points": 1622, "confederation": "UEFA", "flag": "https://media.api-sports.io/flags/dk.svg" },
+    { "position": 23, "teamId": 11, "teamName": "Ecuador", "points": 1615, "confederation": "CONMEBOL", "flag": "https://media.api-sports.io/flags/ec.svg" },
+    { "position": 24, "teamId": 4, "teamName": "Australia", "points": 1608, "confederation": "AFC", "flag": "https://media.api-sports.io/flags/au.svg" },
+    { "position": 25, "teamId": 7, "teamName": "Ukraine", "points": 1600, "confederation": "UEFA", "flag": "https://media.api-sports.io/flags/ua.svg" }
+  ]
+}

@@ -1,0 +1,76 @@
+/* ======================================================
+   ESTILOS PARA TOAST - Mensajes no intrusivos
+   ====================================================== */
+
+.toast {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  min-width: 300px;
+  max-width: 400px;
+  background: var(--bg-card, #1A1A1A);
+  border: 1px solid var(--border-color, #2A313D);
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease-out;
+  pointer-events: auto;
+}
+
+.toast-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toast-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.toast-message {
+  flex: 1;
+  color: var(--text-primary, #FFFFFF);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Variantes de tipo */
+.toast-info {
+  border-left: 3px solid #4FC3F7;
+}
+
+.toast-warning {
+  border-left: 3px solid #F28A00;
+}
+
+.toast-error {
+  border-left: 3px solid #EF4444;
+}
+
+.toast-success {
+  border-left: 3px solid #10B981;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .toast {
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+    max-width: calc(100% - 20px);
+    transform: translateY(-100%);
+  }
+
+  .toast-visible {
+    transform: translateY(0);
+  }
+}

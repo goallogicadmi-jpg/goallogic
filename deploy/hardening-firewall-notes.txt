@@ -1,0 +1,23 @@
+PASO H — Firewall y puertos (fuera del código Node)
+====================================================
+
+Objetivo: solo 80 y 443 expuestos al público; Node escuchando en un puerto local
+accesible solo desde el proxy (misma máquina o red privada).
+
+Ejemplos (ajusta a tu SO):
+
+- UFW (Ubuntu):
+  ufw allow 80/tcp
+  ufw allow 443/tcp
+  ufw enable
+  # No abras 3000/tcp al mundo; Nginx en la misma máquina habla con 127.0.0.1:3000
+
+- firewalld (RHEL/CentOS):
+  firewall-cmd --permanent --add-service=http
+  firewall-cmd --permanent --add-service=https
+  firewall-cmd --reload
+
+- Si Node corre en otro host: restringe el puerto de Node con reglas de origen solo
+  desde la IP del balanceador/Nginx.
+
+Verificación: desde fuera, nmap no debe mostrar 3000/tcp abierto si solo usas proxy local.

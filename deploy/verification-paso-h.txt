@@ -1,0 +1,18 @@
+PASO H — Verificación en producción (checklist)
+==============================================
+
+1) Navegador o curl: https://goal-logic.com debe cargar sin mezcla HTTP (o redirigir 301 desde http://).
+
+2) Respuesta API:
+   curl -sI https://goal-logic.com/api/health
+   - No debe aparecer cabecera "X-Powered-By: Express".
+   - Deben existir cabeceras típicas de Helmet (p. ej. X-Frame-Options, X-Content-Type-Options, Referrer-Policy).
+   - Si Nginx aplica HSTS, debe aparecer Strict-Transport-Security (no duplicar con ENABLE_HELMET_HSTS en Node salvo que sepas lo que haces).
+
+3) JSON: curl -s https://goal-logic.com/api/health | debe ser JSON válido.
+
+4) Panel SPA: abrir consola del navegador; no deben aparecer errores de CSP por esta fase (CSP desactivado en Helmet).
+
+5) Rate limit: más de 100 req/min desde una IP en rutas no excluidas → 429.
+
+6) Webhook Stripe: sigue excluido del rate limit global; comprobar eventos de prueba desde el dashboard/CLI.
