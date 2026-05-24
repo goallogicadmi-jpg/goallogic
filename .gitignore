@@ -50,12 +50,12 @@ coverage/
 *.tmp
 *.temp
 
-# Credentials and sensitive files
-*password*
-*secret*
-*key*
-*credential*
+# Credentials and sensitive files (not application source in utils/)
 contraseña*.txt
+passwords.txt
+password.txt
+*secret*
+*credential*
 *.pem
 *.key
 
