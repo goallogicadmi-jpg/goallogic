@@ -47,8 +47,8 @@ async function main() {
     mode: price.recurring ? 'subscription' : 'payment',
     payment_method_types: ['card'],
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${successUrl || 'https://goal-logic.com/success'}?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: cancelUrl || 'https://goal-logic.com/cancel',
+    success_url: `${successUrl || 'https://goallogic.vercel.app/pago-exitoso'}?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: cancelUrl || 'https://goallogic.vercel.app/pago-cancelado',
     client_reference_id: 'verify-script',
     metadata: { userId: 'verify-script' },
     ...(price.recurring

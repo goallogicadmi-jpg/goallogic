@@ -12,14 +12,47 @@ function getStripeClient() {
   return new Stripe(key);
 }
 
+function normalizeCheckoutRedirectUrl(url) {
+  const trimmed = (typeof url === "string" ? url : "").trim();
+  if (!trimmed) return "";
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return "";
+    return parsed.toString().replace(/\/$/, "");
+  } catch {
+    return "";
+  }
+}
+
+function isAllowedCheckoutRedirectUrl(url) {
+  const normalized = normalizeCheckoutRedirectUrl(url);
+  if (!normalized) return false;
+  if (process.env.NODE_ENV === "production") {
+    return normalized.startsWith("https://");
+  }
+  return true;
+}
+
+function checkoutUrlHint(url) {
+  const normalized = normalizeCheckoutRedirectUrl(url);
+  if (!normalized) return null;
+  try {
+    const u = new URL(normalized);
+    return `${u.origin}${u.pathname}`;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Stripe sustituye {CHECKOUT_SESSION_ID} en la URL; ayuda a evitar caché y permite enlazar la sesión.
  */
 function withCheckoutSessionPlaceholder(url) {
-  if (!url || typeof url !== "string") return url;
-  if (url.includes("{CHECKOUT_SESSION_ID}")) return url;
-  const sep = url.includes("?") ? "&" : "?";
-  return `${url}${sep}session_id={CHECKOUT_SESSION_ID}`;
+  const normalized = normalizeCheckoutRedirectUrl(url);
+  if (!normalized) return url;
+  if (normalized.includes("{CHECKOUT_SESSION_ID}")) return normalized;
+  const sep = normalized.includes("?") ? "&" : "?";
+  return `${normalized}${sep}session_id={CHECKOUT_SESSION_ID}`;
 }
 
 /** Modo inferido de la clave secreta (test/live); no confundir con el priceId (price_… es igual en ambos). */
@@ -114,6 +147,13 @@ function mapStripeCheckoutError(error, skMode) {
       code: "STRIPE_PRICE_ID_MISSING",
     };
   }
+  if (code === "url_invalid") {
+    return {
+      error:
+        "Stripe rechazó las URLs de retorno. En Render usa STRIPE_SUCCESS_URL=https://goallogic.vercel.app/pago-exitoso y STRIPE_CANCEL_URL=https://goallogic.vercel.app/pago-cancelado, y añádelas en Dashboard → Checkout → Allowed redirect URLs (modo LIVE).",
+      code: "STRIPE_URL_INVALID",
+    };
+  }
 
   return {
     error: "Error creando sesión de pago",
@@ -150,8 +190,8 @@ router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, re
       });
     }
 
-    const successUrl = process.env.STRIPE_SUCCESS_URL;
-    const cancelUrl = process.env.STRIPE_CANCEL_URL;
+    const successUrl = normalizeCheckoutRedirectUrl(process.env.STRIPE_SUCCESS_URL);
+    const cancelUrl = normalizeCheckoutRedirectUrl(process.env.STRIPE_CANCEL_URL);
 
     if (!successUrl || !cancelUrl) {
       logger.error("stripe_checkout_config_missing", {
@@ -160,6 +200,18 @@ router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, re
       return res.status(500).json({
         error: "Error de configuración del servidor",
         code: "STRIPE_CHECKOUT_URLS_MISSING",
+      });
+    }
+
+    if (!isAllowedCheckoutRedirectUrl(successUrl) || !isAllowedCheckoutRedirectUrl(cancelUrl)) {
+      logger.error("stripe_checkout_url_invalid", {
+        successUrlHint: checkoutUrlHint(successUrl),
+        cancelUrlHint: checkoutUrlHint(cancelUrl),
+      });
+      return res.status(500).json({
+        error:
+          "URLs de checkout inválidas: en producción deben ser HTTPS (p. ej. https://goallogic.vercel.app/pago-exitoso).",
+        code: "STRIPE_CHECKOUT_URLS_INVALID",
       });
     }
 

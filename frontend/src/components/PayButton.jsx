@@ -54,6 +54,12 @@ export default function PayButton({ buttonText = "Comprar Premium" }) {
             "Faltan STRIPE_SUCCESS_URL o STRIPE_CANCEL_URL en Render."
           );
         }
+        if (data.code === "STRIPE_URL_INVALID" || data.code === "STRIPE_CHECKOUT_URLS_INVALID") {
+          throw new Error(
+            data.error ||
+              "URLs de pago incorrectas en Render. Deben ser https://goallogic.vercel.app/pago-exitoso y /pago-cancelado."
+          );
+        }
         if (res.status === 500 && (data.error || data.message)?.includes("configuración")) {
           throw new Error(
             "Error de configuración en Render (Stripe o JWT). Revisa variables de entorno."

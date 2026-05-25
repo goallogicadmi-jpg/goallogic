@@ -177,6 +177,17 @@ app.use(premiumApiGuard);
 
 const { stripeApiModeFromEnv } = require('./utils/mongoUriHint');
 
+function stripeCheckoutUrlHint(rawUrl) {
+  const trimmed = (rawUrl || '').trim();
+  if (!trimmed) return null;
+  try {
+    const u = new URL(trimmed);
+    return `${u.origin}${u.pathname}`;
+  } catch {
+    return '(invalid-url)';
+  }
+}
+
 app.get('/api/health', (req, res) => {
   const priceId = (process.env.STRIPE_PRICE_ID || '').trim();
   res.json({
@@ -187,8 +198,8 @@ app.get('/api/health', (req, res) => {
       secretKeyMode: stripeApiModeFromEnv(),
       priceIdConfigured: Boolean(priceId),
       priceIdSuffix: priceId ? priceId.slice(-12) : null,
-      successUrlConfigured: Boolean((process.env.STRIPE_SUCCESS_URL || '').trim()),
-      cancelUrlConfigured: Boolean((process.env.STRIPE_CANCEL_URL || '').trim()),
+      successUrl: stripeCheckoutUrlHint(process.env.STRIPE_SUCCESS_URL),
+      cancelUrl: stripeCheckoutUrlHint(process.env.STRIPE_CANCEL_URL),
       webhookSecretConfigured: Boolean((process.env.STRIPE_WEBHOOK_SECRET || '').trim()),
     },
   });

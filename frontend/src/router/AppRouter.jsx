@@ -88,6 +88,9 @@ export default function AppRouter() {
             <Route path="/matches" element={<Navigate to="/partidos" replace />} />
             <Route path="/jugadores/:teamId" element={<JugadoresList />} />
             <Route path="/jugador/:playerId" element={<JugadorProfile />} />
+            <Route path="/pago-exitoso" element={<PaymentSuccess />} />
+            <Route path="/pago-cancelado" element={<PaymentCancel />} />
+            {/* Rutas legacy (Stripe antiguo / enlaces guardados) */}
             <Route path="/success" element={<PaymentSuccess />} />
             <Route path="/cancel" element={<PaymentCancel />} />
             <Route path="/aviso-legal" element={<AvisoLegalPage />} />
