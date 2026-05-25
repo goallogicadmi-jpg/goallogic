@@ -81,20 +81,16 @@ app.use((req, res, next) => {
 
 const stripeWebhook = require('./routes/stripeWebhook');
 
-const CORS_EXTRA = (process.env.CORS_EXTRA_ORIGINS || '')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean);
-
-const CORS_PROD_ORIGINS = [
+const allowedOrigins = [
+  'https://goallogic.vercel.app',
   'https://goal-logic.com',
   'https://www.goal-logic.com',
-  ...CORS_EXTRA,
-];
-const CORS_DEV_ORIGINS = [
-  ...CORS_PROD_ORIGINS,
   'http://localhost:5173',
   'http://localhost:3000',
+  ...(process.env.CORS_EXTRA_ORIGINS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
 ];
 
 // Middleware: gzip (brotli suele ir en Nginx/Cloudflare frente a Node)
@@ -112,22 +108,16 @@ const requestContext = require('./utils/requestContext');
 const globalLimiter = require('./middleware/globalRateLimit');
 const optionalBlockedUserAgents = require('./middleware/optionalBlockedUserAgents');
 
-// CORS: lista explícita (sin "*"); en desarrollo incluye localhost
+// CORS: debe ir antes de express.json() y de las rutas /api
 app.use(
   cors({
     origin(origin, callback) {
-      const allowed =
-        process.env.NODE_ENV === 'production'
-          ? CORS_PROD_ORIGINS
-          : CORS_DEV_ORIGINS;
-      if (!origin) {
+      if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      if (allowed.includes(origin)) {
-        return callback(null, true);
-      }
+      console.log('[CORS] Rechazado:', origin);
       logger.security('cors_rejected', { origin });
-      return callback(null, false);
+      return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
