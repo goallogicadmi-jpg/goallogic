@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getAuthHeaders } from "../setupApiAuth.js";
+import { getAuthHeaders, authFetch } from "../setupApiAuth.js";
 
 /** Debe coincidir con el precio activo en Stripe (Dashboard → producto → Precios). Sin valor, el checkout no arranca. */
 const checkoutPriceId = import.meta.env.VITE_STRIPE_PRICE_ID?.trim() || "";
@@ -26,7 +26,7 @@ export default function PayButton({ buttonText = "Comprar Premium" }) {
         );
       }
 
-      const res = await fetch("/api/payments/create-checkout-session", {
+      const res = await authFetch("/api/payments/create-checkout-session", {
         method: "POST",
         headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ priceId: checkoutPriceId }),

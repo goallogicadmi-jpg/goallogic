@@ -110,7 +110,9 @@ const ComunidadTooltip = ({ isVisible, onClose, buttonRef, onMouseEnter, onMouse
       const token = getToken();
       if (!token) return;
 
-      const response = await fetch('/api/community/posts?analyst=' + user?.id + '&sort=recent&limit=1', {
+      const response = await fetch(
+        resolveApiUrl(`/api/community/posts?analyst=${user?.id}&sort=recent&limit=1`),
+        {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

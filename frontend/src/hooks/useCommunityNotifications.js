@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useUser } from '../context/UserContext';
 import { getNotificationCount, getHotIndicator } from '../services/communityService';
 import { getToken } from '../services/authService';
+import { resolveApiUrl } from '../config/apiBase.js';
 
 /**
  * Hook para manejar notificaciones y badges del botón de Comunidad
@@ -43,7 +44,7 @@ export function useCommunityNotifications() {
       const token = getToken();
       if (!token) return;
 
-      const response = await fetch('/api/community/posts?sort=recent&limit=1', {
+      const response = await fetch(resolveApiUrl('/api/community/posts?sort=recent&limit=1'), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

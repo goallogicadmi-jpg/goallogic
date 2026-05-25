@@ -9,7 +9,8 @@ export function setupApiAuth() {
     axios.defaults.baseURL = API_BASE_URL;
   }
 
-  axios.interceptors.request.use((config) => {    const token = localStorage.getItem('auth_token');
+  axios.interceptors.request.use((config) => {
+    const token = localStorage.getItem('auth_token');
     if (token) {
       config.headers = config.headers || {};
       if (!config.headers.Authorization) {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { register, login, saveToken, saveAuthUserSnapshot } from '../../services/authService';
-import { getAuthHeaders } from '../../setupApiAuth.js';
+import { getAuthHeaders, authFetch } from '../../setupApiAuth.js';
 import { useUser } from '../../context/UserContext';
 import './MiCuenta.css';
 
@@ -129,7 +129,7 @@ const Register = () => {
         return;
       }
 
-      const payRes = await fetch('/api/payments/create-checkout-session', {
+      const payRes = await authFetch('/api/payments/create-checkout-session', {
         method: 'POST',
         headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ priceId: checkoutPriceId }),
