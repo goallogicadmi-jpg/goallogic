@@ -200,6 +200,7 @@ app.get('/api/health', (req, res) => {
       priceIdSuffix: priceId ? priceId.slice(-12) : null,
       successUrl: stripeCheckoutUrlHint(process.env.STRIPE_SUCCESS_URL),
       cancelUrl: stripeCheckoutUrlHint(process.env.STRIPE_CANCEL_URL),
+      couponConfigured: Boolean((process.env.STRIPE_COUPON_ID || '').trim()),
       webhookSecretConfigured: Boolean((process.env.STRIPE_WEBHOOK_SECRET || '').trim()),
     },
   });

@@ -244,6 +244,11 @@ router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, re
       };
     }
 
+    const couponId = (process.env.STRIPE_COUPON_ID || "").trim();
+    if (couponId) {
+      sessionParams.discounts = [{ coupon: couponId }];
+    }
+
     const session = await stripe.checkout.sessions.create(sessionParams);
 
     res.json({ url: session.url });

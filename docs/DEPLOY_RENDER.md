@@ -35,11 +35,12 @@ No uses `node index.js` — ese archivo fue eliminado; el entry es `server.js` (
 - `STRIPE_PRICE_ID` → `price_1Tb3eiE8KSBWzWIREl5xnpiW`
 - `STRIPE_SUCCESS_URL` → `https://goallogic.vercel.app/pago-exitoso`
 - `STRIPE_CANCEL_URL` → `https://goallogic.vercel.app/pago-cancelado`
+- `STRIPE_WEBHOOK_SECRET` → `whsec_...` (LIVE del Dashboard)
+- `STRIPE_COUPON_ID` → `cW7vnkFv` (opcional; descuento automático en checkout)
 
 En **Stripe Dashboard (LIVE)** → Developers → Checkout → Settings → **Allowed redirect URLs**, añade exactamente:
 
 - `https://goallogic.vercel.app/pago-exitoso`
 - `https://goallogic.vercel.app/pago-cancelado`
 
-Tras cambiar variables en Render: **Save** y **Manual Deploy** (o reinicio). Comprueba en `/api/health` que `stripe.successUrl` y `stripe.cancelUrl` muestran esas rutas.
-- `STRIPE_WEBHOOK_SECRET` → `whsec_...` (LIVE del Dashboard)
+Tras cambiar variables en Render: **Save** y **Manual Deploy** (o reinicio). Comprueba en `/api/health` que `stripe.successUrl`, `stripe.cancelUrl` y `stripe.couponConfigured` reflejan la configuración esperada.
