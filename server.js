@@ -54,6 +54,58 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
+const allowedOrigins = [
+  'https://goallogic.vercel.app',
+  'https://goal-logic.com',
+  'https://www.goal-logic.com',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  ...(process.env.CORS_EXTRA_ORIGINS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+];
+
+function normalizeOrigin(origin) {
+  return String(origin || '').trim().replace(/\/$/, '');
+}
+
+function isOriginAllowed(origin) {
+  const normalized = normalizeOrigin(origin);
+  if (!normalized) return true;
+  if (allowedOrigins.includes(normalized)) return true;
+  // Deploy previews de Vercel: *.vercel.app
+  if (/^https:\/\/[\w.-]+\.vercel\.app$/i.test(normalized)) return true;
+  return false;
+}
+
+// CORS: PRIMERO — antes de helmet, compression, express.json() y rutas /api
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (isOriginAllowed(origin)) {
+        const normalized = normalizeOrigin(origin);
+        return callback(null, normalized || true);
+      }
+      console.log('[CORS] Rechazado:', origin);
+      logger.security('cors_rejected', { origin });
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'x-apisports-key',
+      'stripe-signature',
+    ],
+  })
+);
+
+if (process.env.NODE_ENV === 'production') {
+  console.log('[CORS] Orígenes permitidos:', allowedOrigins.join(', '));
+}
+
 const isProduction = process.env.NODE_ENV === 'production';
 const enableHsts =
   isProduction || process.env.ENABLE_HELMET_HSTS === 'true';
@@ -81,18 +133,6 @@ app.use((req, res, next) => {
 
 const stripeWebhook = require('./routes/stripeWebhook');
 
-const allowedOrigins = [
-  'https://goallogic.vercel.app',
-  'https://goal-logic.com',
-  'https://www.goal-logic.com',
-  'http://localhost:5173',
-  'http://localhost:3000',
-  ...(process.env.CORS_EXTRA_ORIGINS || '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean),
-];
-
 // Middleware: gzip (brotli suele ir en Nginx/Cloudflare frente a Node)
 app.use(
   compression({
@@ -107,28 +147,6 @@ const apiShortPublicCache = require('./middleware/apiShortPublicCache');
 const requestContext = require('./utils/requestContext');
 const globalLimiter = require('./middleware/globalRateLimit');
 const optionalBlockedUserAgents = require('./middleware/optionalBlockedUserAgents');
-
-// CORS: debe ir antes de express.json() y de las rutas /api
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      console.log('[CORS] Rechazado:', origin);
-      logger.security('cors_rejected', { origin });
-      return callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'x-apisports-key',
-      'stripe-signature',
-    ],
-  })
-);
 
 app.use(optionalBlockedUserAgents);
 
