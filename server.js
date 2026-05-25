@@ -175,11 +175,22 @@ app.use(globalLimiter);
 app.use(publicCatalogRateLimit);
 app.use(premiumApiGuard);
 
+const { stripeApiModeFromEnv } = require('./utils/mongoUriHint');
+
 app.get('/api/health', (req, res) => {
+  const priceId = (process.env.STRIPE_PRICE_ID || '').trim();
   res.json({
     status: 'ok',
     uptime: process.uptime(),
     timestamp: Date.now(),
+    stripe: {
+      secretKeyMode: stripeApiModeFromEnv(),
+      priceIdConfigured: Boolean(priceId),
+      priceIdSuffix: priceId ? priceId.slice(-12) : null,
+      successUrlConfigured: Boolean((process.env.STRIPE_SUCCESS_URL || '').trim()),
+      cancelUrlConfigured: Boolean((process.env.STRIPE_CANCEL_URL || '').trim()),
+      webhookSecretConfigured: Boolean((process.env.STRIPE_WEBHOOK_SECRET || '').trim()),
+    },
   });
 });
 

@@ -5,7 +5,12 @@ const { authJwt } = require("../middleware/auth");
 const logger = require("../utils/logger");
 
 const router = express.Router();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
+
+function getStripeClient() {
+  const key = (process.env.STRIPE_SECRET_KEY || "").trim();
+  if (!key) return null;
+  return new Stripe(key);
+}
 
 /**
  * Stripe sustituye {CHECKOUT_SESSION_ID} en la URL; ayuda a evitar caché y permite enlazar la sesión.
@@ -25,6 +30,98 @@ function secretKeyMode(secret) {
   return "unknown";
 }
 
+/** Orden de candidatos: en producción prioriza STRIPE_PRICE_ID del servidor (Render). */
+function checkoutPriceCandidates(bodyPriceId) {
+  const envPrice = (process.env.STRIPE_PRICE_ID || "").trim();
+  const bodyPrice = (typeof bodyPriceId === "string" ? bodyPriceId : "").trim();
+  const isProd = process.env.NODE_ENV === "production";
+  if (isProd && envPrice) {
+    return bodyPrice && bodyPrice !== envPrice ? [envPrice, bodyPrice] : [envPrice];
+  }
+  if (bodyPrice) return envPrice && envPrice !== bodyPrice ? [bodyPrice, envPrice] : [bodyPrice];
+  return envPrice ? [envPrice] : [];
+}
+
+/**
+ * Resuelve un price válido para la cuenta/modo de la clave secreta.
+ * Evita fallos cuando el frontend (bundle antiguo) envía un price de test con sk_live.
+ */
+async function resolvePriceForCheckout(stripe, bodyPriceId) {
+  const skMode = secretKeyMode(process.env.STRIPE_SECRET_KEY);
+  const candidates = checkoutPriceCandidates(bodyPriceId);
+  let lastMissing = null;
+
+  for (const priceId of candidates) {
+    try {
+      const price = await stripe.prices.retrieve(priceId);
+      const priceMode = price.livemode ? "live" : "test";
+      if (skMode === "live" && priceMode === "test") {
+        lastMissing = new Error(`Price ${priceId} is test mode but secret key is live`);
+        lastMissing.code = "STRIPE_PRICE_MODE_MISMATCH";
+        continue;
+      }
+      if (skMode === "test" && priceMode === "live") {
+        lastMissing = new Error(`Price ${priceId} is live mode but secret key is test`);
+        lastMissing.code = "STRIPE_PRICE_MODE_MISMATCH";
+        continue;
+      }
+      if (candidates[0] !== priceId) {
+        logger.warn("stripe_checkout_price_fallback", {
+          usedPricePrefix: priceId.slice(0, 20),
+          skippedPrefix: candidates[0].slice(0, 20),
+          secretKeyMode: skMode,
+        });
+      }
+      return { priceId, price };
+    } catch (err) {
+      if (err?.code === "resource_missing") {
+        lastMissing = err;
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  if (lastMissing) throw lastMissing;
+  const err = new Error("No priceId configured");
+  err.code = "STRIPE_PRICE_ID_MISSING";
+  throw err;
+}
+
+function mapStripeCheckoutError(error, skMode) {
+  const code = error?.code;
+  const message = error?.message || "";
+
+  if (code === "resource_missing" && /price/i.test(message)) {
+    return {
+      error:
+        skMode === "live"
+          ? "El precio no existe en Stripe LIVE. Revisa STRIPE_PRICE_ID en Render y redeploy del frontend (VITE_STRIPE_PRICE_ID)."
+          : "El precio no existe en Stripe. Verifica STRIPE_PRICE_ID.",
+      code: "STRIPE_PRICE_NOT_FOUND",
+    };
+  }
+  if (code === "STRIPE_PRICE_MODE_MISMATCH") {
+    return {
+      error:
+        "El price_id no coincide con el modo de la clave (test vs live). Usa price_1Tb3eiE8KSBWzWIREl5xnpiW con sk_live.",
+      code: "STRIPE_PRICE_MODE_MISMATCH",
+    };
+  }
+  if (code === "STRIPE_PRICE_ID_MISSING") {
+    return {
+      error: "Falta STRIPE_PRICE_ID en el servidor.",
+      code: "STRIPE_PRICE_ID_MISSING",
+    };
+  }
+
+  return {
+    error: "Error creando sesión de pago",
+    code: code || "STRIPE_CHECKOUT_FAILED",
+    detail: process.env.NODE_ENV !== "production" ? message : undefined,
+  };
+}
+
 const checkoutLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 20,
@@ -34,13 +131,9 @@ const checkoutLimiter = rateLimit({
 });
 
 router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, res) => {
-  const { priceId } = req.body || {};
+  const { priceId: bodyPriceId } = req.body || {};
   const userId = req.user?.id;
-  const resolvedPriceId =
-    (typeof priceId === "string" && priceId.trim()) ||
-    (typeof process.env.STRIPE_PRICE_ID === "string" &&
-      process.env.STRIPE_PRICE_ID.trim()) ||
-    "";
+  let resolvedPriceId;
   let checkoutMode;
 
   try {
@@ -48,17 +141,12 @@ router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, re
       return res.status(401).json({ error: "Autenticación requerida" });
     }
 
-    if (!process.env.STRIPE_SECRET_KEY) {
+    const stripe = getStripeClient();
+    if (!stripe) {
       logger.error("stripe_checkout_config_missing", { field: "STRIPE_SECRET_KEY" });
       return res.status(500).json({
         error: "Error de configuración del servidor",
         code: "STRIPE_SECRET_KEY_MISSING",
-      });
-    }
-
-    if (!resolvedPriceId) {
-      return res.status(400).json({
-        error: "priceId es requerido",
       });
     }
 
@@ -75,7 +163,9 @@ router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, re
       });
     }
 
-    const price = await stripe.prices.retrieve(resolvedPriceId);
+    const { priceId, price } = await resolvePriceForCheckout(stripe, bodyPriceId);
+    resolvedPriceId = priceId;
+
     const recurring =
       price.recurring != null && typeof price.recurring === "object";
     checkoutMode = recurring ? "subscription" : "payment";
@@ -114,14 +204,24 @@ router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, re
       param: error?.param,
       statusCode: error?.statusCode,
       secretKeyMode: skMode,
-      priceIdPrefix:
+      bodyPriceIdPrefix:
+        typeof bodyPriceId === "string" ? bodyPriceId.slice(0, 24) : undefined,
+      envPriceIdPrefix: (process.env.STRIPE_PRICE_ID || "").slice(0, 24) || undefined,
+      resolvedPriceIdPrefix:
         typeof resolvedPriceId === "string"
           ? resolvedPriceId.slice(0, 24)
           : undefined,
       checkoutMode: checkoutMode !== undefined ? checkoutMode : undefined,
     });
 
-    res.status(500).json({ error: "Error creando sesión de pago" });
+    const mapped = mapStripeCheckoutError(error, skMode);
+    const status =
+      mapped.code === "STRIPE_PRICE_NOT_FOUND" ||
+      mapped.code === "STRIPE_PRICE_MODE_MISMATCH" ||
+      mapped.code === "STRIPE_PRICE_ID_MISSING"
+        ? 400
+        : 500;
+    res.status(status).json(mapped);
   }
 });
 

@@ -59,8 +59,14 @@ export default function PayButton({ buttonText = "Comprar Premium" }) {
             "Error de configuración en Render (Stripe o JWT). Revisa variables de entorno."
           );
         }
+        if (data.code === "STRIPE_PRICE_NOT_FOUND" || data.code === "STRIPE_PRICE_MODE_MISMATCH") {
+          throw new Error(
+            data.error ||
+              "El precio de Stripe no coincide con modo LIVE. Redeploy del frontend y revisa STRIPE_PRICE_ID en Render."
+          );
+        }
         throw new Error(
-          data.error || data.message || `Error al iniciar pago (${res.status})`
+          data.error || data.message || data.detail || `Error al iniciar pago (${res.status})`
         );
       }
       if (!data.url) {
