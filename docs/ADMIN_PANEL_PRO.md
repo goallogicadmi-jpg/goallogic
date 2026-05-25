@@ -5,8 +5,8 @@
 | Ruta | Módulo | Estado |
 |------|--------|--------|
 | `/admin/dashboard` | Dashboard | Implementado (stats existentes) |
-| `/admin/users` | Gestión usuarios | Parcial (listado + perfil) |
-| `/admin/users/:userId` | Detalle usuario | Parcial |
+| `/admin/users` | Gestión usuarios | **Activo** (filtros, premium, Stripe, actividad) |
+| `/admin/users/:userId` | Detalle usuario | **Activo** |
 | `/admin/stripe` | Métricas Stripe | Esqueleto |
 | `/admin/cms` | CMS interno | Esqueleto |
 | `/admin/leagues` | Ligas y datos | Esqueleto |
@@ -38,9 +38,15 @@ frontend/src/components/AdminPanel/
 routes/adminPro.js        # API esqueleto /api/admin/pro/*
 ```
 
+## API usuarios (`/api/admin`)
+
+- `GET /users?email=&premium=&role=&q=&createdFrom=&createdTo=`
+- `GET /user/:id` — incluye `activity[]` y stats comunidad/simulador
+- `PUT /user/:id/premium` — `{ premium: true|false }` (solo admin principal)
+
 ## Próximos pasos sugeridos
 
-1. Usuarios: filtros, toggle premium, `stripe_*` en listado
+1. ~~Usuarios~~ ✅
 2. Stripe: ingresos vía API Stripe + estado webhook
 3. Moderación: UI sobre `/api/community` admin endpoints
 4. Logs: lector de Winston o export desde Render

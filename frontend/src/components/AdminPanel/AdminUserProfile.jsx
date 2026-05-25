@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { getUserProfile } from '../../services/adminService';
+import { useState, useEffect } from 'react';
+import { getUserProfile, setUserPremium } from '../../services/adminService';
 import { sendMessage } from '../../services/messageService';
+import { useUser } from '../../context/UserContext';
+import { getRoleBadge, getPremiumBadge, formatAdminDate, stripeIdShort } from './adminUserUtils';
 import './AdminPanel.css';
 
-/**
- * Vista completa del perfil de un usuario
- * Muestra datos personales, favoritos, simulador, mensajes y apuestas
- */
-const AdminUserProfile = ({ userId, onClose, onSendMessage }) => {
+export default function AdminUserProfile({ userId, onClose, onUserUpdated }) {
+  const { isMainAdmin } = useUser();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,11 +14,10 @@ const AdminUserProfile = ({ userId, onClose, onSendMessage }) => {
   const [messageTitulo, setMessageTitulo] = useState('');
   const [messageContenido, setMessageContenido] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [premiumLoading, setPremiumLoading] = useState(false);
 
   useEffect(() => {
-    if (userId) {
-      loadProfile();
-    }
+    if (userId) loadProfile();
   }, [userId]);
 
   const loadProfile = async () => {
@@ -29,57 +27,66 @@ const AdminUserProfile = ({ userId, onClose, onSendMessage }) => {
       const data = await getUserProfile(userId);
       setProfile(data);
     } catch (err) {
-      console.error('Error cargando perfil:', err);
       setError(err.message || 'Error al cargar el perfil');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    
-    if (!messageTitulo.trim() || !messageContenido.trim()) {
-      alert('Por favor completa todos los campos');
+  const handleTogglePremium = async () => {
+    if (!isMainAdmin) {
+      alert('Solo el administrador principal puede cambiar premium');
+      return;
+    }
+    const user = profile?.user;
+    if (!user) return;
+    if (user.role === 'admin' && user.isMainAdmin) {
+      alert('No se puede modificar el premium del admin principal');
       return;
     }
 
+    const next = !user.premium;
+    const msg = next
+      ? '¿Activar premium manualmente para este usuario?'
+      : '¿Desactivar premium? La suscripción Stripe no se cancela automáticamente.';
+    if (!window.confirm(msg)) return;
+
+    try {
+      setPremiumLoading(true);
+      await setUserPremium(userId, next);
+      await loadProfile();
+      onUserUpdated?.();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      setPremiumLoading(false);
+    }
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!messageTitulo.trim() || !messageContenido.trim()) {
+      alert('Completa título y contenido');
+      return;
+    }
     try {
       setSendingMessage(true);
       await sendMessage(userId, messageTitulo.trim(), messageContenido.trim());
-      alert('Mensaje enviado correctamente');
       setMessageTitulo('');
       setMessageContenido('');
       setShowMessageForm(false);
-      if (onSendMessage) {
-        onSendMessage();
-      }
-      await loadProfile(); // Recargar para actualizar mensajes
+      await loadProfile();
     } catch (err) {
-      console.error('Error enviando mensaje:', err);
-      alert('Error al enviar el mensaje: ' + err.message);
+      alert('Error al enviar: ' + err.message);
     } finally {
       setSendingMessage(false);
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   if (!userId) {
     return (
-      <div className="admin-panel-section">
-        <div className="admin-empty">
-          <p>Selecciona un usuario para ver su perfil</p>
-        </div>
+      <div className="admin-panel-section admin-user-profile-empty">
+        <p className="admin-empty-text">Selecciona un usuario de la lista para ver su detalle.</p>
       </div>
     );
   }
@@ -88,8 +95,8 @@ const AdminUserProfile = ({ userId, onClose, onSendMessage }) => {
     return (
       <div className="admin-panel-section">
         <div className="admin-loading">
-          <div className="admin-spinner"></div>
-          <p>Cargando perfil...</p>
+          <div className="admin-spinner" />
+          <p>Cargando perfil…</p>
         </div>
       </div>
     );
@@ -99,9 +106,8 @@ const AdminUserProfile = ({ userId, onClose, onSendMessage }) => {
     return (
       <div className="admin-panel-section">
         <div className="admin-error">
-          <span>⚠️</span>
           <span>{error}</span>
-          <button onClick={loadProfile} className="admin-btn-retry">
+          <button type="button" onClick={loadProfile} className="admin-btn-retry">
             Reintentar
           </button>
         </div>
@@ -109,196 +115,188 @@ const AdminUserProfile = ({ userId, onClose, onSendMessage }) => {
     );
   }
 
-  if (!profile) {
-    return null;
-  }
+  if (!profile) return null;
 
-  const { user, favorites, simulatorState, messages, bets, stats } = profile;
+  const { user, favorites, simulatorState, messages, activity, stats } = profile;
+  const roleBadge = getRoleBadge(user);
+  const premiumBadge = getPremiumBadge(user);
+  const canTogglePremium = isMainAdmin && !(user.role === 'admin' && user.isMainAdmin);
 
   return (
-    <div className="admin-panel-section">
+    <div className="admin-panel-section admin-user-profile">
       <div className="admin-section-header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="admin-profile-header-row">
           <div>
-            <h2>Perfil de Usuario</h2>
-            <p>{user.nombre} ({user.email})</p>
+            <h2>{user.nombre || 'Usuario'}</h2>
+            <p className="admin-user-email">{user.email}</p>
+            <div className="admin-badge-stack admin-badge-stack-inline">
+              <span className={`role-badge ${roleBadge.className}`}>{roleBadge.text}</span>
+              <span className={`status-badge ${premiumBadge.className}`}>{premiumBadge.text}</span>
+            </div>
           </div>
           {onClose && (
-            <button onClick={onClose} className="admin-btn-close">
-              ✕ Cerrar
+            <button type="button" onClick={onClose} className="admin-btn-close">
+              Cerrar
             </button>
           )}
         </div>
       </div>
 
-      {/* Datos personales */}
-      <div className="admin-profile-section">
-        <h3>📋 Datos Personales</h3>
+      <div className="admin-profile-section admin-stripe-block">
+        <h3>Suscripción y Stripe</h3>
         <div className="admin-profile-grid">
           <div className="admin-profile-item">
-            <label>Nombre:</label>
-            <span>{user.nombre || 'N/A'}</span>
+            <label>Premium</label>
+            <span>{user.premium ? 'Activo' : 'Inactivo'}</span>
           </div>
           <div className="admin-profile-item">
-            <label>Email:</label>
-            <span>{user.email}</span>
+            <label>Premium desde</label>
+            <span>{formatAdminDate(user.premium_since, true)}</span>
+          </div>
+          <div className="admin-profile-item admin-profile-item-full">
+            <label>Customer ID</label>
+            <code className="admin-code">{user.stripe_customer_id || '—'}</code>
+          </div>
+          <div className="admin-profile-item admin-profile-item-full">
+            <label>Subscription ID</label>
+            <code className="admin-code">{user.stripe_subscription_id || '—'}</code>
+          </div>
+        </div>
+        {canTogglePremium && (
+          <button
+            type="button"
+            className={user.premium ? 'admin-btn-danger' : 'admin-btn-primary'}
+            onClick={handleTogglePremium}
+            disabled={premiumLoading}
+          >
+            {premiumLoading
+              ? 'Guardando…'
+              : user.premium
+                ? 'Desactivar premium manualmente'
+                : 'Activar premium manualmente'}
+          </button>
+        )}
+      </div>
+
+      <div className="admin-profile-section">
+        <h3>Datos personales</h3>
+        <div className="admin-profile-grid">
+          <div className="admin-profile-item">
+            <label>Teléfono</label>
+            <span>{user.telefono || '—'}</span>
           </div>
           <div className="admin-profile-item">
-            <label>Teléfono:</label>
-            <span>{user.telefono || 'N/A'}</span>
+            <label>Registro</label>
+            <span>{formatAdminDate(user.created_at, true)}</span>
           </div>
           <div className="admin-profile-item">
-            <label>Rol:</label>
-            <span className={`role-badge role-${user.role}`}>
-              {user.role === 'admin' ? 'Admin Principal' : 
-               user.role === 'admin_secundario' ? 'Admin Secundario' : 'Usuario'}
-            </span>
-          </div>
-          <div className="admin-profile-item">
-            <label>Fecha Registro:</label>
-            <span>{formatDate(user.created_at)}</span>
+            <label>Última actualización</label>
+            <span>{formatAdminDate(user.updated_at, true)}</span>
           </div>
         </div>
       </div>
 
-      {/* Estadísticas rápidas */}
       <div className="admin-profile-section">
-        <h3>📊 Estadísticas</h3>
-        <div className="admin-stats-grid">
+        <h3>Actividad</h3>
+        <div className="admin-stats-grid admin-stats-grid-compact">
           <div className="admin-stat-card-small">
-            <div className="admin-stat-value-small">{stats?.total_messages || 0}</div>
-            <div className="admin-stat-label-small">Mensajes</div>
+            <div className="admin-stat-value-small">{stats?.community_posts ?? 0}</div>
+            <div className="admin-stat-label-small">Posts comunidad</div>
           </div>
           <div className="admin-stat-card-small">
-            <div className="admin-stat-value-small">{stats?.unread_messages || 0}</div>
-            <div className="admin-stat-label-small">No Leídos</div>
+            <div className="admin-stat-value-small">{stats?.community_comments ?? 0}</div>
+            <div className="admin-stat-label-small">Comentarios</div>
           </div>
           <div className="admin-stat-card-small">
-            <div className="admin-stat-value-small">{stats?.total_bets || 0}</div>
+            <div className="admin-stat-value-small">{stats?.total_bets ?? 0}</div>
             <div className="admin-stat-label-small">Apuestas</div>
           </div>
+          <div className="admin-stat-card-small">
+            <div className="admin-stat-value-small">{stats?.simulator_bets ?? 0}</div>
+            <div className="admin-stat-label-small">Simulador</div>
+          </div>
+          <div className="admin-stat-card-small">
+            <div className="admin-stat-value-small">{stats?.total_messages ?? 0}</div>
+            <div className="admin-stat-label-small">Mensajes</div>
+          </div>
         </div>
+
+        {activity?.length > 0 ? (
+          <ul className="admin-activity-timeline">
+            {activity.slice(0, 12).map((item, idx) => (
+              <li key={`${item.type}-${item.date}-${idx}`} className={`admin-activity-item admin-activity-${item.type}`}>
+                <div className="admin-activity-dot" />
+                <div className="admin-activity-body">
+                  <strong>{item.label}</strong>
+                  {item.detail && <span className="admin-activity-detail">{item.detail}</span>}
+                  <time>{formatAdminDate(item.date, true)}</time>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="admin-empty-text">Sin actividad registrada</p>
+        )}
       </div>
 
-      {/* Favoritos */}
       <div className="admin-profile-section">
-        <h3>⭐ Favoritos</h3>
-        <div className="admin-profile-grid">
-          <div className="admin-profile-item">
-            <label>Equipos:</label>
-            <span>{favorites?.equipos?.length || 0}</span>
-            {favorites?.equipos?.length > 0 && (
-              <div className="admin-tags">
-                {favorites.equipos.map((equipo, idx) => (
-                  <span key={idx} className="admin-tag">{equipo}</span>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="admin-profile-item">
-            <label>Ligas:</label>
-            <span>{favorites?.ligas?.length || 0}</span>
-            {favorites?.ligas?.length > 0 && (
-              <div className="admin-tags">
-                {favorites.ligas.map((liga, idx) => (
-                  <span key={idx} className="admin-tag">{liga}</span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        <h3>Favoritos</h3>
+        <p>
+          {favorites?.equipos?.length ?? 0} equipos · {favorites?.ligas?.length ?? 0} ligas
+        </p>
       </div>
 
-      {/* Simulador */}
       {simulatorState && (
         <div className="admin-profile-section">
-          <h3>💰 Simulador</h3>
-          <div className="admin-profile-grid">
-            <div className="admin-profile-item">
-              <label>Capital Inicial:</label>
-              <span>{simulatorState.capital_inicial?.toFixed(2) || '0.00'}€</span>
-            </div>
-            <div className="admin-profile-item">
-              <label>Capital Actual:</label>
-              <span>{simulatorState.capital_actual?.toFixed(2) || '0.00'}€</span>
-            </div>
-            <div className="admin-profile-item">
-              <label>Apuestas Simuladas:</label>
-              <span>{simulatorState.apuestas?.length || 0}</span>
-            </div>
-          </div>
+          <h3>Simulador</h3>
+          <p>
+            Capital: {simulatorState.capital_actual?.toFixed(2) ?? '0'}€ ·{' '}
+            {simulatorState.apuestas?.length ?? 0} apuestas simuladas
+          </p>
         </div>
       )}
 
-      {/* Mensajes */}
       <div className="admin-profile-section">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h3>📬 Mensajes ({messages?.length || 0})</h3>
+        <div className="admin-profile-header-row">
+          <h3>Mensajes ({messages?.length ?? 0})</h3>
           <button
+            type="button"
+            className="admin-btn-secondary"
             onClick={() => setShowMessageForm(!showMessageForm)}
-            className="admin-btn-primary"
           >
-            {showMessageForm ? '✕ Cancelar' : '✉️ Enviar Mensaje'}
+            {showMessageForm ? 'Cancelar' : 'Enviar mensaje'}
           </button>
         </div>
-
         {showMessageForm && (
           <form onSubmit={handleSendMessage} className="admin-message-form">
             <div className="admin-form-group">
-              <label>Título:</label>
+              <label>Título</label>
               <input
                 type="text"
+                className="admin-input"
                 value={messageTitulo}
                 onChange={(e) => setMessageTitulo(e.target.value)}
                 required
                 maxLength={200}
-                className="admin-input"
               />
             </div>
             <div className="admin-form-group">
-              <label>Contenido:</label>
+              <label>Contenido</label>
               <textarea
+                className="admin-textarea"
                 value={messageContenido}
                 onChange={(e) => setMessageContenido(e.target.value)}
                 required
+                rows={4}
                 maxLength={5000}
-                rows={5}
-                className="admin-textarea"
               />
             </div>
-            <button
-              type="submit"
-              disabled={sendingMessage}
-              className="admin-btn-primary"
-            >
-              {sendingMessage ? 'Enviando...' : 'Enviar Mensaje'}
+            <button type="submit" className="admin-btn-primary" disabled={sendingMessage}>
+              {sendingMessage ? 'Enviando…' : 'Enviar'}
             </button>
           </form>
-        )}
-
-        {messages && messages.length > 0 ? (
-          <div className="admin-messages-list">
-            {messages.slice(0, 10).map((message) => (
-              <div key={message._id} className={`admin-message-item ${!message.leido ? 'admin-message-unread' : ''}`}>
-                <div className="admin-message-header">
-                  <strong>{message.titulo}</strong>
-                  <span className={message.leido ? 'admin-message-read' : 'admin-message-unread-badge'}>
-                    {message.leido ? '✓ Leído' : '● No leído'}
-                  </span>
-                </div>
-                <p className="admin-message-content">{message.contenido}</p>
-                <div className="admin-message-meta">
-                  {formatDate(message.created_at)}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="admin-empty-text">No hay mensajes</p>
         )}
       </div>
     </div>
   );
-};
-
-export default AdminUserProfile;
+}

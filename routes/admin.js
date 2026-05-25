@@ -5,6 +5,8 @@ const Message = require('../models/Message');
 const Favorites = require('../models/Favorites');
 const SimulatorState = require('../models/SimulatorState');
 const Bet = require('../models/Bet');
+const CommunityPost = require('../models/CommunityPost');
+const PostComment = require('../models/PostComment');
 const auth = require('../middleware/auth');
 const checkAdmin = require('../middleware/checkAdmin');
 const logger = require('../utils/logger');
@@ -44,38 +46,83 @@ const checkMainAdmin = async (req, res, next) => {
   }
 };
 
+function parseDateStart(iso) {
+  if (!iso || typeof iso !== 'string') return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function parseDateEnd(iso) {
+  const d = parseDateStart(iso);
+  if (!d) return null;
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
+function buildAdminUsersFilter(query) {
+  const { role, email, premium, q, createdFrom, createdTo } = query;
+  const filter = {};
+
+  if (role && ['usuario', 'admin_secundario', 'admin'].includes(role)) {
+    filter.role = role;
+  }
+
+  if (email && typeof email === 'string' && email.trim()) {
+    filter.email = { $regex: email.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' };
+  }
+
+  if (q && typeof q === 'string' && q.trim()) {
+    const escaped = q.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    filter.$or = [
+      { email: { $regex: escaped, $options: 'i' } },
+      { nombre: { $regex: escaped, $options: 'i' } },
+      { apellido: { $regex: escaped, $options: 'i' } },
+    ];
+  }
+
+  if (premium === 'true') filter.premium = true;
+  else if (premium === 'false') filter.premium = { $ne: true };
+
+  const from = parseDateStart(createdFrom);
+  const to = parseDateEnd(createdTo);
+  if (from || to) {
+    filter.created_at = {};
+    if (from) filter.created_at.$gte = from;
+    if (to) filter.created_at.$lte = to;
+  }
+
+  return filter;
+}
+
+const USER_LIST_SELECT =
+  '_id nombre apellido email telefono role isMainAdmin premium premium_since stripe_customer_id stripe_subscription_id created_at updated_at';
+
 /**
  * GET /api/admin/users
- * Obtener lista de usuarios
- * Solo administradores
+ * Filtros: role, email, premium (true|false), q, createdFrom, createdTo (ISO date)
  */
 router.get('/users', auth, checkAdmin, async (req, res) => {
   try {
-    const { role } = req.query;
-    
-    // Construir filtro
-    const filter = {};
-    if (role && (role === 'usuario' || role === 'admin_secundario')) {
-      filter.role = role;
-    }
+    const filter = buildAdminUsersFilter(req.query);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 200, 1), 500);
 
-    // Obtener usuarios con campos específicos
     const users = await User.find(filter)
-      .select('_id nombre email telefono role created_at')
+      .select(USER_LIST_SELECT)
       .sort({ created_at: -1 })
+      .limit(limit)
       .lean();
 
     res.json({
       success: true,
       data: users,
-      total: users.length
+      total: users.length,
     });
   } catch (error) {
-    console.error('Error en GET /api/admin/users:', error);
+    logger.error('admin_users_list_error', { message: error.message });
     res.status(500).json({
       success: false,
       message: 'Error al obtener la lista de usuarios',
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -101,20 +148,79 @@ router.get('/user/:id', auth, checkAdmin, async (req, res) => {
       });
     }
 
-    // Obtener datos relacionados en paralelo
-    const [favorites, simulatorState, messages, bets] = await Promise.all([
-      Favorites.findOne({ user_id: userId }).lean(),
-      SimulatorState.findOne({ user_id: userId }).lean(),
-      Message.find({ user_id: userId })
-        .populate('admin_id', 'nombre email')
-        .sort({ created_at: -1 })
-        .limit(50)
-        .lean(),
-      Bet.find({ user_id: userId })
-        .sort({ created_at: -1 })
-        .limit(50)
-        .lean()
-    ]);
+    const userOid = user._id;
+
+    const [favorites, simulatorState, messages, bets, postsCount, commentsCount, lastPost, lastBet] =
+      await Promise.all([
+        Favorites.findOne({ user_id: userId }).lean(),
+        SimulatorState.findOne({ user_id: userId }).lean(),
+        Message.find({ user_id: userId })
+          .populate('admin_id', 'nombre email')
+          .sort({ created_at: -1 })
+          .limit(50)
+          .lean(),
+        Bet.find({ user_id: userId }).sort({ created_at: -1 }).limit(50).lean(),
+        CommunityPost.countDocuments({ user: userOid }),
+        PostComment.countDocuments({ user: userOid }),
+        CommunityPost.findOne({ user: userOid }).sort({ createdAt: -1 }).select('createdAt text').lean(),
+        Bet.findOne({ user_id: userId }).sort({ created_at: -1 }).select('created_at').lean(),
+      ]);
+
+    const simulatorBets = simulatorState?.apuestas?.length || 0;
+
+    const activity = [];
+
+    activity.push({
+      type: 'register',
+      label: 'Registro en la plataforma',
+      date: user.created_at,
+    });
+
+    if (user.premium_since) {
+      activity.push({
+        type: 'premium',
+        label: 'Premium activado',
+        date: user.premium_since,
+        detail: user.stripe_subscription_id ? 'Stripe' : 'Manual / admin',
+      });
+    }
+
+    if (user.updated_at && String(user.updated_at) !== String(user.created_at)) {
+      activity.push({
+        type: 'profile',
+        label: 'Última actualización de perfil',
+        date: user.updated_at,
+      });
+    }
+
+    if (lastPost?.createdAt) {
+      activity.push({
+        type: 'community',
+        label: 'Última publicación en comunidad',
+        date: lastPost.createdAt,
+        detail: (lastPost.text || '').slice(0, 80),
+      });
+    }
+
+    if (lastBet?.created_at) {
+      activity.push({
+        type: 'bet',
+        label: 'Última apuesta registrada',
+        date: lastBet.created_at,
+      });
+    }
+
+    const recentMessages = (messages || []).slice(0, 5);
+    recentMessages.forEach((m) => {
+      activity.push({
+        type: 'message',
+        label: `Mensaje: ${m.titulo}`,
+        date: m.created_at,
+        detail: m.leido ? 'Leído' : 'No leído',
+      });
+    });
+
+    activity.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     res.json({
       success: true,
@@ -124,12 +230,16 @@ router.get('/user/:id', auth, checkAdmin, async (req, res) => {
         simulatorState: simulatorState || null,
         messages: messages || [],
         bets: bets || [],
+        activity,
         stats: {
           total_messages: messages?.length || 0,
-          unread_messages: messages?.filter(m => !m.leido).length || 0,
-          total_bets: bets?.length || 0
-        }
-      }
+          unread_messages: messages?.filter((m) => !m.leido).length || 0,
+          total_bets: bets?.length || 0,
+          simulator_bets: simulatorBets,
+          community_posts: postsCount,
+          community_comments: commentsCount,
+        },
+      },
     });
   } catch (error) {
     console.error('Error en GET /api/admin/user/:id:', error);
@@ -214,6 +324,81 @@ router.put('/user/:id/role', auth, checkMainAdmin, async (req, res) => {
       success: false,
       message: 'Error al actualizar el rol del usuario',
       error: error.message
+    });
+  }
+});
+
+/**
+ * PUT /api/admin/user/:id/premium
+ * Activar o desactivar premium manualmente (solo admin principal).
+ */
+router.put('/user/:id/premium', auth, checkMainAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { premium } = req.body;
+
+    if (typeof premium !== 'boolean') {
+      return res.status(400).json({
+        success: false,
+        message: 'El campo premium debe ser true o false',
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado',
+      });
+    }
+
+    if (user.isMainAdmin && user.role === 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'No se puede modificar el premium del administrador principal',
+      });
+    }
+
+    const wasPremium = user.premium === true;
+
+    if (premium) {
+      const set = { premium: true, updated_at: new Date() };
+      if (!user.premium_since) set.premium_since = new Date();
+      await User.updateOne({ _id: userId }, { $set: set });
+    } else {
+      await User.updateOne(
+        { _id: userId },
+        {
+          $set: { premium: false, updated_at: new Date() },
+          $unset: { stripe_subscription_id: '' },
+        }
+      );
+    }
+
+    logger.info('admin_premium_toggled', {
+      targetUserId: String(userId),
+      email: user.email,
+      previousPremium: wasPremium,
+      newPremium: premium,
+      actorId: String(req.user.id),
+      ip: req.ip,
+    });
+
+    const updated = await User.findById(userId)
+      .select(USER_LIST_SELECT)
+      .lean();
+
+    res.json({
+      success: true,
+      message: premium ? 'Premium activado manualmente' : 'Premium desactivado',
+      data: updated,
+    });
+  } catch (error) {
+    logger.error('admin_premium_toggle_error', { message: error.message, userId: req.params?.id });
+    res.status(500).json({
+      success: false,
+      message: 'Error al actualizar premium',
+      error: error.message,
     });
   }
 });

@@ -41,24 +41,46 @@ const fetchWithAuth = async (url, options = {}) => {
 };
 
 /**
- * Obtener lista de usuarios
- * @param {string} role - Filtro opcional por rol
- * @returns {Promise<Array>} Lista de usuarios
+ * Obtener lista de usuarios con filtros opcionales.
+ * @param {Object} filters - role, email, premium ('true'|'false'|''), q, createdFrom, createdTo (YYYY-MM-DD)
  */
-export const getUsers = async (role = null) => {
+export const getUsers = async (filters = {}) => {
   try {
-    const url = role ? `/api/admin/users?role=${role}` : '/api/admin/users';
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && String(value).trim() !== '') {
+        params.set(key, String(value).trim());
+      }
+    });
+    const qs = params.toString();
+    const url = qs ? `/api/admin/users?${qs}` : '/api/admin/users';
     const response = await fetchWithAuth(url, { method: 'GET' });
-    
+
     if (!response.success) {
       throw new Error(response.message || 'Error al obtener usuarios');
     }
-    
+
     return response.data;
   } catch (error) {
     console.error('Error en getUsers:', error);
     throw error;
   }
+};
+
+/**
+ * Activar o desactivar premium manualmente (solo admin principal).
+ */
+export const setUserPremium = async (userId, premium) => {
+  const response = await fetchWithAuth(`/api/admin/user/${userId}/premium`, {
+    method: 'PUT',
+    body: JSON.stringify({ premium }),
+  });
+
+  if (!response.success) {
+    throw new Error(response.message || 'Error al actualizar premium');
+  }
+
+  return response.data;
 };
 
 /**

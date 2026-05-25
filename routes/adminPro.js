@@ -6,7 +6,7 @@ const router = express.Router();
 
 /** Módulos del Admin Panel PRO y estado de implementación. */
 const MODULES = [
-  { id: 'users', status: 'partial', apiPrefix: '/api/admin' },
+  { id: 'users', status: 'active', apiPrefix: '/api/admin' },
   { id: 'stripe', status: 'planned', apiPrefix: '/api/admin/pro/stripe' },
   { id: 'cms', status: 'planned', apiPrefix: '/api/admin/pro/cms' },
   { id: 'leagues', status: 'planned', apiPrefix: '/api/admin/pro/leagues' },
