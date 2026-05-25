@@ -201,3 +201,14 @@ export const getAdminStats = async () => {
     throw error;
   }
 };
+
+/**
+ * Metadatos de módulos Admin Panel PRO (esqueleto backend).
+ */
+export const getAdminProModules = async () => {
+  const response = await fetchWithAuth('/api/admin/pro/modules', { method: 'GET' });
+  if (!response.success) {
+    throw new Error(response.message || 'Error al obtener módulos admin');
+  }
+  return response;
+};

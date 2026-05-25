@@ -2541,6 +2541,8 @@ app.use('/api/messages', messagesRoutes);
 // Admin routes
 const adminRoutes = require('./routes/admin.js');
 app.use('/api/admin', adminRoutes);
+const adminProRoutes = require('./routes/adminPro.js');
+app.use('/api/admin/pro', adminProRoutes);
 
 // ======================================================
 // 📌 Rutas de Comunidad

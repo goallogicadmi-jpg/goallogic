@@ -98,7 +98,7 @@ export default function AppRouter() {
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/cuenta" element={<MiCuenta />} />
             <Route path="/micuenta" element={<Navigate to="/cuenta" replace />} />
-            <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/admin/*" element={<AdminPanel />} />
             <Route
               path="/comunidad/*"
               element={
