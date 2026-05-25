@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const auth = require('../middleware/auth');
+const { authJwt } = require('../middleware/auth');
 const checkAdmin = require('../middleware/checkAdmin');
 const CommunityPost = require('../models/CommunityPost');
 const PostComment = require('../models/PostComment');
@@ -65,8 +66,8 @@ router.post('/posts', communityPostLimiter, auth, async (req, res) => {
   }
 });
 
-// Listar posts
-router.get('/posts', auth, async (req, res) => {
+// Listar posts (JWT sin exigir premium: usuarios en proceso de pago pueden ver el feed)
+router.get('/posts', authJwt, async (req, res) => {
   try {
     const { model, publicationType, matchId, sort = 'recent', analyst, limit } = req.query;
 
@@ -95,7 +96,7 @@ router.get('/posts', auth, async (req, res) => {
 });
 
 // Detalle de post
-router.get('/posts/:id', auth, async (req, res) => {
+router.get('/posts/:id', authJwt, async (req, res) => {
   try {
     const post = await CommunityPost.findById(req.params.id)
       .populate('user', 'nombre email');
@@ -258,7 +259,7 @@ const notificationCache = new Map();
 const HOT_CACHE_TTL = 5 * 60 * 1000; // 5 minutos
 
 // Obtener contador de notificaciones (comentarios nuevos en posts del usuario)
-router.get('/notifications/count', auth, async (req, res) => {
+router.get('/notifications/count', authJwt, async (req, res) => {
   try {
     const userId = req.user.id;
     const cacheKey = `notifications_${userId}`;
@@ -300,7 +301,7 @@ router.get('/notifications/count', auth, async (req, res) => {
 });
 
 // Obtener si hay posts "Hot" (alta actividad reciente)
-router.get('/hot-indicator', auth, async (req, res) => {
+router.get('/hot-indicator', authJwt, async (req, res) => {
   try {
     const cacheKey = 'hot_indicator';
     const cached = notificationCache.get(cacheKey);
@@ -341,7 +342,7 @@ router.get('/hot-indicator', auth, async (req, res) => {
 });
 
 // Obtener estadísticas del usuario para gamificación
-router.get('/user-stats', auth, async (req, res) => {
+router.get('/user-stats', authJwt, async (req, res) => {
   try {
     const { userId } = req.query;
     const targetUserId = userId || req.user.id;

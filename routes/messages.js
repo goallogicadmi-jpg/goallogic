@@ -3,6 +3,7 @@ const router = express.Router();
 const Message = require('../models/Message');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const { authJwt } = require('../middleware/auth');
 const checkAdmin = require('../middleware/checkAdmin');
 
 /**
@@ -82,7 +83,7 @@ router.post('/send', auth, checkAdmin, async (req, res) => {
  * Obtener todos los mensajes del usuario autenticado
  * Ordenados por fecha descendente (más recientes primero)
  */
-router.get('/inbox', auth, async (req, res) => {
+router.get('/inbox', authJwt, async (req, res) => {
   try {
     const userId = req.user.id;
 

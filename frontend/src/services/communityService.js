@@ -29,6 +29,9 @@ export async function getNotificationCount() {
     });
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        return 0;
+      }
       throw new Error('Error al obtener contador de notificaciones');
     }
 
@@ -117,6 +120,9 @@ export async function getHotIndicator() {
     });
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        return false;
+      }
       throw new Error('Error al obtener indicador Hot');
     }
 

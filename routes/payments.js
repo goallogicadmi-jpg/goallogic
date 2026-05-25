@@ -52,6 +52,7 @@ router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, re
       logger.error("stripe_checkout_config_missing", { field: "STRIPE_SECRET_KEY" });
       return res.status(500).json({
         error: "Error de configuración del servidor",
+        code: "STRIPE_SECRET_KEY_MISSING",
       });
     }
 
@@ -70,6 +71,7 @@ router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, re
       });
       return res.status(500).json({
         error: "Error de configuración del servidor",
+        code: "STRIPE_CHECKOUT_URLS_MISSING",
       });
     }
 

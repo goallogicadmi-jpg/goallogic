@@ -33,8 +33,12 @@ const fetchWithAuth = async (url, options = {}) => {
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }));
-    throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+    const errorData = await response.json().catch(() => ({}));
+    const msg =
+      errorData.message ||
+      errorData.error ||
+      `Error ${response.status}: ${response.statusText}`;
+    throw new Error(msg);
   }
 
   return response.json();

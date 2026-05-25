@@ -34,6 +34,31 @@ export default function PayButton({ buttonText = "Comprar Premium" }) {
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        if (res.status === 401) {
+          throw new Error(
+            data.message || "Sesión expirada. Cierra sesión e inicia sesión de nuevo."
+          );
+        }
+        if (res.status === 403) {
+          throw new Error(
+            data.error || data.message || "No tienes permiso para iniciar el pago."
+          );
+        }
+        if (res.status === 500 && data.code === "STRIPE_SECRET_KEY_MISSING") {
+          throw new Error(
+            "Stripe no está configurado en el servidor (falta STRIPE_SECRET_KEY en Render)."
+          );
+        }
+        if (res.status === 500 && data.code === "STRIPE_CHECKOUT_URLS_MISSING") {
+          throw new Error(
+            "Faltan STRIPE_SUCCESS_URL o STRIPE_CANCEL_URL en Render."
+          );
+        }
+        if (res.status === 500 && (data.error || data.message)?.includes("configuración")) {
+          throw new Error(
+            "Error de configuración en Render (Stripe o JWT). Revisa variables de entorno."
+          );
+        }
         throw new Error(
           data.error || data.message || `Error al iniciar pago (${res.status})`
         );
