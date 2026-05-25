@@ -3492,13 +3492,20 @@ function startServer() {
     );
 
     app.listen(PORT, () => {
+        const deployRef =
+            process.env.RENDER_GIT_COMMIT ||
+            process.env.RENDER_COMMIT ||
+            process.env.VERCEL_GIT_COMMIT_SHA ||
+            'local';
         console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
-        console.log(`📡 Rutas disponibles:`);
+        console.log(`📦 Deploy ref: ${deployRef}`);
+        console.log(`📡 Rutas clave:`);
+        console.log(`   - GET /api/health`);
+        console.log(`   - POST /api/payments/create-checkout-session`);
+        console.log(`   - POST /api/payments/webhook`);
         console.log(`   - GET /api/leagues`);
         console.log(`   - GET /estadisticas/torneo?leagueId=X&season=Y`);
         console.log(`   - GET /api/players/topscorers?leagueId=X&season=Y`);
-        console.log(`   - GET /api/players/topassists?leagueId=X&season=Y`);
         console.log(`   - GET /api/team-info/:teamId`);
-        console.log(`   - Y más...`);
     });
 }

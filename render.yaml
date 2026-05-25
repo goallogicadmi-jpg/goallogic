@@ -1,0 +1,13 @@
+# Render Blueprint — backend GoalLogic (raíz del repo)
+# Dashboard: Settings deben coincidir con estos valores.
+services:
+  - type: web
+    name: goallogic-api
+    runtime: node
+    rootDir: .
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
