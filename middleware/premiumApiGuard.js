@@ -12,37 +12,15 @@ const {
 function isPremiumProtectedPath(pathname) {
   const p = pathname || '';
 
-  if (p.startsWith('/api/search-teams')) return false;
-  if (p === '/api/leagues') return false;
-  if (p === '/api/equipos') return false;
-  if (p.startsWith('/api/clubes/competitions')) return false;
-  if (p.startsWith('/api/selecciones/competitions')) return false;
-  if (p.startsWith('/api/league-info')) return false;
+  // IMPORTANTE:
+  // - Clubes / Selecciones / Partidos y todo su contenido (fixtures, perfiles, equipos, ligas, etc.) es PÚBLICO.
+  // - Solo las funciones premium (GoalLogic Predict / análisis) requieren sesión premium.
 
   if (p.startsWith('/api/predictions')) return true;
   if (p.startsWith('/api/predicciones')) return true;
   if (p.startsWith('/api/analizar')) return true;
-  if (p.startsWith('/api/h2h')) return true;
-  // FIXTURES PÚBLICOS: necesarios para feeds, calendario y match center sin sesión.
-  if (p.startsWith('/api/fixtures')) return false;
-  if (p.startsWith('/api/team-')) return true;
-  if (p.startsWith('/api/players/')) return true;
-  if (p.startsWith('/api/jugadores/')) return true;
-  if (p.startsWith('/api/jugador/')) return true;
-  if (p.startsWith('/api/news')) return true;
-  if (/^\/api\/equipos\/[^/]+\/detalle$/.test(p)) return true;
-  if (p.startsWith('/api/squad')) return true;
-  if (p === '/api/search' || p.startsWith('/api/search/')) return true;
-  // FEED PÚBLICO: Clubes/Selecciones/Partidos deben ser accesibles sin sesión.
-  // Botones premium y endpoints premium se protegen aparte.
-  if (p.startsWith('/api/clubes/fixtures')) return false;
-  if (p.startsWith('/api/selecciones/fixtures')) return false;
-  if (p === '/api/partidos' || p.startsWith('/api/partidos/')) return false;
-  // Perfiles de equipo por dominio: públicos (Clubes y Selecciones).
-  if (p.startsWith('/api/clubes/teams/')) return false;
-  if (p.startsWith('/api/selecciones/teams/')) return false;
-  if (/^\/api\/league\/\d+/.test(p)) return true;
-  if (p.startsWith('/estadisticas')) return true;
+
+  // Todo lo demás queda público.
   return false;
 }
 
