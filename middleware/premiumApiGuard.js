@@ -23,7 +23,8 @@ function isPremiumProtectedPath(pathname) {
   if (p.startsWith('/api/predicciones')) return true;
   if (p.startsWith('/api/analizar')) return true;
   if (p.startsWith('/api/h2h')) return true;
-  if (p.startsWith('/api/fixtures')) return true;
+  // FIXTURES PÚBLICOS: necesarios para feeds, calendario y match center sin sesión.
+  if (p.startsWith('/api/fixtures')) return false;
   if (p.startsWith('/api/team-')) return true;
   if (p.startsWith('/api/players/')) return true;
   if (p.startsWith('/api/jugadores/')) return true;
@@ -37,8 +38,9 @@ function isPremiumProtectedPath(pathname) {
   if (p.startsWith('/api/clubes/fixtures')) return false;
   if (p.startsWith('/api/selecciones/fixtures')) return false;
   if (p === '/api/partidos' || p.startsWith('/api/partidos/')) return false;
-  if (p.startsWith('/api/clubes/teams/')) return true;
-  if (p.startsWith('/api/selecciones/teams/')) return true;
+  // Perfiles de equipo por dominio: públicos (Clubes y Selecciones).
+  if (p.startsWith('/api/clubes/teams/')) return false;
+  if (p.startsWith('/api/selecciones/teams/')) return false;
   if (/^\/api\/league\/\d+/.test(p)) return true;
   if (p.startsWith('/estadisticas')) return true;
   return false;
