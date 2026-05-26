@@ -2,6 +2,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useUser } from "../context/UserContext";
 import NotificationBell from "../components/NotificationBell";
+import UserMenuAvatar from "../components/UserMenuAvatar";
 import AdminLink from "../components/AdminPanel/AdminLink";
 import ComunidadButton from "../components/ComunidadButton";
 import Toast from "../components/Toast";
@@ -218,10 +219,6 @@ export default function Layout() {
         { label: 'Clubes', section: 'clubes', path: '/clubes' },
         { label: 'Selecciones', section: 'selecciones', path: '/selecciones' },
         { label: 'Partidos', section: 'partidos', path: '/partidos' },
-        // Solo mostrar "Mi Cuenta" si NO es administrador
-        ...(userIsAuthenticated && (userIsAdmin || userIsMainAdmin) ? [] : [
-          { label: 'Mi Cuenta', section: 'proyecto', path: '/torneos' }
-        ]),
         { label: 'Predicciones', section: 'predicciones', path: '/predicciones' },
         // NOTA: "Comunidad" ahora se renderiza con el componente React ComunidadButton
         // Se filtra del array para evitar duplicación con document.createElement
@@ -578,6 +575,7 @@ export default function Layout() {
           <div className="main-header-actions">
             <AdminLink />
             <NotificationBell />
+            <UserMenuAvatar />
           </div>
         </div>
       </header>

@@ -708,8 +708,10 @@ textarea:disabled {
 .main-header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: flex-end;
+  gap: 8px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 /* Overlay del drawer en móvil */
