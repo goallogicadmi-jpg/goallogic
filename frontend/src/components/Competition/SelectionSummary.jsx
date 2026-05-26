@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { getLeagueFixtures } from '../../api/api';
+import {
+  SESSION_REQUIRED_PREDICCIONES_TOAST_MESSAGE,
+  SESSION_REQUIRED_TOAST_DURATION_MS,
+} from '../../constants/sessionMessages';
+import { usePrediccionesNavigation } from '../../hooks/usePrediccionesNavigation';
 import PartidoCard from '../Partidos/PartidoCard';
 import MatchCenter from '../Partidos/MatchCenter';
+import Toast from '../Toast';
 import { tokens } from '../../styles/tokens';
 import {
   buildTendenciasSummary,
@@ -169,6 +175,11 @@ export default function SelectionSummary({
   const [proximoPartido, setProximoPartido] = useState(null);
   const [torneoTabla, setTorneoTabla] = useState([]);
   const [partidoSeleccionado, setPartidoSeleccionado] = useState(null);
+  const {
+    handlePrediccionesClick,
+    showSessionToast,
+    setShowSessionToast,
+  } = usePrediccionesNavigation(domain, leagueId);
 
   useEffect(() => {
     if (!leagueId || !season) {
@@ -267,6 +278,7 @@ export default function SelectionSummary({
               partido={proximoPartido}
               domain={domain}
               onClick={() => setPartidoSeleccionado(proximoPartido)}
+              onPrediccionesClick={handlePrediccionesClick}
             />
           </>
         ) : (
@@ -390,6 +402,15 @@ export default function SelectionSummary({
           partido={partidoSeleccionado}
           domain={domain}
           onClose={() => setPartidoSeleccionado(null)}
+        />
+      )}
+
+      {showSessionToast && (
+        <Toast
+          message={SESSION_REQUIRED_PREDICCIONES_TOAST_MESSAGE}
+          type="warning"
+          duration={SESSION_REQUIRED_TOAST_DURATION_MS}
+          onClose={() => setShowSessionToast(false)}
         />
       )}
     </div>

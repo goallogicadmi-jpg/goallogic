@@ -205,10 +205,16 @@ function PartidoCard({
   const handlePrediccionesClick = useCallback(async (e) => {
     e.stopPropagation(); // Evitar que se abra el modal
 
+    const homeTeam = partido?.teams?.home;
+    const awayTeam = partido?.teams?.away;
+
+    if (!homeTeam || !awayTeam) {
+      setErrorPredicciones("No se pudieron obtener los datos de los equipos");
+      return;
+    }
+
     if (onPrediccionesClick) {
       onPrediccionesClick(partido);
-    } else {
-      setErrorPredicciones("No se pudieron obtener los datos de los equipos");
     }
   }, [onPrediccionesClick, partido]);
 

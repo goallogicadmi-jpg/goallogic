@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { getLeagueFixtures } from '../../api/api';
-import { useUser } from '../../context/UserContext';
 import {
   SESSION_REQUIRED_PREDICCIONES_TOAST_MESSAGE,
   SESSION_REQUIRED_TOAST_DURATION_MS,
 } from '../../constants/sessionMessages';
+import { usePrediccionesNavigation } from '../../hooks/usePrediccionesNavigation';
 import PartidoCard from '../Partidos/PartidoCard';
 import MatchCenter from '../Partidos/MatchCenter';
 import Toast from '../Toast';
@@ -63,13 +62,15 @@ export default function CompetitionFixturesSection({
   lastCount = 10,
   onNavigateToTab,
 }) {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useUser();
+  const {
+    handlePrediccionesClick,
+    showSessionToast,
+    setShowSessionToast,
+  } = usePrediccionesNavigation(domain, leagueId);
   const [fixtures, setFixtures] = useState({ proximos: [], pasados: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [partidoSeleccionado, setPartidoSeleccionado] = useState(null);
-  const [showSessionToast, setShowSessionToast] = useState(false);
 
   useEffect(() => {
     if (!leagueId || !season) {
@@ -115,43 +116,6 @@ export default function CompetitionFixturesSection({
   const handlePartidoClick = useCallback((partido) => {
     setPartidoSeleccionado(partido);
   }, []);
-
-  const handlePrediccionesClick = useCallback(
-    (partido) => {
-      if (!isAuthenticated) {
-        setShowSessionToast(true);
-        return;
-      }
-
-      const homeTeam = partido?.teams?.home;
-      const awayTeam = partido?.teams?.away;
-      const matchDomain = partido?.domain || domain;
-
-      if (!homeTeam || !awayTeam) {
-        return;
-      }
-
-      navigate('/predicciones', {
-        state: {
-          domain: matchDomain,
-          leagueId: partido.league?.id ?? leagueId,
-          fixtureId: partido.fixture?.id ?? null,
-          fromMatchesRoute: window.location.pathname,
-          homeTeam: {
-            id: homeTeam.id,
-            name: homeTeam.name,
-            logo: homeTeam.logo,
-          },
-          awayTeam: {
-            id: awayTeam.id,
-            name: awayTeam.name,
-            logo: awayTeam.logo,
-          },
-        },
-      });
-    },
-    [navigate, domain, leagueId, isAuthenticated]
-  );
 
   if (loading) {
     return <p style={loadingStyle}>Cargando partidos...</p>;
