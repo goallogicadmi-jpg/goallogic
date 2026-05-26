@@ -32,9 +32,11 @@ function isPremiumProtectedPath(pathname) {
   if (/^\/api\/equipos\/[^/]+\/detalle$/.test(p)) return true;
   if (p.startsWith('/api/squad')) return true;
   if (p === '/api/search' || p.startsWith('/api/search/')) return true;
-  if (p.startsWith('/api/clubes/fixtures')) return true;
-  if (p.startsWith('/api/selecciones/fixtures')) return true;
-  if (p === '/api/partidos' || p.startsWith('/api/partidos/')) return true;
+  // FEED PÚBLICO: Clubes/Selecciones/Partidos deben ser accesibles sin sesión.
+  // Botones premium y endpoints premium se protegen aparte.
+  if (p.startsWith('/api/clubes/fixtures')) return false;
+  if (p.startsWith('/api/selecciones/fixtures')) return false;
+  if (p === '/api/partidos' || p.startsWith('/api/partidos/')) return false;
   if (p.startsWith('/api/clubes/teams/')) return true;
   if (p.startsWith('/api/selecciones/teams/')) return true;
   if (/^\/api\/league\/\d+/.test(p)) return true;
