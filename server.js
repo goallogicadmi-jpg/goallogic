@@ -1712,10 +1712,58 @@ app.get('/api/predictions', async (req, res) => {
         // ============================================
 
         // Promedios de goles
-        const homeGoalsFor = homeStats?.goals?.for?.average?.total || 0;
-        const homeGoalsAgainst = homeStats?.goals?.against?.average?.total || 0;
-        const awayGoalsFor = awayStats?.goals?.for?.average?.total || 0;
-        const awayGoalsAgainst = awayStats?.goals?.against?.average?.total || 0;
+        // NOTE: En selecciones/copa, la API a veces devuelve promedios null o 0 pese a haber goles reales.
+        // Mantener motor igual: solo robustecer fallbacks de datos.
+        const safeNum = (v) => {
+            const n = Number(v);
+            return Number.isFinite(n) ? n : null;
+        };
+        const avgGoalsFromFixtures = (fixtures, teamId) => {
+            const rows = Array.isArray(fixtures) ? fixtures : [];
+            const finished = rows
+                .filter((f) => f?.fixture?.status?.short === 'FT' && f?.goals?.home !== null && f?.goals?.away !== null)
+                .slice(0, 5);
+            if (!finished.length) return { forAvg: null, againstAvg: null, games: 0 };
+            let gf = 0;
+            let ga = 0;
+            let games = 0;
+            for (const f of finished) {
+                const isHome = f?.teams?.home?.id === teamId;
+                const hg = Number(f?.goals?.home ?? 0);
+                const ag = Number(f?.goals?.away ?? 0);
+                if (!Number.isFinite(hg) || !Number.isFinite(ag)) continue;
+                gf += isHome ? hg : ag;
+                ga += isHome ? ag : hg;
+                games += 1;
+            }
+            if (!games) return { forAvg: null, againstAvg: null, games: 0 };
+            return { forAvg: gf / games, againstAvg: ga / games, games };
+        };
+
+        const homeFixturesAvg = avgGoalsFromFixtures(homeFixtures, homeTeamId);
+        const awayFixturesAvg = avgGoalsFromFixtures(awayFixtures, awayTeamId);
+
+        const homeGoalsForRaw = safeNum(homeStats?.goals?.for?.average?.total);
+        const homeGoalsAgainstRaw = safeNum(homeStats?.goals?.against?.average?.total);
+        const awayGoalsForRaw = safeNum(awayStats?.goals?.for?.average?.total);
+        const awayGoalsAgainstRaw = safeNum(awayStats?.goals?.against?.average?.total);
+
+        const homeGoalsFor =
+            homeGoalsForRaw && homeGoalsForRaw > 0
+                ? homeGoalsForRaw
+                : (homeFixturesAvg.forAvg ?? 0);
+        const homeGoalsAgainst =
+            homeGoalsAgainstRaw && homeGoalsAgainstRaw > 0
+                ? homeGoalsAgainstRaw
+                : (homeFixturesAvg.againstAvg ?? 0);
+        const awayGoalsFor =
+            awayGoalsForRaw && awayGoalsForRaw > 0
+                ? awayGoalsForRaw
+                : (awayFixturesAvg.forAvg ?? 0);
+        const awayGoalsAgainst =
+            awayGoalsAgainstRaw && awayGoalsAgainstRaw > 0
+                ? awayGoalsAgainstRaw
+                : (awayFixturesAvg.againstAvg ?? 0);
 
         // xG y xGA (Expected Goals)
         // Validar disponibilidad y marcar cuando se usa fallback
@@ -1725,12 +1773,17 @@ app.get('/api/predictions', async (req, res) => {
         const xGA_visita_api = awayStats?.goals?.against?.expected?.total;
         
         // Determinar si xG está disponible o se usa fallback
-        const xG_local_disponible = xG_local_api !== null && xG_local_api !== undefined;
-        const xGA_local_disponible = xGA_local_api !== null && xGA_local_api !== undefined;
-        const xG_visita_disponible = xG_visita_api !== null && xG_visita_api !== undefined;
-        const xGA_visita_disponible = xGA_visita_api !== null && xGA_visita_api !== undefined;
+        // IMPORTANT: Si la API devuelve 0 (caso frecuente en selecciones), tratamos como "no disponible".
+        const isValidApiXg = (v) => {
+            const n = safeNum(v);
+            return n !== null && n > 0;
+        };
+        const xG_local_disponible = isValidApiXg(xG_local_api);
+        const xGA_local_disponible = isValidApiXg(xGA_local_api);
+        const xG_visita_disponible = isValidApiXg(xG_visita_api);
+        const xGA_visita_disponible = isValidApiXg(xGA_visita_api);
         
-        // Usar xG de la API si está disponible, sino usar promedio de goles como estimación
+        // Usar xG de la API si está disponible, sino usar promedio de goles (o últimos partidos) como estimación
         const xG_local = parseFloat(xG_local_disponible ? xG_local_api : homeGoalsFor).toFixed(2);
         const xGA_local = parseFloat(xGA_local_disponible ? xGA_local_api : homeGoalsAgainst).toFixed(2);
         const xG_visita = parseFloat(xG_visita_disponible ? xG_visita_api : awayGoalsFor).toFixed(2);
@@ -3055,6 +3108,21 @@ app.get('/api/equipos/:id/detalle', async (req, res) => {
                 escribirLog(`📊 [EQUIPOS/DETALLE] Promedios: tirosAlArco=${tirosAlArcoPromedio}, tirosEnContra=${tirosEnContraPromedio}, xG=${(xGTotal / partidosConEstadisticas).toFixed(2)}, xGA=${xGAPromedio}`);
             } else {
                 escribirLog(`⚠️ [EQUIPOS/DETALLE] No se pudieron obtener estadísticas de ningún partido`);
+            }
+        }
+
+        // Fallback puntual: en selecciones a veces no hay métrica "Expected Goals" en fixtures/statistics.
+        // Si xGTotal quedó en 0 pero sí hubo goles reales, estimar un xG básico (sin tocar motor).
+        if (partidosConEstadisticas > 0 && xGTotal === 0) {
+            const golesRealesTotal = (ultimosPartidos || []).reduce(
+                (sum, p) => sum + (Number(p?.golesFavor) || 0),
+                0
+            );
+            if (golesRealesTotal > 0) {
+                const avgGoles = golesRealesTotal / Math.max((ultimosPartidos || []).length || partidosConEstadisticas, 1);
+                // Estimación simple: ligeramente por encima de goles reales (evita 0 y mantiene escala razonable).
+                xGTotal = Math.max(0.1, avgGoles * 1.05) * partidosConEstadisticas;
+                escribirLog(`🧩 [EQUIPOS/DETALLE] Fallback xG aplicado: avgGoles=${avgGoles.toFixed(2)} => xG estimado`);
             }
         }
 

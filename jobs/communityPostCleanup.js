@@ -103,7 +103,6 @@ function stopCommunityPostCleanup() {
 }
 
 module.exports = {
-  POST_TTL_MS,
   CLEANUP_INTERVAL_MS,
   purgeExpiredCommunityPosts,
   startCommunityPostCleanup,
