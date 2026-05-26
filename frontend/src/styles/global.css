@@ -82,6 +82,13 @@
 
   /* Layout */
   --layout-header-height: 72px;
+  --layout-max-width: 1400px;
+  --layout-gutter: 16px;
+
+  /* Breakpoints (referencia para media queries) */
+  --breakpoint-mobile: 480px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-laptop: 1024px;
 }
 
 /* Reset y Base */
@@ -97,6 +104,11 @@ html, body, #root {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
 }
 
 body {
@@ -171,11 +183,22 @@ p {
   margin: var(--spacing-xs) 0 0 0;
 }
 
+/* Contenedor principal de contenido (layout base fluido) */
+.app-container {
+  max-width: var(--layout-max-width);
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--layout-gutter);
+  box-sizing: border-box;
+}
+
 /* Contenedores y Cards */
 .container {
-  max-width: 1400px;
+  max-width: var(--layout-max-width);
+  width: 100%;
   margin: 0 auto;
-  padding: var(--spacing-xl);
+  padding: var(--spacing-xl) var(--layout-gutter);
+  box-sizing: border-box;
 }
 
 .card {
@@ -333,6 +356,14 @@ button:disabled,
   margin-bottom: var(--spacing-lg);
 }
 
+/* Wrapper responsive para TODAS las tablas */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -385,6 +416,12 @@ table th.text-right {
 table td.text-center,
 table th.text-center {
   text-align: center;
+}
+
+.team-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Badges de Forma (G, E, P) */
@@ -561,6 +598,7 @@ textarea:disabled {
   width: 100%;
   min-height: 100vh;
   padding-top: var(--layout-header-height);
+  box-sizing: border-box;
 }
 
 .main-header-content {
@@ -615,6 +653,91 @@ textarea:disabled {
 /* Usar order para forzar que aparezca después de los botones dinámicos */
 #main-header-nav .comunidad-button-wrapper {
   order: 999; /* Forzar que aparezca al final */
+}
+
+/* Botón hamburguesa (oculto en desktop) */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  margin: 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.hamburger-btn:hover,
+.hamburger-btn:focus {
+  border-color: var(--accent-orange);
+  background: rgba(242, 138, 0, 0.1);
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.hamburger-btn__bar {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 1px;
+  transform-origin: center;
+  transition: transform 0.3s ease, opacity 0.3s ease, background 0.2s ease;
+}
+
+.hamburger-btn.open .bar-top {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger-btn.open .bar-middle {
+  opacity: 0;
+}
+
+.hamburger-btn.open .bar-bottom {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.main-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* Overlay del drawer en móvil */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity 0.25s ease;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.sidebar-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.sidebar-open {
+  overflow: hidden;
+  touch-action: none;
 }
 
 /* Hero Section */
@@ -679,8 +802,10 @@ textarea:disabled {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  max-width: 1400px;
+  max-width: var(--layout-max-width);
+  width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .pick-card {
@@ -707,8 +832,10 @@ textarea:disabled {
   border-radius: 12px;
   padding: 24px;
   transition: all 0.25s ease;
-  max-width: 1400px;
+  max-width: var(--layout-max-width);
+  width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* Espaciado Global para Secciones */
@@ -719,4 +846,267 @@ section {
 /* Transiciones Suaves */
 * {
   transition: all 0.25s ease-in-out;
+}
+
+/* ============================================
+   BREAKPOINTS GLOBALES (base responsive)
+   ============================================ */
+
+/* Celulares */
+@media (max-width: 480px) {
+  :root {
+    --layout-header-height: 56px;
+    --layout-gutter: 12px;
+  }
+
+  .main-header {
+    padding: 8px 0;
+  }
+
+  .main-header-content {
+    padding: 8px 12px;
+  }
+
+  .app-container {
+    padding: 0 12px;
+  }
+
+  /* Tablas — compactación */
+  .table-responsive table th,
+  .table-responsive table td {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+
+  /* Home — tipografía y tarjetas compactas */
+  .hero h1,
+  .hero-content h1 {
+    font-size: 1.4rem;
+  }
+
+  .top-picks-section h2,
+  .live-stats-section h2 {
+    font-size: 1.2rem;
+  }
+
+  .pick-card h3,
+  .pick-card .card-title {
+    font-size: 1rem;
+  }
+
+  .pick-card p,
+  .pick-card .card-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .card,
+  .pick-card,
+  .live-card {
+    padding: 12px;
+  }
+
+  .hero p {
+    font-size: 0.9rem;
+  }
+
+  .hero-cta {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+
+  /* QA móvil — unificación global */
+  section {
+    padding: 16px 0;
+  }
+
+  h1 { font-size: 1.4rem; }
+  h2 { font-size: 1.2rem; }
+  h3 { font-size: 1rem; }
+  p  { font-size: 0.9rem; }
+
+  button,
+  .btn {
+    min-height: 36px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Home — grids a 1 columna (complementa home.css) */
+@media (max-width: 768px) {
+  .top-picks-grid,
+  .live-card-grid,
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .top-picks-section,
+  .live-stats-section {
+    padding: 40px 16px;
+  }
+
+  .hero {
+    height: auto;
+    min-height: 50vh;
+    padding: 32px 16px;
+  }
+
+  .hero-content {
+    padding: 0 16px;
+  }
+
+  section.top-picks-section,
+  section.live-stats-section {
+    padding: 40px 0;
+  }
+}
+
+/* Tablets y móvil — layout principal + drawer */
+@media (max-width: 768px) {
+  :root {
+    --layout-header-height: 60px;
+  }
+
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .sidebar-overlay:not(.visible) {
+    visibility: hidden;
+  }
+
+  .sidebar-overlay.visible {
+    visibility: visible;
+  }
+
+  .main-header-content {
+    padding: 0 16px;
+    gap: 8px;
+  }
+
+  .main-header-logo-img {
+    height: 36px;
+    max-width: 120px;
+  }
+
+  /* Navegación como drawer lateral */
+  .sidebar.main-header-nav {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 260px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: calc(var(--layout-header-height) + 16px) 16px 24px;
+    background: var(--bg-main);
+    border-right: 1px solid var(--border-color);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform;
+    z-index: 9999;
+    overflow-y: auto;
+    flex-wrap: nowrap;
+  }
+
+  .sidebar.main-header-nav.open {
+    transform: translateX(0);
+  }
+
+  .sidebar.main-header-nav .nav-button {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 14px;
+  }
+
+  .sidebar.main-header-nav .comunidad-button-wrapper {
+    width: 100%;
+    order: unset;
+  }
+
+  /* Contenido debajo del header fijo en móvil */
+  .layout-page-shell,
+  .app-container,
+  main.layout-page-shell {
+    padding-top: var(--layout-header-height, 60px);
+  }
+
+  /* El shell ya compensa el header; no duplicar en el hijo directo */
+  .layout-page-shell > .app-container {
+    padding-top: 0;
+  }
+
+  /* mains anidados (p. ej. CompetitionPageLayout) no suman offset extra */
+  .layout-page-shell .app-container main:not(.layout-page-shell) {
+    padding-top: 0;
+  }
+
+  html {
+    scroll-padding-top: var(--layout-header-height, 60px);
+  }
+
+  /* Contenido a ancho completo; sidebar no empuja el layout */
+  .layout-page-shell {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .layout-page-shell .app-container {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Tabs internos de competición: visibles al hacer scroll */
+  nav[aria-label='Secciones de la competición'] {
+    position: sticky;
+    top: var(--layout-header-height, 60px);
+    z-index: 90;
+    background-color: #1a1a1a;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+}
+
+/* Desktop — navegación visible en el header */
+@media (min-width: 769px) {
+  .hamburger-btn {
+    display: none;
+  }
+
+  .sidebar-overlay {
+    display: none !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+  }
+
+  .sidebar.main-header-nav {
+    position: static;
+    transform: none;
+    height: auto;
+    width: auto;
+    flex: 1;
+    flex-direction: row;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+}
+
+/* Laptops pequeñas */
+@media (max-width: 1024px) {
+  /* Ajustes específicos en pasos siguientes */
 }

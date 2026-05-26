@@ -106,7 +106,7 @@ function MiniGroupTable({ rows, groupLabel, onTeamClick }) {
       {groupLabel && (
         <p style={{ ...mutedStyle, marginBottom: tokens.spacing.sm }}>{groupLabel}</p>
       )}
-      <div className="standings-table-wrapper" style={{ padding: tokens.spacing.md }}>
+      <div className="standings-table-wrapper table-responsive" style={{ padding: tokens.spacing.md }}>
         <table className="standings-table">
           <thead>
             <tr>

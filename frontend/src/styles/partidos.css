@@ -1311,6 +1311,51 @@
   }
 }
 
+@media (max-width: 480px) {
+  /* Fixtures / tarjetas de partido — compactación móvil */
+  .partido-card {
+    padding: 10px 8px;
+  }
+
+  .partido-card-competicion {
+    font-size: 11px;
+  }
+
+  .partido-card-fecha,
+  .partido-card-hora {
+    font-size: 10px;
+  }
+
+  .partido-card-equipo {
+    font-size: 13px;
+  }
+
+  .logo-equipo {
+    width: 20px;
+    height: 20px;
+  }
+
+  .partido-card-center {
+    margin: 0 8px;
+    min-width: 64px;
+  }
+
+  .partido-card-resultado {
+    font-size: 16px;
+  }
+
+  /* Tabla de clasificación del módulo Partidos */
+  .tabla-competicion th,
+  .tabla-competicion td {
+    padding: 6px 6px;
+    font-size: 12px;
+  }
+
+  .tabla-equipo {
+    gap: 6px;
+  }
+}
+
 /* Player Modal */
 .player-modal-overlay {
   position: fixed;

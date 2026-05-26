@@ -22,6 +22,7 @@ export default function Layout() {
   const [internalActiveSection, setInternalActiveSection] = useState(null);
   const { isAdmin, isMainAdmin, isAuthenticated } = useUser();
   const [showPrediccionesSessionToast, setShowPrediccionesSessionToast] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Escuchar eventos de cambio de sección interna (para "Mi Cuenta" y "Comunidad")
   useEffect(() => {
@@ -47,6 +48,59 @@ export default function Layout() {
       setInternalActiveSection(null);
     }
   }, [location.pathname]);
+
+  // Cerrar sidebar al cambiar de ruta
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Bloquear scroll del body cuando el drawer está abierto
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.classList.add('sidebar-open');
+    } else {
+      document.body.classList.remove('sidebar-open');
+    }
+    return () => document.body.classList.remove('sidebar-open');
+  }, [isSidebarOpen]);
+
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarOpen((open) => !open);
+  }, []);
+
+  const closeSidebar = useCallback(() => {
+    setIsSidebarOpen(false);
+  }, []);
+
+  // Cerrar con tecla Escape
+  useEffect(() => {
+    if (!isSidebarOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isSidebarOpen]);
+
+  // Cerrar al hacer clic en cualquier enlace o botón dentro del drawer
+  useEffect(() => {
+    const navContainer = navContainerRef.current;
+    if (!navContainer) return;
+
+    const handleDrawerClick = (event) => {
+      const clickable = event.target.closest('button, a, [role="link"]');
+      if (clickable && navContainer.contains(clickable)) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    navContainer.addEventListener('click', handleDrawerClick);
+    return () => navContainer.removeEventListener('click', handleDrawerClick);
+  }, []);
 
   // Determinar la sección activa basada en la ruta y estado interno
   const getActiveSection = () => {
@@ -74,6 +128,7 @@ export default function Layout() {
 
   // Función para manejar la navegación (memoizada para evitar recreaciones)
   const handleNavigation = useCallback((section) => {
+    setIsSidebarOpen(false);
     switch(section) {
       case 'torneos':
       case 'ligas':
@@ -483,6 +538,18 @@ export default function Layout() {
       `}</style>
       <header className="main-header">
         <div className="main-header-content">
+          <button
+            type="button"
+            className={`hamburger-btn${isSidebarOpen ? ' open' : ''}`}
+            aria-label={isSidebarOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
+            aria-expanded={isSidebarOpen}
+            aria-controls="main-header-nav"
+            onClick={toggleSidebar}
+          >
+            <span className="hamburger-btn__bar bar-top" aria-hidden="true" />
+            <span className="hamburger-btn__bar bar-middle" aria-hidden="true" />
+            <span className="hamburger-btn__bar bar-bottom" aria-hidden="true" />
+          </button>
           <div className="main-header-logo-container">
             {!logoError ? (
               <img
@@ -498,23 +565,38 @@ export default function Layout() {
             ) : null}
             <span className={`main-header-logo-text ${logoError ? 'show' : ''}`}>GoalLogic</span>
           </div>
-          <div className="main-header-nav" id="main-header-nav" ref={navContainerRef}>
+          <nav
+            className={`sidebar main-header-nav${isSidebarOpen ? ' open' : ''}`}
+            id="main-header-nav"
+            ref={navContainerRef}
+            aria-label="Navegación principal"
+          >
             {/* Los botones de navegación se insertarán aquí dinámicamente */}
             {/* El botón de Comunidad se renderiza directamente como componente React */}
             <ComunidadButton />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          </nav>
+          <div className="main-header-actions">
             <AdminLink />
             <NotificationBell />
           </div>
         </div>
       </header>
+      <button
+        type="button"
+        className={`sidebar-overlay${isSidebarOpen ? ' visible' : ''}`}
+        aria-label="Cerrar menú de navegación"
+        aria-hidden={!isSidebarOpen}
+        tabIndex={isSidebarOpen ? 0 : -1}
+        onClick={closeSidebar}
+      />
       <CmsGlobalBanner />
       <OperationalSettingsBanner />
       <main className="layout-page-shell">
-        <LegalAcceptanceGate>
-          <Outlet />
-        </LegalAcceptanceGate>
+        <div className="app-container">
+          <LegalAcceptanceGate>
+            <Outlet />
+          </LegalAcceptanceGate>
+        </div>
       </main>
       <SiteFooter />
       {showPrediccionesSessionToast && (

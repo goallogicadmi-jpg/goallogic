@@ -74,3 +74,14 @@
     transform: translateY(0);
   }
 }
+
+@media (max-width: 480px) {
+  .toast {
+    top: calc(var(--layout-header-height, 56px) + 8px);
+    padding: 10px 12px;
+  }
+
+  .toast-message {
+    font-size: 0.9rem;
+  }
+}

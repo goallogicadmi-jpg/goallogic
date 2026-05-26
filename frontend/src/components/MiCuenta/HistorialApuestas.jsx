@@ -430,7 +430,7 @@ const HistorialApuestas = ({ refreshTrigger }) => {
           <p className="historial-empty-subtitle">Crea tu primera apuesta en el panel de arriba.</p>
         </div>
       ) : (
-        <div className="historial-table-container">
+        <div className="historial-table-container table-responsive">
           <table className="historial-table">
             <thead>
               <tr>

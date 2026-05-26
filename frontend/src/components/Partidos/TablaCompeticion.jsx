@@ -79,7 +79,7 @@ export default function TablaCompeticion({ leagueId, season }) {
   }
 
   return (
-    <div className="tabla-competicion-container">
+    <div className="tabla-competicion-container table-responsive">
       <table className="tabla-competicion">
         <thead>
           <tr>

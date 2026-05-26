@@ -492,6 +492,32 @@ export default function Leagues() {
           color: var(--text-secondary);
           font-weight: 400;
         }
+        @media (max-width: 768px) {
+          .page-wrapper .hero-logo-section {
+            padding: 48px 16px;
+            min-height: auto;
+          }
+          .page-wrapper .hero-logo-full {
+            max-width: 280px;
+          }
+          .page-wrapper .hero-subtitle {
+            font-size: 1rem;
+          }
+          .leagues-bar-container {
+            padding: var(--spacing-md) 16px;
+          }
+        }
+        @media (max-width: 480px) {
+          .page-wrapper .hero-logo-section {
+            padding: 32px 12px;
+          }
+          .page-wrapper .hero-logo-full {
+            max-width: 220px;
+          }
+          .page-wrapper .hero-subtitle {
+            font-size: 0.9rem;
+          }
+        }
       `}</style>
       <div className="page-wrapper">
 

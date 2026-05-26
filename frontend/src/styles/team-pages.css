@@ -1,0 +1,96 @@
+/* ============================================
+   Clubes / Selecciones — Responsive (PASO 7)
+   Aplica a EquipoDetalle + TeamDetails
+   ============================================ */
+
+.team-detail-page,
+.team-details-page {
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.team-header,
+.selection-header {
+  overflow-x: hidden;
+}
+
+.team-header-logo,
+.selection-header-logo {
+  max-width: 180px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.team-venue-image,
+.selection-venue-image {
+  max-width: 100%;
+  height: auto;
+}
+
+.team-section-grid,
+.team-hub-grid,
+.selection-hub-grid,
+.team-section-grid,
+.selection-section-grid {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .team-section-grid,
+  .team-hub-grid,
+  .selection-hub-grid,
+  .selection-section-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .team-header,
+  .selection-header {
+    padding: 16px 12px !important;
+  }
+
+  .team-header-logo,
+  .selection-header-logo {
+    max-width: 120px;
+  }
+
+  .team-detail-page .card,
+  .team-details-page .card {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+
+  .team-detail-page .card-title,
+  .team-details-page .card-title {
+    font-size: 1rem;
+  }
+
+  .team-detail-page .card-subtitle,
+  .team-details-page .card-subtitle {
+    font-size: 0.85rem;
+  }
+
+  /* Fixtures internos */
+  .fixture-row {
+    padding: 8px 6px !important;
+  }
+
+  .fixture-team-logo {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .fixture-team-name {
+    font-size: 0.9rem !important;
+  }
+
+  .fixture-time {
+    font-size: 0.8rem !important;
+  }
+}
+

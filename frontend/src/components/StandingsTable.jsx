@@ -385,7 +385,7 @@ export default function StandingsTable({ leagueId, season, onTeamClick, leagueIn
                 </h3>
               );
             })()}
-            <div className="standings-table-wrapper">
+            <div className="standings-table-wrapper table-responsive">
               <table className="standings-table">
                 <thead>
                   <tr>
@@ -448,10 +448,10 @@ export default function StandingsTable({ leagueId, season, onTeamClick, leagueIn
                             >
                               <div className="team-cell">
                                 {team.logo && (
-                                  <img src={team.logo} alt={team.teamName} className="team-logo" style={{ width: "18px", height: "18px" }} />
+                                  <img src={team.logo} alt={team.teamName} className="team-logo" />
                                 )}
                                 {visual.icon && <span style={{ marginRight: 6 }}>{visual.icon}</span>}
-                                <span>{team.teamName}</span>
+                                <span className="team-name">{team.teamName}</span>
                               </div>
                             </td>
                             <td>{team.played || 0}</td>
@@ -581,11 +581,10 @@ export default function StandingsTable({ leagueId, season, onTeamClick, leagueIn
                                   src={allocation.logo || originalData.logo} 
                                   alt={allocation.teamName} 
                                   className="team-logo" 
-                                  style={{ width: "18px", height: "18px" }} 
                                 />
                               )}
                               {visual.icon && <span style={{ marginRight: 6 }}>{visual.icon}</span>}
-                              <span>{allocation.teamName}</span>
+                              <span className="team-name">{allocation.teamName}</span>
                             </div>
                           </td>
                           <td>{allocation.played || originalData.jugados || 0}</td>
@@ -715,7 +714,7 @@ export default function StandingsTable({ leagueId, season, onTeamClick, leagueIn
   // ✅ RENDERIZAR TABLA ÚNICA (liga normal o primer grupo)
   console.log("✅ RENDERIZANDO TABLA ÚNICA. Equipos:", tabla.length);
   return (
-    <div className="standings-table-wrapper">
+    <div className="standings-table-wrapper table-responsive">
       <table className="standings-table">
         <thead>
           <tr>
@@ -778,10 +777,10 @@ export default function StandingsTable({ leagueId, season, onTeamClick, leagueIn
                     >
                       <div className="team-cell">
                         {team.logo && (
-                          <img src={team.logo} alt={team.teamName} className="team-logo" style={{ width: "18px", height: "18px" }} />
+                          <img src={team.logo} alt={team.teamName} className="team-logo" />
                         )}
                         {visual.icon && <span style={{ marginRight: 6 }}>{visual.icon}</span>}
-                        <span>{team.teamName}</span>
+                        <span className="team-name">{team.teamName}</span>
                       </div>
                     </td>
                     <td>{team.played || 0}</td>

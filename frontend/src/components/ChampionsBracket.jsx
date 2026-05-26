@@ -44,7 +44,7 @@ export default function ChampionsBracket({ bracket, onMatchUpdate }) {
     return (
       <div 
         key={match.id || Math.random()} 
-        className={`bracket-match ${isCompleted ? 'completed' : ''} ${hasWinner ? 'has-winner' : ''}`}
+        className={`bracket-match knockout-match-card ${isCompleted ? 'completed' : ''} ${hasWinner ? 'has-winner' : ''}`}
       >
         <div className="match-teams">
           <div className={`match-team ${hasWinner && match.winner?.id === match.homeTeam?.id ? 'winner' : ''}`}>
@@ -52,11 +52,11 @@ export default function ChampionsBracket({ bracket, onMatchUpdate }) {
               <img 
                 src={match.homeTeam.logo} 
                 alt={match.homeTeam.name} 
-                className="team-logo-small"
+                className="team-logo-small knockout-team-logo"
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
             )}
-            <span className="team-name">{match.homeTeam?.name || 'TBD'}</span>
+            <span className="team-name knockout-team-name">{match.homeTeam?.name || 'TBD'}</span>
             {hasWinner && match.winner?.id === match.homeTeam?.id && (
               <span className="winner-badge">✓</span>
             )}
@@ -73,15 +73,15 @@ export default function ChampionsBracket({ bracket, onMatchUpdate }) {
                       <span>{formatMatchDate(score.date)}</span>
                     </div>
                   )}
-                  <span className="score-number">{score.homeScore || 0}</span>
+                  <span className="score-number knockout-score">{score.homeScore || 0}</span>
                   <span className="score-separator">-</span>
-                  <span className="score-number">{score.awayScore || 0}</span>
+                  <span className="score-number knockout-score">{score.awayScore || 0}</span>
                   {match.tieBreak?.type === 'penalties' && (
                     <div className="aggregate-score">
                       <span className="aggregate-label">Penales:</span>
-                      <span className="score-number">{match.tieBreak.home || 0}</span>
+                      <span className="score-number knockout-score">{match.tieBreak.home || 0}</span>
                       <span className="score-separator">-</span>
-                      <span className="score-number">{match.tieBreak.away || 0}</span>
+                      <span className="score-number knockout-score">{match.tieBreak.away || 0}</span>
                     </div>
                   )}
                 </div>
@@ -113,17 +113,17 @@ export default function ChampionsBracket({ bracket, onMatchUpdate }) {
                   {match.aggregateScore?.home !== null && (
                     <div className="aggregate-score">
                       <span className="aggregate-label">Global:</span>
-                      <span className="score-number">{match.aggregateScore.home || 0}</span>
+                      <span className="score-number knockout-score">{match.aggregateScore.home || 0}</span>
                       <span className="score-separator">-</span>
-                      <span className="score-number">{match.aggregateScore.away || 0}</span>
+                      <span className="score-number knockout-score">{match.aggregateScore.away || 0}</span>
                     </div>
                   )}
                   {match.tieBreak?.type === 'penalties' && (
                     <div className="aggregate-score">
                       <span className="aggregate-label">Penales:</span>
-                      <span className="score-number">{match.tieBreak.home || 0}</span>
+                      <span className="score-number knockout-score">{match.tieBreak.home || 0}</span>
                       <span className="score-separator">-</span>
-                      <span className="score-number">{match.tieBreak.away || 0}</span>
+                      <span className="score-number knockout-score">{match.tieBreak.away || 0}</span>
                     </div>
                   )}
                   {match.tieBreak?.type === 'extra_time' && (
@@ -144,11 +144,11 @@ export default function ChampionsBracket({ bracket, onMatchUpdate }) {
               <img 
                 src={match.awayTeam.logo} 
                 alt={match.awayTeam.name} 
-                className="team-logo-small"
+                className="team-logo-small knockout-team-logo"
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
             )}
-            <span className="team-name">{match.awayTeam?.name || 'TBD'}</span>
+            <span className="team-name knockout-team-name">{match.awayTeam?.name || 'TBD'}</span>
             {hasWinner && match.winner?.id === match.awayTeam?.id && (
               <span className="winner-badge">✓</span>
             )}
@@ -164,9 +164,13 @@ export default function ChampionsBracket({ bracket, onMatchUpdate }) {
     }
 
     const matchList = Array.isArray(matches) ? matches : [matches];
+    const isFinal = roundName === 'final';
 
     return (
-      <div key={roundName} className="bracket-round">
+      <div
+        key={roundName}
+        className={`bracket-round knockout-column${isFinal ? ' knockout-final' : ''}`}
+      >
         <h3 className="round-title">{title}</h3>
         <div className="round-matches">
           {matchList.map((match, index) => (
@@ -192,40 +196,42 @@ export default function ChampionsBracket({ bracket, onMatchUpdate }) {
         </div>
       </div>
 
-      <div className="bracket-content">
-        {/* Playoff */}
-        {bracket.playoff && bracket.playoff.length > 0 && (
-          renderRound('playoff', bracket.playoff, 'Playoff (9-24)')
-        )}
+      <div className="knockout-scroll" aria-label="Bracket eliminatorio (desliza horizontalmente)">
+        <div className="bracket-content">
+          {/* Playoff */}
+          {bracket.playoff && bracket.playoff.length > 0 && (
+            renderRound('playoff', bracket.playoff, 'Playoff (9-24)')
+          )}
 
-        {/* Octavos de Final */}
-        {bracket.roundOf16 && bracket.roundOf16.length > 0 && (
-          renderRound('roundOf16', bracket.roundOf16, 'Octavos de Final')
-        )}
+          {/* Octavos de Final */}
+          {bracket.roundOf16 && bracket.roundOf16.length > 0 && (
+            renderRound('roundOf16', bracket.roundOf16, 'Octavos de Final')
+          )}
 
-        {/* Cuartos de Final */}
-        {bracket.quarterFinals && bracket.quarterFinals.length > 0 && (
-          renderRound('quarterFinals', bracket.quarterFinals, 'Cuartos de Final')
-        )}
+          {/* Cuartos de Final */}
+          {bracket.quarterFinals && bracket.quarterFinals.length > 0 && (
+            renderRound('quarterFinals', bracket.quarterFinals, 'Cuartos de Final')
+          )}
 
-        {/* Semifinal */}
-        {bracket.semiFinals && bracket.semiFinals.length > 0 && (
-          renderRound('semiFinals', bracket.semiFinals, 'Semifinal')
-        )}
+          {/* Semifinal */}
+          {bracket.semiFinals && bracket.semiFinals.length > 0 && (
+            renderRound('semiFinals', bracket.semiFinals, 'Semifinal')
+          )}
 
-        {/* Final */}
-        {bracket.final && (
-          renderRound('final', bracket.final, 'Final')
-        )}
+          {/* Final */}
+          {bracket.final && (
+            renderRound('final', bracket.final, 'Final')
+          )}
 
-        {/* Mensaje si no hay bracket iniciado */}
-        {(!bracket.playoff || bracket.playoff.length === 0) && 
-         (!bracket.roundOf16 || bracket.roundOf16.length === 0) && 
-         !bracket.final && (
-          <div className="bracket-empty">
-            <p>El bracket aún no ha comenzado. Los playoffs se generarán cuando la fase de grupos termine.</p>
-          </div>
-        )}
+          {/* Mensaje si no hay bracket iniciado */}
+          {(!bracket.playoff || bracket.playoff.length === 0) && 
+           (!bracket.roundOf16 || bracket.roundOf16.length === 0) && 
+           !bracket.final && (
+            <div className="bracket-empty">
+              <p>El bracket aún no ha comenzado. Los playoffs se generarán cuando la fase de grupos termine.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

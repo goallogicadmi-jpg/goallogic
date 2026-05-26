@@ -70,7 +70,7 @@ export default function PlayerMatchesTable({ matches, playerName }) {
   };
 
   return (
-    <div style={tableStyle}>
+    <div style={tableStyle} className="table-responsive">
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>

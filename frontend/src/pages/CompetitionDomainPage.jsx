@@ -10,26 +10,12 @@ import CompetitionLogo from "../components/Competition/CompetitionLogo";
 import { tokens } from "../styles/tokens";
 import { GoalLogicSectionHeader } from "../components/GoalLogicTitle";
 
-const hubGridStyle = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(108px, 1fr))",
-  gap: tokens.spacing.lg,
-};
-
 const logoButtonStyle = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
   gap: tokens.spacing.sm,
-  padding: tokens.spacing.md,
   borderRadius: "12px",
   border: "1px solid rgba(79, 195, 247, 0.15)",
-  backgroundColor: "#1a1a1a",
   cursor: "pointer",
   transition: "border-color 0.2s, transform 0.2s, box-shadow 0.2s",
-  minHeight: "120px",
-  width: "100%",
   color: tokens.colors.textSecondary,
   font: "inherit",
 };
@@ -38,21 +24,6 @@ const logoImageStyle = {
   width: 64,
   height: 64,
   objectFit: "contain",
-};
-
-const logoNameStyle = {
-  margin: 0,
-  fontSize: tokens.typography.fontSizeXs,
-  fontWeight: tokens.typography.fontWeightMedium,
-  color: tokens.colors.textSecondary,
-  textAlign: "center",
-  lineHeight: 1.3,
-  maxWidth: "100%",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  display: "-webkit-box",
-  WebkitLineClamp: 2,
-  WebkitBoxOrient: "vertical",
 };
 
 function getShortName(competition) {
@@ -70,9 +41,10 @@ function CompetitionLogoItem({ competition, onSelect }) {
   return (
     <button
       type="button"
+      className="home-hub-card"
       style={{
         ...logoButtonStyle,
-        borderColor: hovered ? "rgba(79, 195, 247, 0.45)" : logoButtonStyle.borderColor,
+        borderColor: hovered ? "rgba(79, 195, 247, 0.45)" : "rgba(79, 195, 247, 0.15)",
         transform: hovered ? "translateY(-2px)" : "none",
         boxShadow: hovered ? "0 4px 16px rgba(79, 195, 247, 0.12)" : "none",
       }}
@@ -112,7 +84,7 @@ function CompetitionLogoItem({ competition, onSelect }) {
           ?
         </span>
       )}
-      {shortName ? <span style={logoNameStyle}>{shortName}</span> : null}
+      {shortName ? <span className="home-hub-card__label">{shortName}</span> : null}
     </button>
   );
 }
@@ -164,16 +136,9 @@ export default function CompetitionDomainPage({ domain = "club" }) {
   }, [competitions]);
 
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "calc(100vh - var(--layout-header-height, 72px))",
-        padding: "32px 24px 40px",
-        backgroundColor: "#0f1419",
-      }}
-    >
-      <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
-        <div style={{ marginBottom: tokens.spacing.xl }}>
+    <div className="home-page">
+      <div className="home-page__inner">
+        <div className="home-page__intro">
           <GoalLogicSectionHeader size="lg" />
         </div>
 
@@ -186,17 +151,9 @@ export default function CompetitionDomainPage({ domain = "club" }) {
         {!loading &&
           !error &&
           groupedCompetitions.map(([groupLabel, groupItems]) => (
-            <section key={groupLabel} style={{ marginBottom: tokens.spacing.xxl }}>
-              <h2
-                style={{
-                  color: tokens.colors.textPrimary,
-                  marginBottom: tokens.spacing.lg,
-                  fontSize: tokens.typography.fontSizeXl,
-                }}
-              >
-                {groupLabel}
-              </h2>
-              <div style={hubGridStyle}>
+            <section key={groupLabel} className="home-section">
+              <h2 className="home-section__title">{groupLabel}</h2>
+              <div className="home-hub-grid">
                 {groupItems.map((competition) => (
                   <CompetitionLogoItem
                     key={competition.id}

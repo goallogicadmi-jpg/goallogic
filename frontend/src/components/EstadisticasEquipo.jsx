@@ -101,35 +101,37 @@ export default function EstadisticasEquipo({ equipoId, leagueId, season }) {
       {/* Tendencias */}
       <h3>Tendencias (últimos 6 partidos)</h3>
       {stats.tendencias && stats.tendencias.length > 0 ? (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#f8f9fa" }}>
-              <th style={{ padding: "10px", textAlign: "left", borderBottom: "2px solid #dee2e6" }}>Fecha</th>
-              <th style={{ padding: "10px", textAlign: "left", borderBottom: "2px solid #dee2e6" }}>Rival</th>
-              <th style={{ padding: "10px", textAlign: "center", borderBottom: "2px solid #dee2e6" }}>Resultado</th>
-              <th style={{ padding: "10px", textAlign: "center", borderBottom: "2px solid #dee2e6" }}>Marcador</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stats.tendencias.map((t, i) => (
-              <tr key={i} style={{ borderBottom: "1px solid #dee2e6" }}>
-                <td style={{ padding: "10px" }}>{t.fecha}</td>
-                <td style={{ padding: "10px" }}>{t.rival}</td>
-                <td style={{ 
-                  padding: "10px", 
-                  textAlign: "center",
-                  color: t.resultado === "Victoria" ? "#27ae60" : t.resultado === "Derrota" ? "#e74c3c" : "#f39c12",
-                  fontWeight: "bold"
-                }}>
-                  {t.resultado}
-                </td>
-                <td style={{ padding: "10px", textAlign: "center" }}>
-                  {t.golesFavor} - {t.golesContra}
-                </td>
+        <div className="table-responsive">
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ backgroundColor: "#f8f9fa" }}>
+                <th style={{ padding: "10px", textAlign: "left", borderBottom: "2px solid #dee2e6" }}>Fecha</th>
+                <th style={{ padding: "10px", textAlign: "left", borderBottom: "2px solid #dee2e6" }}>Rival</th>
+                <th style={{ padding: "10px", textAlign: "center", borderBottom: "2px solid #dee2e6" }}>Resultado</th>
+                <th style={{ padding: "10px", textAlign: "center", borderBottom: "2px solid #dee2e6" }}>Marcador</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {stats.tendencias.map((t, i) => (
+                <tr key={i} style={{ borderBottom: "1px solid #dee2e6" }}>
+                  <td style={{ padding: "10px" }}>{t.fecha}</td>
+                  <td style={{ padding: "10px" }}>{t.rival}</td>
+                  <td style={{ 
+                    padding: "10px", 
+                    textAlign: "center",
+                    color: t.resultado === "Victoria" ? "#27ae60" : t.resultado === "Derrota" ? "#e74c3c" : "#f39c12",
+                    fontWeight: "bold"
+                  }}>
+                    {t.resultado}
+                  </td>
+                  <td style={{ padding: "10px", textAlign: "center" }}>
+                    {t.golesFavor} - {t.golesContra}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <p>No hay datos de partidos recientes</p>
       )}

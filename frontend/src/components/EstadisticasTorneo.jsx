@@ -238,7 +238,7 @@ export default function EstadisticasTorneo({ leagueId, season }) {
       <div style={layoutContainerStyle}>
         {/* Tabla a la izquierda */}
         <div style={tableWrapperStyle}>
-          <div style={tableContainerStyle}>
+          <div style={tableContainerStyle} className="table-responsive">
             <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "900px" }}>
               <thead>
                 <tr>

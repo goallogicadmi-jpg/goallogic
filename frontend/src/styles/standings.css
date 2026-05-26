@@ -67,6 +67,10 @@
   transition: color 0.2s ease;
 }
 
+.standings-table .team-name {
+  white-space: nowrap;
+}
+
 .standings-table .team-cell:hover {
   color: var(--accent-primary);
 }
@@ -182,6 +186,30 @@
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: 0.4px;
+}
+
+@media (max-width: 768px) {
+  .standings-table-wrapper {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .standings-table th,
+  .standings-table td {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+
+  .standings-table .form-badge {
+    width: 18px;
+    height: 18px;
+  }
+
+  .standings-table .team-logo {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 /* ✅ ESTILOS PARA LEYENDA DE COLORES DE CLASIFICACIÓN */

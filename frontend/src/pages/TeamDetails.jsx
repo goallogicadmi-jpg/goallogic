@@ -334,14 +334,15 @@ export default function TeamDetails() {
     teamStatistics.length > 0;
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} className="team-details-page">
       {/* Header con imagen del equipo y estadio */}
-      <div style={cardStyle}>
+      <div style={cardStyle} className="team-header">
         {/* Imagen del equipo - grande y centrada */}
         {teamInfo?.logo && (
           <img 
             src={teamInfo.logo} 
             alt={teamInfo.name || "Equipo"}
+            className="team-header-logo"
             onError={(e) => {
               e.target.style.display = "none";
             }}
@@ -360,6 +361,7 @@ export default function TeamDetails() {
           <img 
             src={teamInfo.venue.image} 
             alt={teamInfo.venue || "Estadio"}
+            className="team-venue-image"
             onError={(e) => {
               e.target.style.display = "none";
             }}

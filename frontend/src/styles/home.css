@@ -1,0 +1,258 @@
+/* ============================================
+   HOME — Responsive (PASO 4)
+   Hub /clubes, hero /torneos, bloques globales
+   ============================================ */
+
+.home-page {
+  width: 100%;
+  min-height: calc(100vh - var(--layout-header-height, 72px));
+  padding: 32px 24px 40px;
+  background-color: var(--bg-main, #0f1419);
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.home-page__inner {
+  max-width: var(--layout-max-width, 1400px);
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.home-page__intro {
+  margin-bottom: var(--spacing-xl, 32px);
+}
+
+.home-section {
+  margin-bottom: var(--spacing-xl, 32px);
+}
+
+.home-section__title {
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-lg, 24px);
+  font-size: var(--font-size-xl, 18px);
+  font-weight: var(--font-weight-semibold, 600);
+  text-align: left;
+}
+
+/* Grid de competiciones (hub) */
+.home-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  gap: var(--spacing-lg, 24px);
+  width: 100%;
+}
+
+.home-hub-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm, 8px);
+  padding: var(--spacing-md, 16px);
+  border-radius: 12px;
+  border: 1px solid rgba(79, 195, 247, 0.15);
+  background-color: var(--bg-card, #1a1a1a);
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  min-height: 120px;
+  width: 100%;
+  color: var(--text-secondary);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.home-hub-card img,
+.home-hub-card .competition-logo {
+  max-width: 100%;
+  height: auto;
+}
+
+.home-hub-card__label {
+  margin: 0;
+  font-size: var(--font-size-xs, 11px);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.3;
+  max-width: 100%;
+}
+
+/* Imágenes en bloques Home */
+.home-page img,
+.hero-logo-section img,
+.hero img,
+.top-picks-section img,
+.live-stats-section img,
+.pick-card img,
+.live-card img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Grids preparados en global.css */
+.live-card-grid,
+.stats-grid {
+  display: grid;
+  gap: 24px;
+  width: 100%;
+  max-width: var(--layout-max-width, 1400px);
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.live-card-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.stats-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Tarjetas Home — títulos */
+.pick-card .card-title,
+.pick-card h3,
+.live-card .card-title,
+.live-card h3 {
+  font-size: var(--font-size-lg, 16px);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm, 8px);
+}
+
+.pick-card .card-subtitle,
+.pick-card p,
+.live-card .card-subtitle,
+.live-card p {
+  font-size: var(--font-size-md, 14px);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Hero legacy (Leagues / torneos) */
+.page-wrapper .hero-logo-section {
+  overflow-x: hidden;
+}
+
+/* Tablets y móvil */
+@media (max-width: 768px) {
+  .home-page {
+    padding: 24px 16px 32px;
+  }
+
+  .home-section__title {
+    text-align: left;
+  }
+
+  .top-picks-grid,
+  .live-card-grid,
+  .stats-grid,
+  .home-hub-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .top-picks-section,
+  .live-stats-section {
+    padding: 40px 16px;
+  }
+
+  .hero {
+    height: auto;
+    min-height: 50vh;
+    padding: 32px 16px;
+  }
+
+  .hero-content {
+    padding: 0 16px;
+  }
+
+  .page-wrapper .hero-logo-section {
+    padding: 48px 16px;
+    min-height: auto;
+  }
+
+  .page-wrapper .hero-logo-full {
+    max-width: 280px;
+  }
+
+  .page-wrapper .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  section.top-picks-section,
+  section.live-stats-section {
+    padding: 40px 0;
+  }
+}
+
+/* Celulares */
+@media (max-width: 480px) {
+  .home-page {
+    padding: 16px 12px 24px;
+  }
+
+  .home-page h1,
+  .hero h1,
+  .page-wrapper .hero-logo-section .goal-logic-title {
+    font-size: 1.4rem !important;
+  }
+
+  .home-page h2,
+  .home-section__title,
+  .hero h2 {
+    font-size: 1.2rem;
+  }
+
+  .home-page h3,
+  .pick-card .card-title,
+  .pick-card h3,
+  .live-card .card-title,
+  .live-card h3 {
+    font-size: 1rem;
+  }
+
+  .home-page p,
+  .hero p,
+  .page-wrapper .hero-subtitle,
+  .pick-card .card-subtitle,
+  .pick-card p,
+  .live-card .card-subtitle,
+  .live-card p {
+    font-size: 0.9rem;
+  }
+
+  .card,
+  .pick-card,
+  .live-card {
+    padding: 12px;
+  }
+
+  .pick-card .card-title,
+  .pick-card h3 {
+    font-size: 1rem;
+  }
+
+  .pick-card .card-subtitle,
+  .pick-card p {
+    font-size: 0.85rem;
+  }
+
+  .home-hub-card {
+    min-height: 100px;
+    padding: 12px;
+  }
+
+  .hero-cta {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+
+  .page-wrapper .hero-logo-section {
+    padding: 32px 12px;
+  }
+
+  .page-wrapper .hero-logo-full {
+    max-width: 220px;
+  }
+}

@@ -75,7 +75,7 @@ function MiniStandingsTable({ rows, leagueId, onTeamClick, zone = 'top' }) {
   }
 
   return (
-    <div className="standings-table-wrapper" style={{ padding: tokens.spacing.md }}>
+    <div className="standings-table-wrapper table-responsive" style={{ padding: tokens.spacing.md }}>
       <table className="standings-table">
         <thead>
           <tr>

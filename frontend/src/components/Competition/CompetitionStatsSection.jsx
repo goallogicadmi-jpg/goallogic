@@ -329,7 +329,7 @@ export default function CompetitionStatsSection({
 
       <section style={cardStyle}>
         <h3 style={sectionTitleStyle}>Estadísticas básicas</h3>
-        <div className="standings-table-wrapper">
+        <div className="standings-table-wrapper table-responsive">
           <table className="standings-table">
             <thead>
               <tr>
@@ -388,7 +388,7 @@ export default function CompetitionStatsSection({
 
       <section style={cardStyle}>
         <h3 style={sectionTitleStyle}>Tendencias (últimos 6 partidos)</h3>
-        <div className="standings-table-wrapper" style={{ maxHeight: 420, overflowY: 'auto' }}>
+        <div className="standings-table-wrapper table-responsive" style={{ maxHeight: 420, overflowY: 'auto' }}>
           <table className="standings-table">
             <thead>
               <tr>
@@ -412,7 +412,7 @@ export default function CompetitionStatsSection({
 
       <section style={cardStyle}>
         <h3 style={sectionTitleStyle}>xG / xGA estimado por equipo</h3>
-        <div className="standings-table-wrapper">
+        <div className="standings-table-wrapper table-responsive">
           <table className="standings-table">
             <thead>
               <tr>

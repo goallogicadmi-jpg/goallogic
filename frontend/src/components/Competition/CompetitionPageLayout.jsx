@@ -174,7 +174,7 @@ export default function CompetitionPageLayout({
           </button>
         </div>
       </header>
-      <main>{children}</main>
+      <div className="competition-page-body">{children}</div>
     </div>
   );
 }

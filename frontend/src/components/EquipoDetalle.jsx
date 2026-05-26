@@ -682,9 +682,9 @@ export default function EquipoDetalle({
   const showSeasonStandings = hasSeasonStandingContent(detailedStats, { form: formString });
 
   return (
-    <div style={{ padding: "20px", width: "100%", backgroundColor: "#F1F5F9" }}>
+    <div className="team-detail-page" style={{ padding: "20px", width: "100%", backgroundColor: "#F1F5F9" }}>
       {/* Header del equipo con imagen grande y estadio */}
-      <div style={{
+      <div className={domain === "selection" ? "selection-header team-header" : "team-header"} style={{
         ...cardStyle,
         textAlign: "center",
         padding: "20px 16px"
@@ -694,6 +694,7 @@ export default function EquipoDetalle({
           <img 
             src={teamInfo.logo} 
             alt={teamInfo.name || "Equipo"}
+            className={domain === "selection" ? "selection-header-logo team-header-logo" : "team-header-logo"}
             onError={(e) => {
               e.target.style.display = "none";
             }}
@@ -712,6 +713,7 @@ export default function EquipoDetalle({
           <img 
             src={venueImageUrl} 
             alt={stadiumAlt}
+            className={domain === "selection" ? "selection-venue-image team-venue-image" : "team-venue-image"}
             onError={(e) => {
               e.target.style.display = "none";
             }}
@@ -818,7 +820,7 @@ export default function EquipoDetalle({
       {Array.isArray(teamStatistics) && teamStatistics.length > 0 && (
         <div style={cardStyle}>
           <h2 style={titleStyle}>Estadísticas de Juego</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "8px" }}>
+          <div className="team-section-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "8px" }}>
             {teamStatistics.map((stat, idx) => (
               <div key={idx} style={statItemStyle}>
                 <p style={{ color: "#64748b", fontSize: "10px", marginBottom: "2px" }}>
@@ -843,7 +845,7 @@ export default function EquipoDetalle({
             <h3 style={{ fontSize: "13px", fontWeight: "600", color: "#1a1a1a", marginBottom: "10px" }}>
               Promedio de Goles
             </h3>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "8px" }}>
+            <div className="team-section-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "8px" }}>
               <div style={statItemStyle}>
                 <p style={{ color: "#64748b", fontSize: "10px", marginBottom: "2px" }}>Goles por Partido</p>
                 <p style={{ color: "#1a1a1a", fontSize: "14px", fontWeight: "600" }}>
@@ -876,7 +878,7 @@ export default function EquipoDetalle({
             <h3 style={{ fontSize: "13px", fontWeight: "600", color: "#1a1a1a", marginBottom: "10px" }}>
               Defensa y Ataque
             </h3>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "8px" }}>
+            <div className="team-section-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "8px" }}>
               <div style={statItemStyle}>
                 <p className={`${ADVANCED_METRIC_LABEL_CLASS} advanced-metric-label--light`} style={getAdvancedMetricLabelStyle({}, 'light')}>{ML.cleanSheets}</p>
                 <p style={{ color: "#1a1a1a", fontSize: "14px", fontWeight: "600" }}>
@@ -897,7 +899,7 @@ export default function EquipoDetalle({
             <h3 style={{ fontSize: "13px", fontWeight: "600", color: "#1a1a1a", marginBottom: "10px" }}>
               Over/Under (Basado en {advancedStats.totalMatches} partidos)
             </h3>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "8px" }}>
+            <div className="team-section-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "8px" }}>
               <div style={statItemStyle}>
                 <p style={{ color: "#64748b", fontSize: "10px", marginBottom: "2px" }}>Over 0.5</p>
                 <p style={{ color: "#1a1a1a", fontSize: "14px", fontWeight: "600" }}>
@@ -1175,6 +1177,7 @@ export default function EquipoDetalle({
               return (
                 <div
                   key={idx}
+                  className="fixture-row"
                   style={{
                     backgroundColor: bgColor,
                     padding: "10px 12px",
@@ -1192,7 +1195,7 @@ export default function EquipoDetalle({
                   <p style={{ margin: "0 0 2px 0", fontSize: "11px", color: "#64748b", fontWeight: "500" }}>
                     Marcador: {goalsFor !== null && goalsAgainst !== null ? `${goalsFor} - ${goalsAgainst}` : "N/D"}
                   </p>
-                  <p style={{ margin: "0", fontSize: "10px", color: "#64748b", fontWeight: "400" }}>
+                  <p className="fixture-time" style={{ margin: "0", fontSize: "10px", color: "#64748b", fontWeight: "400" }}>
                     Fecha: {fechaFormateada}
                   </p>
                 </div>
@@ -1206,7 +1209,7 @@ export default function EquipoDetalle({
       {Array.isArray(upcomingFixtures) && upcomingFixtures.length > 0 && (
         <div style={cardStyle}>
           <h2 style={titleStyle}>Próximos Partidos</h2>
-          <div style={{ overflowX: "auto" }}>
+          <div className="table-responsive" style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
               <thead>
                 <tr style={{ borderBottom: "2px solid #e2e8f0" }}>

@@ -676,7 +676,7 @@ export default function SimuladorApuestas() {
       </div>
 
       {/* Tabla editable */}
-      <div className="simulador-table-container">
+      <div className="simulador-table-container table-responsive">
         <table className="simulador-table">
           <thead>
             <tr>
