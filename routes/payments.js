@@ -3,6 +3,10 @@ const Stripe = require("stripe");
 const rateLimit = require("express-rate-limit");
 const { authJwt } = require("../middleware/auth");
 const logger = require("../utils/logger");
+const {
+  validatePromotionCode,
+  resolveCheckoutDiscount,
+} = require("../utils/stripeCouponAdmin");
 
 const router = express.Router();
 
@@ -170,8 +174,24 @@ const checkoutLimiter = rateLimit({
   message: { error: "Demasiadas solicitudes de pago. Intenta en un minuto." },
 });
 
+router.post("/validate-coupon", checkoutLimiter, authJwt, async (req, res) => {
+  try {
+    const { code } = req.body || {};
+    const result = await validatePromotionCode(code);
+    if (!result.valid) {
+      return res.status(400).json({ success: false, ...result });
+    }
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Error al validar cupón",
+    });
+  }
+});
+
 router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, res) => {
-  const { priceId: bodyPriceId } = req.body || {};
+  const { priceId: bodyPriceId, promotionCode } = req.body || {};
   const userId = req.user?.id;
   let resolvedPriceId;
   let checkoutMode;
@@ -244,9 +264,21 @@ router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, re
       };
     }
 
-    const couponId = (process.env.STRIPE_COUPON_ID || "").trim();
-    if (couponId) {
-      sessionParams.discounts = [{ coupon: couponId }];
+    try {
+      const discount = await resolveCheckoutDiscount({ promotionCode });
+      if (discount?.type === 'promotion_code') {
+        sessionParams.discounts = [{ promotion_code: discount.id }];
+      } else if (discount?.type === 'coupon') {
+        sessionParams.discounts = [{ coupon: discount.id }];
+      }
+    } catch (couponErr) {
+      if (couponErr.code === 'COUPON_INVALID') {
+        return res.status(400).json({
+          error: couponErr.message,
+          code: 'COUPON_INVALID',
+        });
+      }
+      throw couponErr;
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);

@@ -221,6 +221,13 @@ router.post('/login', loginLimiter, async (req, res) => {
       expiresIn: JWT_EXPIRES_IN,
     });
 
+    logger.info('auth_login_success', {
+      userId: String(user._id),
+      email: user.email,
+      role: user.role || 'usuario',
+      ip: req.ip,
+    });
+
     res.json({
       success: true,
       token: token,

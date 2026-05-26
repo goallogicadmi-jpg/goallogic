@@ -16,6 +16,7 @@ function buildPredictionsLeagues(domain = "club", apiRows = []) {
   }
 
   return catalogComps
+    .filter((comp) => comp.active !== false)
     .filter((comp) => comp.features?.hasPredictions !== false)
     .map((comp) => {
       const id = Number(comp.id);

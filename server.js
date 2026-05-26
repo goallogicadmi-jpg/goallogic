@@ -7,7 +7,13 @@ const path = require('path');
 const axios = require('axios');
 const helmet = require('helmet');
 require('dotenv').config();
-const { getCompetitionById, getCompetitionsByDomain } = require('./utils/competitionCatalog');
+const {
+  getCompetitionById,
+  getCompetitionsByDomain,
+  initLeagueCatalogCache,
+} = require('./utils/competitionCatalog');
+const { initSystemSettingsCache } = require('./utils/systemSettingsService');
+const maintenanceModeGuard = require('./middleware/maintenanceMode');
 const { buildPredictionsLeagues } = require('./utils/predictionsLeagues');
 const { findUpcomingFixtureBetweenTeams, normalizeTeamId } = require('./utils/upcomingFixtureUtils');
 const { dedupeInjuriesByPlayer, buildInjuriesQueryPlans } = require('./utils/injuriesApiUtils');
@@ -172,6 +178,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(apiShortPublicCache);
 app.use(requestContext.middleware);
 app.use(globalLimiter);
+app.use(maintenanceModeGuard);
 app.use(publicCatalogRateLimit);
 app.use(premiumApiGuard);
 
@@ -261,6 +268,8 @@ async function connectToMongoDB() {
 
             const { startCommunityPostCleanup } = require('./jobs/communityPostCleanup');
             startCommunityPostCleanup();
+            const { startMessageCampaignWorker } = require('./jobs/messageCampaignWorker');
+            startMessageCampaignWorker();
             
             // Crear administrador principal por defecto
             try {
@@ -2543,6 +2552,26 @@ const adminRoutes = require('./routes/admin.js');
 app.use('/api/admin', adminRoutes);
 const adminProRoutes = require('./routes/adminPro.js');
 app.use('/api/admin/pro', adminProRoutes);
+const adminStripeRoutes = require('./routes/adminStripe.js');
+app.use('/api/admin/stripe', adminStripeRoutes);
+const adminModerationRoutes = require('./routes/adminModeration.js');
+app.use('/api/admin/moderation', adminModerationRoutes);
+const adminLogsRoutes = require('./routes/adminLogs.js');
+app.use('/api/admin/logs', adminLogsRoutes);
+const adminCmsRoutes = require('./routes/adminCms.js');
+app.use('/api/admin/cms', adminCmsRoutes);
+const cmsPublicRoutes = require('./routes/cmsPublic.js');
+app.use('/api/cms', cmsPublicRoutes);
+const adminLeaguesRoutes = require('./routes/adminLeagues.js');
+app.use('/api/admin/leagues', adminLeaguesRoutes);
+const adminCouponsRoutes = require('./routes/adminCoupons.js');
+app.use('/api/admin/coupons', adminCouponsRoutes);
+const adminSettingsRoutes = require('./routes/adminSettings.js');
+app.use('/api/admin/settings', adminSettingsRoutes);
+const adminMessagesRoutes = require('./routes/adminMessages.js');
+app.use('/api/admin/messages', adminMessagesRoutes);
+const settingsPublicRoutes = require('./routes/settingsPublic.js');
+app.use('/api/settings', settingsPublicRoutes);
 
 // ======================================================
 // 📌 Rutas de Comunidad
@@ -3486,12 +3515,34 @@ app.get('*', (req, res) => {
 // 🚀 Iniciar servidor
 // ======================================================
 // Intentar conectar a MongoDB, pero iniciar el servidor de todas formas
-connectToMongoDB().then(() => {
+connectToMongoDB().then(async () => {
     console.log('✅ MongoDB conectado, iniciando servidor...');
+    try {
+        const count = await initLeagueCatalogCache();
+        console.log(`✅ Catálogo de ligas cargado (${count?.length ?? 0} competiciones)`);
+    } catch (e) {
+        console.warn('⚠️ Catálogo de ligas: carga parcial', e.message);
+    }
+    try {
+        await initSystemSettingsCache();
+        console.log('✅ Configuración global cargada');
+    } catch (e) {
+        console.warn('⚠️ Configuración global: carga parcial', e.message);
+    }
     startServer();
-}).catch((error) => {
+}).catch(async (error) => {
     console.warn('⚠️ MongoDB no disponible, pero iniciando servidor de todas formas...');
     console.warn('⚠️ Algunas funcionalidades que requieren MongoDB pueden no estar disponibles');
+    try {
+        await initLeagueCatalogCache();
+    } catch (_) {
+        /* JSON fallback */
+    }
+    try {
+        await initSystemSettingsCache();
+    } catch (_) {
+        /* defaults */
+    }
     startServer();
 });
 

@@ -7,6 +7,8 @@ import ComunidadButton from "../components/ComunidadButton";
 import Toast from "../components/Toast";
 import SiteFooter from "../components/legal/SiteFooter";
 import LegalAcceptanceGate from "../components/legal/LegalAcceptanceGate";
+import CmsGlobalBanner from "../components/Cms/CmsGlobalBanner";
+import OperationalSettingsBanner from "../components/OperationalSettingsBanner";
 import {
   SESSION_REQUIRED_PREDICCIONES_TOAST_MESSAGE,
   SESSION_REQUIRED_TOAST_DURATION_MS,
@@ -507,6 +509,8 @@ export default function Layout() {
           </div>
         </div>
       </header>
+      <CmsGlobalBanner />
+      <OperationalSettingsBanner />
       <main className="layout-page-shell">
         <LegalAcceptanceGate>
           <Outlet />

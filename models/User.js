@@ -111,6 +111,17 @@ const userSchema = new mongoose.Schema({
   legalAcceptedAt: {
     type: Date
   },
+  /** Bloqueo de participación en comunidad (posts/comentarios). */
+  communityBlocked: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
+  /** Silencio temporal en comunidad (null = sin silencio). */
+  communityMutedUntil: {
+    type: Date,
+    default: null,
+  },
   /** Hash SHA-256 del token de recuperación de contraseña (no almacenar token plano). */
   resetPasswordToken: {
     type: String,

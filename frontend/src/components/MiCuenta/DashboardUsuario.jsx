@@ -11,6 +11,7 @@ import {
   IconEvolucionProfit,
   IconRendimiento,
 } from './CuentaIcons';
+import CmsDashboardSection from '../Cms/CmsDashboardSection';
 import './cuentaSections.css';
 import './MiCuenta.css';
 
@@ -142,6 +143,8 @@ const DashboardUsuario = () => {
         </CuentaSectionTitle>
         <p className="cuenta-section-desc">Resumen de tu actividad</p>
       </div>
+
+      <CmsDashboardSection />
 
       <div className="dashboard-cards">
         <div className="dashboard-card">

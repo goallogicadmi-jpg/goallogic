@@ -5,13 +5,36 @@ const checkAdmin = require('../middleware/checkAdmin');
 const CommunityPost = require('../models/CommunityPost');
 const PostComment = require('../models/PostComment');
 const PostReaction = require('../models/PostReaction');
+const User = require('../models/User');
 const { containsBannedWords } = require('../utils/contentFilter');
+const logger = require('../utils/logger');
+const {
+  getCommunityRestriction,
+  notDeletedFilter,
+  logModerationAction,
+} = require('../utils/moderationHelpers');
+const {
+  getSettingBoolean,
+  getSettingNumber,
+} = require('../utils/systemSettingsService');
 
 const { communityPostLimiter } = require('../middleware/routeRateLimits');
+
+async function loadParticipationUser(userId) {
+  return User.findById(userId).select(
+    'communityBlocked communityMutedUntil role isMainAdmin nombre email'
+  );
+}
 
 // Crear post
 router.post('/posts', communityPostLimiter, auth, async (req, res) => {
   try {
+    const author = await loadParticipationUser(req.user.id);
+    const restriction = getCommunityRestriction(author);
+    if (!restriction.canParticipate) {
+      return res.status(403).json({ message: restriction.reason });
+    }
+
     const {
       publicationType,
       matchInfo,
@@ -71,7 +94,7 @@ router.get('/posts', authJwt, async (req, res) => {
   try {
     const { model, publicationType, matchId, sort = 'recent', analyst, limit } = req.query;
 
-    const filter = {};
+    const filter = { ...notDeletedFilter() };
     if (publicationType) filter.publicationType = publicationType;
     if (model) filter.modelUsed = model;
     if (matchId) filter.matchId = matchId;
@@ -98,11 +121,13 @@ router.get('/posts', authJwt, async (req, res) => {
 // Detalle de post
 router.get('/posts/:id', authJwt, async (req, res) => {
   try {
-    const post = await CommunityPost.findById(req.params.id)
-      .populate('user', 'nombre email');
+    const post = await CommunityPost.findOne({
+      _id: req.params.id,
+      ...notDeletedFilter(),
+    }).populate('user', 'nombre email');
     if (!post) return res.status(404).json({ message: 'No encontrado' });
 
-    const comments = await PostComment.find({ post: post._id })
+    const comments = await PostComment.find({ post: post._id, ...notDeletedFilter() })
       .populate('user', 'nombre')
       .sort({ createdAt: 1 });
 
@@ -116,6 +141,12 @@ router.get('/posts/:id', authJwt, async (req, res) => {
 // Comentar
 router.post('/posts/:id/comments', auth, async (req, res) => {
   try {
+    const author = await loadParticipationUser(req.user.id);
+    const restriction = getCommunityRestriction(author);
+    if (!restriction.canParticipate) {
+      return res.status(403).json({ message: restriction.reason });
+    }
+
     const { text } = req.body;
 
     if (containsBannedWords(text)) {
@@ -124,7 +155,10 @@ router.post('/posts/:id/comments', auth, async (req, res) => {
       });
     }
 
-    const post = await CommunityPost.findById(req.params.id);
+    const post = await CommunityPost.findOne({
+      _id: req.params.id,
+      ...notDeletedFilter(),
+    });
     if (!post) return res.status(404).json({ message: 'Post no encontrado' });
 
     const comment = await PostComment.create({
@@ -191,9 +225,16 @@ router.delete('/posts/:id', auth, checkAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Post no encontrado' });
     }
 
-    await PostComment.deleteMany({ post: post._id });
-    await PostReaction.deleteMany({ post: post._id });
-    await post.deleteOne();
+    post.deletedAt = new Date();
+    await post.save();
+    await PostComment.updateMany({ post: post._id }, { deletedAt: new Date() });
+
+    logModerationAction('delete_post', req, {
+      contentType: 'post',
+      targetId: String(post._id),
+      targetUserId: String(post.user),
+      via: 'community_route',
+    });
 
     res.json({ message: 'Publicación eliminada', id: req.params.id });
   } catch (err) {
@@ -218,9 +259,17 @@ router.delete('/posts/:postId/comments/:commentId', auth, checkAdmin, async (req
       return res.status(404).json({ message: 'Comentario no encontrado' });
     }
 
-    await comment.deleteOne();
+    comment.deletedAt = new Date();
+    await comment.save();
     post.commentsCount = Math.max(0, (post.commentsCount || 0) - 1);
     await post.save();
+
+    logModerationAction('delete_comment', req, {
+      contentType: 'comment',
+      targetId: String(comment._id),
+      postId: String(post._id),
+      via: 'community_route',
+    });
 
     res.json({
       message: 'Comentario eliminado',
@@ -236,21 +285,69 @@ router.delete('/posts/:postId/comments/:commentId', auth, checkAdmin, async (req
 // Reportar
 router.post('/posts/:id/report', auth, async (req, res) => {
   try {
+    if (!getSettingBoolean('community.reports_enabled', true)) {
+      return res.status(403).json({ message: 'Los reportes están deshabilitados temporalmente' });
+    }
+
     const { reason } = req.body;
+    const maxLen = getSettingNumber('community.max_report_reason_length', 300);
     const post = await CommunityPost.findById(req.params.id);
     if (!post) return res.status(404).json({ message: 'Post no encontrado' });
 
     post.isReported = true;
+    post.reportStatus = 'open';
     post.reports.push({
       user: req.user.id,
-      reason: reason?.slice(0, 300),
+      reason: reason?.slice(0, maxLen),
     });
     await post.save();
+
+    logger.info('community_post_reported', {
+      postId: String(post._id),
+      reporterId: String(req.user.id),
+    });
 
     res.json({ message: 'Publicación reportada para revisión' });
   } catch (err) {
     console.error('Error reportando post:', err);
     res.status(500).json({ message: 'Error al reportar la publicación' });
+  }
+});
+
+// Reportar comentario
+router.post('/posts/:postId/comments/:commentId/report', auth, async (req, res) => {
+  try {
+    if (!getSettingBoolean('community.reports_enabled', true)) {
+      return res.status(403).json({ message: 'Los reportes están deshabilitados temporalmente' });
+    }
+
+    const { reason } = req.body;
+    const maxLen = getSettingNumber('community.max_report_reason_length', 300);
+    const comment = await PostComment.findOne({
+      _id: req.params.commentId,
+      post: req.params.postId,
+      ...notDeletedFilter(),
+    });
+    if (!comment) return res.status(404).json({ message: 'Comentario no encontrado' });
+
+    comment.isReported = true;
+    comment.reportStatus = 'open';
+    comment.reports.push({
+      user: req.user.id,
+      reason: reason?.slice(0, maxLen),
+    });
+    await comment.save();
+
+    logger.info('community_comment_reported', {
+      commentId: String(comment._id),
+      postId: String(req.params.postId),
+      reporterId: String(req.user.id),
+    });
+
+    res.json({ message: 'Comentario reportado para revisión' });
+  } catch (err) {
+    console.error('Error reportando comentario:', err);
+    res.status(500).json({ message: 'Error al reportar el comentario' });
   }
 });
 

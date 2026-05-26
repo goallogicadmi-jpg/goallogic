@@ -1,38 +1,29 @@
-const fs = require("fs");
-const path = require("path");
-
-const CATALOG_PATH = path.join(__dirname, "../frontend/src/config/competitionCatalog.json");
-
-/** Lee el catálogo en cada llamada para evitar datos obsoletos en memoria (require cache). */
-function readCatalogFile() {
-  const raw = fs.readFileSync(CATALOG_PATH, "utf8");
-  return JSON.parse(raw);
-}
+/**
+ * Catálogo de competiciones — delega en leagueCatalogStore (Mongo + caché en memoria).
+ * Fallback a JSON si Mongo no está disponible.
+ */
+const store = require('./leagueCatalogStore');
 
 function getCompetitionCatalog() {
-  return [...readCatalogFile()].sort((left, right) => left.priority - right.priority);
+  return store.getCompetitionCatalog();
 }
 
 function getCompetitionsByDomain(domain) {
-  return getCompetitionCatalog().filter((competition) => competition.domain === domain);
+  return store.getCompetitionsByDomain(domain, { activeOnly: true });
 }
 
 function getCompetitionById(competitionId) {
-  const parsedId = Number(competitionId);
-  return readCatalogFile().find((competition) => Number(competition.id) === parsedId) || null;
+  const c = store.getCompetitionById(competitionId);
+  if (!c || c.active === false) return null;
+  return c;
 }
 
 function getCompetitionByIdAndDomain(competitionId, domain) {
-  const competition = getCompetitionById(competitionId);
-  if (!competition || competition.domain !== domain) {
-    return null;
-  }
-
-  return competition;
+  return store.getCompetitionByIdAndDomain(competitionId, domain);
 }
 
 function getCompetitionIdsByDomain(domain) {
-  return getCompetitionsByDomain(domain).map((competition) => Number(competition.id));
+  return store.getCompetitionIdsByDomain(domain, { activeOnly: true });
 }
 
 module.exports = {
@@ -41,4 +32,6 @@ module.exports = {
   getCompetitionById,
   getCompetitionByIdAndDomain,
   getCompetitionIdsByDomain,
+  initLeagueCatalogCache: store.initLeagueCatalogCache,
+  reloadMemoryCatalog: store.reloadMemoryCatalog,
 };

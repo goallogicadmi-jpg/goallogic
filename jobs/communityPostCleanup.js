@@ -4,8 +4,12 @@ const PostComment = require('../models/PostComment');
 const PostReaction = require('../models/PostReaction');
 const logger = require('../utils/logger');
 
-/** Tiempo de vida de publicaciones: 3 días (72 horas) */
-const POST_TTL_MS = 72 * 60 * 60 * 1000;
+const { getSettingNumber } = require('../utils/systemSettingsService');
+
+function getPostTtlMs() {
+  const hours = getSettingNumber('community.post_ttl_hours', 72);
+  return Math.max(1, hours) * 60 * 60 * 1000;
+}
 
 /** Intervalo entre ejecuciones del limpiador (1 hora) */
 const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
@@ -34,7 +38,7 @@ async function deletePostsAndRelated(postIds) {
  * @returns {Promise<number>}
  */
 async function purgeExpiredCommunityPosts() {
-  const cutoff = new Date(Date.now() - POST_TTL_MS);
+  const cutoff = new Date(Date.now() - getPostTtlMs());
   let totalDeleted = 0;
 
   // Procesar en lotes para no bloquear el event loop ni saturar la BD

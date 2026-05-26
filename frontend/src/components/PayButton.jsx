@@ -8,9 +8,11 @@ const checkoutPriceId = import.meta.env.VITE_STRIPE_PRICE_ID?.trim() || "";
  * Checkout Stripe por URL (sesión creada en el servidor).
  * Requiere JWT: el servidor usa req.user.id, no acepta userId en el body.
  */
-export default function PayButton({ buttonText = "Comprar Premium" }) {
+export default function PayButton({ buttonText = "Comprar Premium", showCouponField = true }) {
   const [busy, setBusy] = useState(false);
   const [localError, setLocalError] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [couponHint, setCouponHint] = useState("");
 
   const handlePay = async () => {
     setLocalError("");
@@ -26,10 +28,15 @@ export default function PayButton({ buttonText = "Comprar Premium" }) {
         );
       }
 
+      const body = { priceId: checkoutPriceId };
+      if (couponCode.trim()) {
+        body.promotionCode = couponCode.trim().toUpperCase();
+      }
+
       const res = await authFetch("/api/payments/create-checkout-session", {
         method: "POST",
         headers: getAuthHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ priceId: checkoutPriceId }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json().catch(() => ({}));
@@ -65,6 +72,9 @@ export default function PayButton({ buttonText = "Comprar Premium" }) {
             "Error de configuración en Render (Stripe o JWT). Revisa variables de entorno."
           );
         }
+        if (data.code === "COUPON_INVALID") {
+          throw new Error(data.error || data.message || "Cupón no válido");
+        }
         if (data.code === "STRIPE_PRICE_NOT_FOUND" || data.code === "STRIPE_PRICE_MODE_MISMATCH") {
           throw new Error(
             data.error ||
@@ -86,8 +96,53 @@ export default function PayButton({ buttonText = "Comprar Premium" }) {
     }
   };
 
+  const handleValidateCoupon = async () => {
+    setCouponHint("");
+    setLocalError("");
+    if (!couponCode.trim()) return;
+    try {
+      const res = await authFetch("/api/payments/validate-coupon", {
+        method: "POST",
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ code: couponCode.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Cupón no válido");
+      }
+      setCouponHint(data.data?.message || "Cupón válido");
+    } catch (e) {
+      setLocalError(e.message || "Cupón no válido");
+    }
+  };
+
   return (
-    <div>
+    <div className="pay-button-wrap">
+      {showCouponField && (
+        <div className="pay-button-coupon">
+          <input
+            type="text"
+            className="pay-button-coupon-input"
+            placeholder="Código promocional (opcional)"
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+            disabled={busy}
+          />
+          <button
+            type="button"
+            className="pay-button-coupon-validate"
+            onClick={handleValidateCoupon}
+            disabled={busy || !couponCode.trim()}
+          >
+            Validar
+          </button>
+        </div>
+      )}
+      {couponHint && (
+        <p className="pay-button-coupon-hint" style={{ color: "#81c784", fontSize: "0.85rem", marginBottom: 8 }}>
+          {couponHint}
+        </p>
+      )}
       <button
         type="button"
         className="pay-button-stripe"

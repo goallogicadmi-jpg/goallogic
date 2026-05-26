@@ -1,70 +1,82 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getSentMessages } from '../../services/messageService';
+import { getAdminMessageHistory } from '../../services/messagesAdminService';
+import { useUser } from '../../context/UserContext';
 import './Admin.css';
 
-/**
- * Componente para mostrar los mensajes enviados por el administrador
- */
 const AdminMensajesEnviados = () => {
+  const { isMainAdmin } = useUser();
+
   const [messages, setMessages] = useState([]);
   const [stats, setStats] = useState({ total: 0, read: 0, unread: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const [filters, setFilters] = useState({
+    q: '',
+    leido: '',
+    from: '',
+    to: '',
+    campaignId: '',
+  });
 
-  // Cargar mensajes al montar
-  useEffect(() => {
-    loadMessages();
-  }, []);
-
-  // Función para cargar mensajes enviados
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getSentMessages();
-      setMessages(data.messages || []);
-      setStats(data.stats || { total: 0, read: 0, unread: 0 });
+      if (isMainAdmin) {
+        const data = await getAdminMessageHistory({
+          q: filters.q || undefined,
+          leido: filters.leido || undefined,
+          from: filters.from || undefined,
+          to: filters.to || undefined,
+          campaignId: filters.campaignId || undefined,
+          limit: 100,
+        });
+        setMessages(data.messages || []);
+        setStats(data.stats || { total: 0, read: 0, unread: 0 });
+      } else {
+        const data = await getSentMessages();
+        setMessages(data.messages || []);
+        setStats(data.stats || { total: 0, read: 0, unread: 0 });
+      }
     } catch (err) {
       console.error('Error cargando mensajes enviados:', err);
       setError(err.message || 'Error al cargar los mensajes enviados');
     } finally {
       setLoading(false);
     }
-  };
+  }, [isMainAdmin, filters]);
 
-  // Función para formatear fecha
+  useEffect(() => {
+    loadMessages();
+  }, [loadMessages]);
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffTime = Math.abs(now - date);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 1) {
-      return 'Hoy';
-    } else if (diffDays === 2) {
-      return 'Ayer';
-    } else if (diffDays <= 7) {
-      return `Hace ${diffDays - 1} días`;
-    } else {
-      return date.toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    }
+    if (diffDays === 1) return 'Hoy';
+    if (diffDays === 2) return 'Ayer';
+    if (diffDays <= 7) return `Hace ${diffDays - 1} días`;
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
-  // Función para formatear hora
   const formatTime = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('es-ES', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
-  if (loading) {
+  if (loading && messages.length === 0) {
     return (
       <div className="admin-mensajes-enviados">
         <div className="admin-loading">
@@ -81,7 +93,7 @@ const AdminMensajesEnviados = () => {
         <div className="admin-error">
           <span>⚠️</span>
           <span>{error}</span>
-          <button onClick={loadMessages} className="admin-btn-retry">
+          <button type="button" onClick={loadMessages} className="admin-btn-retry">
             Reintentar
           </button>
         </div>
@@ -91,12 +103,48 @@ const AdminMensajesEnviados = () => {
 
   return (
     <div className="admin-mensajes-enviados">
-      <div className="admin-section-header">
-        <h2>Mensajes Enviados</h2>
-        <p>Historial de mensajes que has enviado a los usuarios</p>
-      </div>
+      {isMainAdmin && (
+        <div className="admin-filters-row admin-mensajes-filters">
+          <input
+            type="text"
+            placeholder="Buscar título o contenido…"
+            value={filters.q}
+            onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
+            className="admin-input"
+          />
+          <select
+            value={filters.leido}
+            onChange={(e) => setFilters((f) => ({ ...f, leido: e.target.value }))}
+          >
+            <option value="">Todos</option>
+            <option value="true">Leídos</option>
+            <option value="false">No leídos</option>
+          </select>
+          <input
+            type="date"
+            value={filters.from}
+            onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
+            className="admin-input"
+          />
+          <input
+            type="date"
+            value={filters.to}
+            onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
+            className="admin-input"
+          />
+          <input
+            type="text"
+            placeholder="ID campaña (opcional)"
+            value={filters.campaignId}
+            onChange={(e) => setFilters((f) => ({ ...f, campaignId: e.target.value }))}
+            className="admin-input"
+          />
+          <button type="button" className="admin-btn-secondary" onClick={loadMessages}>
+            Filtrar
+          </button>
+        </div>
+      )}
 
-      {/* Estadísticas */}
       <div className="admin-stats">
         <div className="admin-stat-card">
           <div className="admin-stat-value">{stats.total}</div>
@@ -114,7 +162,7 @@ const AdminMensajesEnviados = () => {
 
       {messages.length === 0 ? (
         <div className="admin-empty">
-          <p>📬 No has enviado ningún mensaje aún</p>
+          <p>📬 No hay mensajes con estos filtros</p>
         </div>
       ) : (
         <div className="admin-mensajes-list">
@@ -126,7 +174,9 @@ const AdminMensajesEnviados = () => {
             >
               <div className="admin-mensaje-header">
                 <h4>{message.titulo}</h4>
-                <span className={`admin-mensaje-status ${message.leido ? 'admin-mensaje-leido' : 'admin-mensaje-no-leido'}`}>
+                <span
+                  className={`admin-mensaje-status ${message.leido ? 'admin-mensaje-leido' : 'admin-mensaje-no-leido'}`}
+                >
                   {message.leido ? '✓ Leído' : '● No leído'}
                 </span>
               </div>
@@ -137,6 +187,9 @@ const AdminMensajesEnviados = () => {
                 <span>
                   {formatDate(message.created_at)} • {formatTime(message.created_at)}
                 </span>
+                {message.campaign_id && (
+                  <span className="admin-mensaje-campaign-tag">Campaña</span>
+                )}
               </div>
               <div className="admin-mensaje-preview">
                 {message.contenido.length > 150
@@ -148,11 +201,11 @@ const AdminMensajesEnviados = () => {
         </div>
       )}
 
-      {/* Vista detallada del mensaje seleccionado */}
       {selectedMessage && (
         <div className="admin-mensaje-detail">
           <div className="admin-mensaje-detail-header">
             <button
+              type="button"
               className="admin-mensaje-close-btn"
               onClick={() => setSelectedMessage(null)}
             >
@@ -167,9 +220,12 @@ const AdminMensajesEnviados = () => {
                 )}
               </span>
               <span>
-                {formatDate(selectedMessage.created_at)} • {formatTime(selectedMessage.created_at)}
+                {formatDate(selectedMessage.created_at)} •{' '}
+                {formatTime(selectedMessage.created_at)}
               </span>
-              <span className={`admin-mensaje-status ${selectedMessage.leido ? 'admin-mensaje-leido' : 'admin-mensaje-no-leido'}`}>
+              <span
+                className={`admin-mensaje-status ${selectedMessage.leido ? 'admin-mensaje-leido' : 'admin-mensaje-no-leido'}`}
+              >
                 {selectedMessage.leido ? '✓ Leído' : '● No leído'}
               </span>
             </div>

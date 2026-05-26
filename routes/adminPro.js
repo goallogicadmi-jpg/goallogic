@@ -7,13 +7,13 @@ const router = express.Router();
 /** Módulos del Admin Panel PRO y estado de implementación. */
 const MODULES = [
   { id: 'users', status: 'active', apiPrefix: '/api/admin' },
-  { id: 'stripe', status: 'planned', apiPrefix: '/api/admin/pro/stripe' },
-  { id: 'cms', status: 'planned', apiPrefix: '/api/admin/pro/cms' },
-  { id: 'leagues', status: 'planned', apiPrefix: '/api/admin/pro/leagues' },
-  { id: 'moderation', status: 'partial', apiPrefix: '/api/community' },
-  { id: 'logs', status: 'planned', apiPrefix: '/api/admin/pro/logs' },
-  { id: 'coupons', status: 'planned', apiPrefix: '/api/admin/pro/coupons' },
-  { id: 'settings', status: 'planned', apiPrefix: '/api/admin/pro/settings' },
+  { id: 'stripe', status: 'active', apiPrefix: '/api/admin/stripe' },
+  { id: 'cms', status: 'active', apiPrefix: '/api/admin/cms' },
+  { id: 'leagues', status: 'active', apiPrefix: '/api/admin/leagues' },
+  { id: 'moderation', status: 'active', apiPrefix: '/api/admin/moderation' },
+  { id: 'logs', status: 'active', apiPrefix: '/api/admin/logs' },
+  { id: 'coupons', status: 'active', apiPrefix: '/api/admin/coupons' },
+  { id: 'settings', status: 'active', apiPrefix: '/api/admin/settings' },
 ];
 
 /**
@@ -41,11 +41,6 @@ function notImplemented(moduleId) {
   };
 }
 
-router.get('/stripe/overview', auth, checkAdmin, notImplemented('stripe'));
-router.get('/cms/items', auth, checkAdmin, notImplemented('cms'));
-router.get('/leagues/catalog', auth, checkAdmin, notImplemented('leagues'));
 router.get('/logs', auth, checkAdmin, notImplemented('logs'));
-router.get('/coupons', auth, checkAdmin, notImplemented('coupons'));
-router.get('/settings', auth, checkAdmin, notImplemented('settings'));
 
 module.exports = router;

@@ -3,6 +3,7 @@ const path = require('path');
 const winston = require('winston');
 const DailyRotateFile = require('winston-daily-rotate-file');
 const { getFields } = require('./requestContext');
+const { AuditLogTransport } = require('./auditLogService');
 
 const logsDir = path.join(__dirname, '..', 'logs');
 if (!fs.existsSync(logsDir)) {
@@ -74,6 +75,7 @@ const logger = winston.createLogger({
   transports: [
     appRotate,
     criticalFile,
+    new AuditLogTransport({ level: 'info' }),
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize({ all: true }),

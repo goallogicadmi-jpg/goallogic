@@ -39,6 +39,13 @@ const messageSchema = new mongoose.Schema({
     default: false,
     index: true // Índice para contar mensajes no leídos
   },
+  // Campaña masiva/programada (opcional)
+  campaign_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'MessageCampaign',
+    default: null,
+    index: true,
+  },
   // Fecha de creación
   created_at: {
     type: Date,

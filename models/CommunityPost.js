@@ -45,7 +45,22 @@ const CommunityPostSchema = new mongoose.Schema({
     reason: String,
     createdAt: { type: Date, default: Date.now },
   }],
+  reportStatus: {
+    type: String,
+    enum: ['open', 'resolved', 'dismissed'],
+    default: 'open',
+  },
+  deletedAt: { type: Date, default: null },
+  moderationHistory: [{
+    action: { type: String, required: true },
+    actor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    note: { type: String, default: '' },
+    at: { type: Date, default: Date.now },
+  }],
 }, { timestamps: true });
+
+CommunityPostSchema.index({ isReported: 1, reportStatus: 1 });
+CommunityPostSchema.index({ deletedAt: 1 });
 
 CommunityPostSchema.index({ createdAt: 1 });
 

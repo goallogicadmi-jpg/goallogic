@@ -87,7 +87,7 @@ export const ADMIN_NAV_GROUPS = [
         path: '/admin/messages/bulk',
         label: 'Mensajes masivos',
         icon: '📢',
-        description: 'Envío masivo o broadcast',
+        description: 'Segmentación, plantillas y programación',
         mainAdminOnly: true,
       },
       {
@@ -95,7 +95,7 @@ export const ADMIN_NAV_GROUPS = [
         path: '/admin/messages/sent',
         label: 'Mensajes enviados',
         icon: '📬',
-        description: 'Historial de envíos',
+        description: 'Campañas, métricas y filtros',
       },
     ],
   },

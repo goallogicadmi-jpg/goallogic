@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const logger = require('../utils/logger');
 const metrics = require('../utils/metrics');
+const stripeWebhookMetrics = require('../utils/stripeWebhookMetrics');
 const { mongoUriHint, stripeApiModeFromEnv } = require('../utils/mongoUriHint');
 
 const PAYMENT_FAILED_TYPES = new Set([
@@ -169,6 +170,7 @@ function subscriptionShouldDeactivatePremium(sub) {
  * Requiere body raw (express.raw) para verificar la firma de Stripe.
  */
 async function stripeWebhook(req, res) {
+  const handlerStarted = Date.now();
   console.log('WEBHOOK_HANDLER_START');
   const isProd = process.env.NODE_ENV === 'production';
   const whSecret =
@@ -258,10 +260,12 @@ async function stripeWebhook(req, res) {
         rawUtf8.length > 20000 ? `${rawUtf8.slice(0, 20000)}...<truncado>` : rawUtf8,
       ip: req.ip,
     });
+    stripeWebhookMetrics.recordSignatureError(err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   metrics.incWebhookEvents();
+  stripeWebhookMetrics.recordEventStart(event);
   console.log(`Evento recibido: ${event.type}`);
 
   if (PAYMENT_FAILED_TYPES.has(event.type)) {
@@ -436,6 +440,7 @@ async function stripeWebhook(req, res) {
         }
     }
   } catch (e) {
+    stripeWebhookMetrics.recordHandlerError(event.type, e.message);
     logger.critical('stripe_webhook_handler_error', {
       type: event.type,
       message: e.message,
@@ -444,6 +449,7 @@ async function stripeWebhook(req, res) {
     return res.status(500).json({ error: 'Webhook handler error' });
   }
 
+  stripeWebhookMetrics.recordEventSuccess(Date.now() - handlerStarted);
   return res.json({ received: true });
 }
 
