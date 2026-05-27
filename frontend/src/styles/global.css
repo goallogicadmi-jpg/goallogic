@@ -603,17 +603,29 @@ textarea:disabled {
 
 .main-header-content {
   width: 100%;
-  max-width: 100%;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
   padding: 0 var(--spacing-xl);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  box-sizing: border-box;
+}
+
+.main-header-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
 }
 
 .main-header-logo-container {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-sm);
+  flex-shrink: 0;
 }
 
 .main-header-logo-img {
@@ -644,9 +656,11 @@ textarea:disabled {
 .main-header-nav {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: var(--spacing-xl);
   flex-wrap: nowrap;
+  flex: 1;
+  min-width: 0;
 }
 
 /* Asegurar que el botón de Comunidad esté al final visualmente */
@@ -711,7 +725,6 @@ textarea:disabled {
   justify-content: flex-end;
   gap: 8px;
   flex-shrink: 0;
-  margin-left: auto;
 }
 
 /* Overlay del drawer en móvil */
@@ -1002,8 +1015,30 @@ section {
   }
 
   .main-header-content {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
     padding: 0 16px;
     gap: 8px;
+  }
+
+  .main-header-start {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .main-header-logo-container {
+    grid-column: 2;
+    justify-self: center;
+  }
+
+  .main-header-actions {
+    grid-column: 3;
+    justify-self: end;
   }
 
   .main-header-logo-img {
@@ -1101,6 +1136,32 @@ section {
 
 /* Desktop — navegación visible en el header */
 @media (min-width: 769px) {
+  .main-header-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: var(--layout-max-width);
+    margin: 0 auto;
+    gap: var(--spacing-lg);
+  }
+
+  .main-header-start {
+    display: none;
+  }
+
+  .main-header-logo-container {
+    justify-content: center;
+  }
+
+  .main-header-nav {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .main-header-actions {
+    flex-shrink: 0;
+  }
+
   .hamburger-btn {
     display: none;
   }

@@ -535,18 +535,20 @@ export default function Layout() {
       `}</style>
       <header className="main-header">
         <div className="main-header-content">
-          <button
-            type="button"
-            className={`hamburger-btn${isSidebarOpen ? ' open' : ''}`}
-            aria-label={isSidebarOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
-            aria-expanded={isSidebarOpen}
-            aria-controls="main-header-nav"
-            onClick={toggleSidebar}
-          >
-            <span className="hamburger-btn__bar bar-top" aria-hidden="true" />
-            <span className="hamburger-btn__bar bar-middle" aria-hidden="true" />
-            <span className="hamburger-btn__bar bar-bottom" aria-hidden="true" />
-          </button>
+          <div className="main-header-start">
+            <button
+              type="button"
+              className={`hamburger-btn${isSidebarOpen ? ' open' : ''}`}
+              aria-label={isSidebarOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
+              aria-expanded={isSidebarOpen}
+              aria-controls="main-header-nav"
+              onClick={toggleSidebar}
+            >
+              <span className="hamburger-btn__bar bar-top" aria-hidden="true" />
+              <span className="hamburger-btn__bar bar-middle" aria-hidden="true" />
+              <span className="hamburger-btn__bar bar-bottom" aria-hidden="true" />
+            </button>
+          </div>
           <div className="main-header-logo-container">
             {!logoError ? (
               <img
