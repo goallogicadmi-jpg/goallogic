@@ -9,6 +9,12 @@ export default function LineupsPitch({
   onPlayerClick,
   compact = false,
   startersCount = 0,
+  eventsByPlayer = {},
+  newPlayerEventIds,
+  onPlayerEventAnimated,
+  animateEventByPlayer = {},
+  isSelectingSecondPlayer = false,
+  comparePlayerAId = null,
 }) {
   if (!team) return null;
 
@@ -36,6 +42,12 @@ export default function LineupsPitch({
             teamColors={team.colors}
             onClick={onPlayerClick}
             compact={compact || densePitch}
+            playerEvents={eventsByPlayer[String(player.id)] || []}
+            newPlayerEventIds={newPlayerEventIds}
+            onPlayerEventAnimated={onPlayerEventAnimated}
+            activeEventAnimation={animateEventByPlayer[String(player.id)]}
+            isSelectingSecondPlayer={isSelectingSecondPlayer}
+            comparePlayerAId={comparePlayerAId}
           />
         ))}
       </div>

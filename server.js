@@ -18,6 +18,8 @@ const { buildPredictionsLeagues } = require('./utils/predictionsLeagues');
 const { findUpcomingFixtureBetweenTeams, normalizeTeamId } = require('./utils/upcomingFixtureUtils');
 const { dedupeInjuriesByPlayer, buildInjuriesQueryPlans } = require('./utils/injuriesApiUtils');
 const { logUpstream, GENERIC_API_ERROR } = require('./utils/upstreamError');
+const { buildPlayerHeatmapPoints } = require('./utils/playerHeatmap');
+const { buildTacticalViewResponse } = require('./utils/tacticalView');
 const { buildProductionCspDirectives } = require('./utils/cspDirectives');
 const premiumApiGuard = require('./middleware/premiumApiGuard');
 const publicCatalogRateLimit = require('./middleware/publicCatalogRateLimit');
@@ -698,6 +700,184 @@ app.get('/api/fixtures/:fixtureId/lineups', async (req, res) => {
         res.json(response.data);
     } catch (error) {
         logUpstream('fixtures_lineups', error);
+        const status = error.response?.status;
+        res.status(status && status >= 400 && status < 600 ? status : 500).json({
+            error: GENERIC_API_ERROR,
+        });
+    }
+});
+
+// ======================================================
+// 📌 Estadísticas de un jugador en un partido (fixture)
+// ======================================================
+app.get('/api/fixtures/:fixtureId/player/:playerId', async (req, res) => {
+    try {
+        const { fixtureId, playerId } = req.params;
+
+        if (!fixtureId || !playerId) {
+            return res.status(400).json({ error: 'Faltan parámetros: fixtureId o playerId' });
+        }
+
+        if (!process.env.API_KEY) {
+            return res.status(500).json({
+                error: 'servicio_datos_no_configurado',
+                message: 'Servicio de datos no disponible en este momento.',
+            });
+        }
+
+        const response = await axios.get(
+            `https://v3.football.api-sports.io/fixtures/players?fixture=${fixtureId}`,
+            { headers: apiHeaders }
+        );
+
+        const teams = response.data?.response || [];
+        let found = null;
+
+        for (const teamBlock of teams) {
+            const players = teamBlock?.players || [];
+            const match = players.find(
+                (entry) => String(entry?.player?.id) === String(playerId)
+            );
+            if (match) {
+                found = {
+                    team: teamBlock.team || null,
+                    player: match.player,
+                    statistics: match.statistics || [],
+                };
+                break;
+            }
+        }
+
+        res.json({ response: found });
+    } catch (error) {
+        logUpstream('fixtures_player_stats', error);
+        const status = error.response?.status;
+        res.status(status && status >= 400 && status < 600 ? status : 500).json({
+            error: GENERIC_API_ERROR,
+        });
+    }
+});
+
+// ======================================================
+// 📌 Mapa de calor de un jugador en un partido
+// ======================================================
+app.get('/api/fixtures/:fixtureId/player/:playerId/heatmap', async (req, res) => {
+    try {
+        const { fixtureId, playerId } = req.params;
+
+        if (!fixtureId || !playerId) {
+            return res.status(400).json({ error: 'Faltan parámetros: fixtureId o playerId' });
+        }
+
+        if (!process.env.API_KEY) {
+            return res.status(500).json({
+                error: 'servicio_datos_no_configurado',
+                message: 'Servicio de datos no disponible en este momento.',
+            });
+        }
+
+        const [eventsRes, lineupsRes, playersRes] = await Promise.all([
+            axios.get(
+                `https://v3.football.api-sports.io/fixtures/events?fixture=${fixtureId}`,
+                { headers: apiHeaders }
+            ),
+            axios.get(
+                `https://v3.football.api-sports.io/fixtures/lineups?fixture=${fixtureId}`,
+                { headers: apiHeaders }
+            ),
+            axios.get(
+                `https://v3.football.api-sports.io/fixtures/players?fixture=${fixtureId}`,
+                { headers: apiHeaders }
+            ),
+        ]);
+
+        const events = eventsRes.data?.response || [];
+        const lineups = lineupsRes.data?.response || [];
+        const teams = playersRes.data?.response || [];
+
+        let playerEntry = null;
+        for (const teamBlock of teams) {
+            const match = (teamBlock?.players || []).find(
+                (entry) => String(entry?.player?.id) === String(playerId)
+            );
+            if (match) {
+                playerEntry = match;
+                break;
+            }
+        }
+
+        const heatmap = buildPlayerHeatmapPoints({
+            events,
+            lineups,
+            playerEntry,
+            playerId,
+        });
+
+        res.json({
+            response: {
+                points: heatmap.points,
+                source: heatmap.source,
+                meta: heatmap.meta,
+            },
+        });
+    } catch (error) {
+        logUpstream('fixtures_player_heatmap', error);
+        const status = error.response?.status;
+        res.status(status && status >= 400 && status < 600 ? status : 500).json({
+            error: GENERIC_API_ERROR,
+        });
+    }
+});
+
+// ======================================================
+// 📌 Vista táctica del partido (posiciones promedio + red de pases)
+// ======================================================
+app.get('/api/fixtures/:fixtureId/tactical', async (req, res) => {
+    try {
+        const { fixtureId } = req.params;
+        const { homeTeamId, awayTeamId } = req.query;
+
+        if (!fixtureId) {
+            return res.status(400).json({ error: 'Falta parámetro: fixtureId' });
+        }
+
+        if (!process.env.API_KEY) {
+            return res.status(500).json({
+                error: 'servicio_datos_no_configurado',
+                message: 'Servicio de datos no disponible en este momento.',
+            });
+        }
+
+        const [eventsRes, lineupsRes, playersRes] = await Promise.all([
+            axios.get(
+                `https://v3.football.api-sports.io/fixtures/events?fixture=${fixtureId}`,
+                { headers: apiHeaders }
+            ),
+            axios.get(
+                `https://v3.football.api-sports.io/fixtures/lineups?fixture=${fixtureId}`,
+                { headers: apiHeaders }
+            ),
+            axios.get(
+                `https://v3.football.api-sports.io/fixtures/players?fixture=${fixtureId}`,
+                { headers: apiHeaders }
+            ),
+        ]);
+
+        const lineups = lineupsRes.data?.response || [];
+        const events = eventsRes.data?.response || [];
+        const playersFixture = playersRes.data?.response || [];
+
+        const tactical = buildTacticalViewResponse({
+            lineups,
+            events,
+            playersFixture,
+            homeTeamId: homeTeamId || lineups[0]?.team?.id,
+            awayTeamId: awayTeamId || lineups[1]?.team?.id,
+        });
+
+        res.json({ response: tactical });
+    } catch (error) {
+        logUpstream('fixtures_tactical', error);
         const status = error.response?.status;
         res.status(status && status >= 400 && status < 600 ? status : 500).json({
             error: GENERIC_API_ERROR,

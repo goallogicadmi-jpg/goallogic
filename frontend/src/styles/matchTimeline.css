@@ -1,0 +1,305 @@
+/* ============================================
+   Match Timeline
+   ============================================ */
+
+.match-timeline {
+  width: 100%;
+  color: var(--text-primary, #fff);
+}
+
+.match-timeline--loading,
+.match-timeline--error,
+.match-timeline--empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-secondary, #b3b8c2);
+}
+
+.match-timeline--error {
+  color: #e74c3c;
+}
+
+.match-timeline__header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.match-timeline__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #4fc3f7;
+}
+
+.match-timeline__live-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  animation: matchTimelinePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes matchTimelinePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.match-timeline__count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-secondary, #8b949e);
+}
+
+/* —— Horizontal (desktop) —— */
+.match-timeline__horizontal-wrap {
+  display: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.match-timeline__horizontal {
+  position: relative;
+  min-width: 720px;
+  min-height: 220px;
+  padding: 12px 16px 20px;
+}
+
+.match-timeline__axis {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.match-timeline__axis-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(79, 195, 247, 0.15),
+    rgba(79, 195, 247, 0.55),
+    rgba(79, 195, 247, 0.15)
+  );
+}
+
+.match-timeline__axis-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary, #8b949e);
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.match-timeline__horizontal-track {
+  position: relative;
+  min-height: 200px;
+  z-index: 1;
+}
+
+.match-timeline-event--horizontal {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 148px;
+  z-index: 2;
+}
+
+.match-timeline-event--horizontal.match-timeline-event--home {
+  transform: translate(-50%, calc(-100% - 18px));
+}
+
+.match-timeline-event--horizontal.match-timeline-event--away {
+  transform: translate(-50%, 18px);
+}
+
+.match-timeline-event--horizontal .match-timeline-event__connector {
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  background: var(--match-timeline-team-color, #4fc3f7);
+  opacity: 0.6;
+}
+
+.match-timeline-event--horizontal.match-timeline-event--home .match-timeline-event__connector {
+  bottom: -14px;
+  height: 14px;
+  transform: translateX(-50%);
+}
+
+.match-timeline-event--horizontal.match-timeline-event--away .match-timeline-event__connector {
+  top: -14px;
+  height: 14px;
+  transform: translateX(-50%);
+}
+
+/* —— Vertical (móvil) —— */
+.match-timeline__vertical {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 12px;
+  border-left: 2px solid rgba(79, 195, 247, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.match-timeline__vertical > li {
+  position: relative;
+}
+
+.match-timeline__vertical > li::before {
+  content: '';
+  position: absolute;
+  left: -17px;
+  top: 18px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4fc3f7;
+  box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.2);
+}
+
+.match-timeline-event--vertical {
+  position: relative;
+}
+
+.match-timeline-event--vertical .match-timeline-event__connector {
+  display: none;
+}
+
+/* —— Event card —— */
+.match-timeline-event__card {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid var(--match-timeline-team-color, #4fc3f7);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  animation: matchTimelineFadeIn 0.4s ease-out;
+}
+
+.match-timeline-event--new .match-timeline-event__card {
+  animation: matchTimelineFadeIn 0.55s ease-out;
+  background: rgba(79, 195, 247, 0.1);
+}
+
+.match-timeline-event--important .match-timeline-event__card {
+  border-left-width: 4px;
+  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.25), 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.match-timeline-event--important.match-timeline-event--new .match-timeline-event__card {
+  animation: matchTimelineHighlight 0.7s ease-out;
+}
+
+@keyframes matchTimelineFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes matchTimelineHighlight {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+    box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(250, 204, 21, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.match-timeline-event__minute {
+  flex-shrink: 0;
+  min-width: 28px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-orange, #f28a00);
+  line-height: 1.2;
+}
+
+.match-timeline-event__icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.match-timeline-event__body {
+  min-width: 0;
+  flex: 1;
+}
+
+.match-timeline-event__team-logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
+
+.match-timeline-event__label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+}
+
+.match-timeline-event__player {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary, #b3b8c2);
+}
+
+.match-timeline-event__team {
+  margin: 4px 0 0;
+  font-size: 10px;
+  color: var(--text-secondary, #8b949e);
+}
+
+@media (min-width: 900px) {
+  .match-timeline__horizontal-wrap {
+    display: block;
+  }
+
+  .match-timeline__vertical {
+    display: none;
+  }
+}
+
+@media (max-width: 899px) {
+  .match-timeline__horizontal-wrap {
+    display: none;
+  }
+
+  .match-timeline__vertical {
+    display: flex;
+  }
+}

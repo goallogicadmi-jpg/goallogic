@@ -443,6 +443,55 @@ export async function getFixtureLineups(fixtureId) {
   }
 }
 
+// Vista táctica del partido (posiciones promedio + pases)
+export async function getFixtureTactical(fixtureId, homeTeamId, awayTeamId) {
+  try {
+    const params = new URLSearchParams();
+    if (homeTeamId != null) params.set('homeTeamId', String(homeTeamId));
+    if (awayTeamId != null) params.set('awayTeamId', String(awayTeamId));
+    const qs = params.toString();
+    const url = `/api/fixtures/${fixtureId}/tactical${qs ? `?${qs}` : ''}`;
+    const res = await authFetch(url);
+    if (!res.ok) {
+      throw new Error(`Error ${res.status}: ${res.statusText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('❌ Error obteniendo vista táctica:', error);
+    throw error;
+  }
+}
+
+// Mapa de calor de un jugador en un partido
+export async function getFixturePlayerHeatmap(fixtureId, playerId) {
+  try {
+    const res = await authFetch(`/api/fixtures/${fixtureId}/player/${playerId}/heatmap`);
+    if (!res.ok) {
+      throw new Error(`Error ${res.status}: ${res.statusText}`);
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('❌ Error obteniendo heatmap del jugador:', error);
+    throw error;
+  }
+}
+
+// Estadísticas de un jugador en un partido concreto
+export async function getFixturePlayerStats(fixtureId, playerId) {
+  try {
+    const res = await authFetch(`/api/fixtures/${fixtureId}/player/${playerId}`);
+    if (!res.ok) {
+      throw new Error(`Error ${res.status}: ${res.statusText}`);
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('❌ Error obteniendo stats del jugador en el partido:', error);
+    throw error;
+  }
+}
+
 // Obtener estadísticas de un partido
 export async function getFixtureStatistics(fixtureId) {
   try {

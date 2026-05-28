@@ -10,6 +10,12 @@ export default function LineupsTeamBlock({
   onTeamClick,
   onPlayerClick,
   compactPitch = false,
+  eventsByPlayer = {},
+  newPlayerEventIds,
+  onPlayerEventAnimated,
+  animateEventByPlayer = {},
+  isSelectingSecondPlayer = false,
+  comparePlayerAId = null,
 }) {
   if (!team) return null;
 
@@ -61,6 +67,12 @@ export default function LineupsTeamBlock({
         onPlayerClick={onPlayerClick}
         compact={compactPitch}
         startersCount={team.starters?.length || 0}
+        eventsByPlayer={eventsByPlayer}
+        newPlayerEventIds={newPlayerEventIds}
+        onPlayerEventAnimated={onPlayerEventAnimated}
+        animateEventByPlayer={animateEventByPlayer}
+        isSelectingSecondPlayer={isSelectingSecondPlayer}
+        comparePlayerAId={comparePlayerAId}
       />
 
       {team.substitutes?.length > 0 && (
@@ -73,6 +85,8 @@ export default function LineupsTeamBlock({
                   player={player}
                   teamColors={team.colors}
                   onClick={onPlayerClick}
+                  isSelectingSecondPlayer={isSelectingSecondPlayer}
+                  comparePlayerAId={comparePlayerAId}
                 />
               </li>
             ))}

@@ -197,8 +197,282 @@
   box-shadow: none !important;
 }
 
+.lineups-player--event-active {
+  z-index: 5;
+}
+
+/* —— Eventos sobre jugador (gol, tarjetas, VAR…) —— */
+/* —— Toasts de eventos en vivo —— */
+.lineups-live-toasts {
+  position: sticky;
+  bottom: 8px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  pointer-events: none;
+}
+
+.lineups-live-toast {
+  align-self: center;
+  max-width: min(100%, 420px);
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(15, 20, 28, 0.92);
+  border: 1px solid rgba(79, 195, 247, 0.35);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  animation: lineupsLiveToastIn 0.35s ease-out;
+}
+
+@keyframes lineupsLiveToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lineups-player-events {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  max-width: 58px;
+  min-height: 14px;
+  margin-bottom: 1px;
+  pointer-events: auto;
+  z-index: 4;
+}
+
+.lineups-player-events--compact {
+  max-width: 46px;
+  gap: 1px;
+}
+
+.lineups-player-event {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  cursor: default;
+  animation: lineupsSubFadeIn 0.35s ease-out;
+}
+
+.lineups-player-event--new {
+  animation: lineupsSubFadeIn 0.5s ease-out;
+  background: rgba(79, 195, 247, 0.25);
+  outline: 1px solid rgba(79, 195, 247, 0.45);
+}
+
+.lineups-player-event__dual {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  font-size: 8px;
+  line-height: 1;
+}
+
+.lineups-player-events__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: default;
+}
+
+.lineups-player-events--compact .lineups-player-event {
+  width: 14px;
+  height: 14px;
+  font-size: 9px;
+}
+
+.lineups-player-events--compact .lineups-player-event__dual {
+  font-size: 7px;
+}
+
+.lineups-player-events--compact .lineups-player-events__more {
+  min-width: 14px;
+  height: 14px;
+  font-size: 8px;
+}
+
+.lineups-player__avatar-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lineups-player-event-anim {
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  box-sizing: border-box;
+}
+
+.lineups-player-event-anim--compact {
+  inset: -5px;
+}
+
+.lineups-player-event-anim__icon {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  z-index: 2;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.lineups-player-event-anim__icon--injury {
+  color: #f87171;
+}
+
+.lineups-player-event-anim__icon--miss {
+  color: #ef4444;
+  font-size: 10px;
+}
+
+.lineups-player-event-anim.event-pulse-goal {
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.75);
+  animation: lineupsEventPulseGoal 2s ease-out;
+}
+
+.lineups-player-event-anim.event-flash-yellow {
+  background: rgba(250, 204, 21, 0.35);
+  animation: lineupsEventFlashYellow 1.6s ease-out;
+}
+
+.lineups-player-event-anim.event-flash-red {
+  background: rgba(239, 68, 68, 0.4);
+  animation: lineupsEventFlashRed 1.8s ease-out;
+}
+
+.lineups-player-event-anim.event-var-blink {
+  border: 2px solid rgba(59, 130, 246, 0.9);
+  animation: lineupsEventVarBlink 2.2s ease-in-out;
+}
+
+.lineups-player-event-anim.event-injury-shake {
+  animation: lineupsEventInjuryShake 2s ease-in-out;
+}
+
+.lineups-player-event-anim.event-penalty-green {
+  border: 2px solid rgba(34, 197, 94, 0.9);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.55);
+  animation: lineupsEventPenaltyGreen 2s ease-out;
+}
+
+.lineups-player-event-anim.event-penalty-red {
+  border: 2px solid rgba(239, 68, 68, 0.9);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  animation: lineupsEventPenaltyRed 2.2s ease-out;
+}
+
+@keyframes lineupsEventPulseGoal {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.2;
+    box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.8);
+  }
+  40% {
+    transform: scale(1.08);
+    opacity: 1;
+    box-shadow: 0 0 0 10px rgba(250, 204, 21, 0);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+    box-shadow: 0 0 0 0 rgba(250, 204, 21, 0);
+  }
+}
+
+@keyframes lineupsEventFlashYellow {
+  0%, 100% { opacity: 0; }
+  15%, 45% { opacity: 1; background: rgba(250, 204, 21, 0.55); }
+  30%, 60% { opacity: 0.35; }
+}
+
+@keyframes lineupsEventFlashRed {
+  0%, 100% { opacity: 0; }
+  20%, 50% { opacity: 1; background: rgba(239, 68, 68, 0.65); }
+  35%, 65% { opacity: 0.4; }
+}
+
+@keyframes lineupsEventVarBlink {
+  0%, 100% { opacity: 0.15; border-color: rgba(59, 130, 246, 0.3); }
+  50% { opacity: 1; border-color: rgba(96, 165, 250, 1); box-shadow: 0 0 14px rgba(59, 130, 246, 0.65); }
+}
+
+@keyframes lineupsEventInjuryShake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-2px); }
+  30% { transform: translateX(2px); }
+  45% { transform: translateX(-2px); }
+  60% { transform: translateX(2px); }
+  75% { transform: translateX(-1px); }
+}
+
+@keyframes lineupsEventPenaltyGreen {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.3;
+  }
+  45% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes lineupsEventPenaltyRed {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
 .lineups-player__avatar {
   position: relative;
+  z-index: 1;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -351,6 +625,195 @@
   white-space: nowrap;
 }
 
+.lineups__status {
+  margin-bottom: 12px;
+}
+
+.lineups__status--loading {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* —— Cambios en vivo —— */
+.lineups-subs {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color, #1f2630);
+}
+
+.lineups-subs__heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.lineups-subs__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.lineups-subs__live-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  animation: lineupsSubsPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes lineupsSubsPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.lineups-subs__status,
+.lineups-subs__error {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.lineups-subs__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.lineups-subs-col {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color, #1f2630);
+  border-radius: 10px;
+  border-top: 3px solid var(--lineups-subs-primary, #1565c0);
+  padding: 12px;
+  min-width: 0;
+}
+
+.lineups-subs-col__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.lineups-subs-col__logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.lineups-subs-col__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lineups-subs-col__empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.lineups-subs-col__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lineups-sub__item {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 8px;
+  align-items: start;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  animation: lineupsSubFadeIn 0.35s ease-out;
+}
+
+.lineups-sub__item--new {
+  animation: lineupsSubFadeIn 0.5s ease-out;
+  background: rgba(79, 195, 247, 0.08);
+  border-color: rgba(79, 195, 247, 0.25);
+}
+
+@keyframes lineupsSubFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lineups-sub__minute {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-orange, #f28a00);
+  line-height: 1.2;
+}
+
+.lineups-sub__players {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lineups-sub__player {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.lineups-sub__arrow {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.lineups-sub__arrow--out {
+  color: #ef4444;
+}
+
+.lineups-sub__arrow--in {
+  color: #22c55e;
+}
+
+.lineups-sub__name {
+  font-size: 12px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .lineups-subs__columns {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .lineups__grid {
     gap: 16px;
@@ -372,6 +835,21 @@
   .lineups-player__avatar {
     width: 32px;
     height: 32px;
+  }
+
+  .lineups-player-event-anim {
+    inset: -5px;
+  }
+
+  .lineups-player-event-anim__icon {
+    font-size: 9px;
+    top: -2px;
+    right: -2px;
+  }
+
+  .lineups-live-toast {
+    font-size: 12px;
+    padding: 8px 12px;
   }
 
   .lineups-player__badge {

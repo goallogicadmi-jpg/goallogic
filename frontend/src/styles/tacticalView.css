@@ -1,0 +1,214 @@
+/* ============================================
+   Tactical View
+   ============================================ */
+
+.tactical-view {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  color: var(--text-primary, #fff);
+  animation: tacticalViewFadeIn 0.45s ease-out;
+}
+
+@keyframes tacticalViewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tactical-view--loading,
+.tactical-view--error {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-secondary, #b3b8c2);
+}
+
+.tactical-view--error {
+  color: #e74c3c;
+}
+
+.tactical-view__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.tactical-view__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #4fc3f7;
+}
+
+.tactical-view__live {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.tactical-view__team-select {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tactical-view__team-select button {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(79, 195, 247, 0.25);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text-secondary, #b3b8c2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tactical-view__team-select button.is-active {
+  background: rgba(79, 195, 247, 0.15);
+  border-color: rgba(79, 195, 247, 0.45);
+  color: #4fc3f7;
+}
+
+.tactical-pitch-wrap {
+  opacity: 0;
+}
+
+.tactical-pitch-wrap--loaded {
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.tactical-pitch__team-label {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #8b949e);
+  text-align: center;
+}
+
+.tactical-pitch {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  overflow: visible;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.tactical-pitch__link {
+  transition: stroke-opacity 0.2s ease, stroke-width 0.2s ease;
+  animation: tacticalLinkDraw 0.6s ease-out backwards;
+}
+
+@keyframes tacticalLinkDraw {
+  from {
+    stroke-opacity: 0;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-opacity: inherit;
+    stroke-dashoffset: 0;
+  }
+}
+
+.tactical-pitch__link--hover {
+  filter: drop-shadow(0 0 4px rgba(79, 195, 247, 0.8));
+}
+
+.tactical-pitch__node {
+  cursor: pointer;
+  animation: tacticalNodeIn 0.4s ease-out backwards;
+}
+
+.tactical-pitch__node:nth-child(1) { animation-delay: 0.05s; }
+.tactical-pitch__node:nth-child(2) { animation-delay: 0.08s; }
+.tactical-pitch__node:nth-child(3) { animation-delay: 0.11s; }
+
+@keyframes tacticalNodeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tactical-pitch__node-bg {
+  fill: var(--tactical-primary, #1565c0);
+  stroke: var(--tactical-secondary, #0d3d18);
+  stroke-width: 0.6;
+  transition: r 0.15s ease, fill 0.15s ease;
+}
+
+.tactical-pitch__node--hover .tactical-pitch__node-bg {
+  fill: #4fc3f7;
+  r: 6.5;
+}
+
+.tactical-pitch__node-photo {
+  clip-path: circle(50%);
+}
+
+.tactical-pitch__node-initial {
+  fill: #fff;
+  font-size: 4px;
+  font-weight: 700;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.tactical-pitch__node-number {
+  fill: rgba(255, 255, 255, 0.85);
+  font-size: 3px;
+  font-weight: 700;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.tactical-pitch__tooltip {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(79, 195, 247, 0.3);
+  font-size: 12px;
+  text-align: center;
+  color: #fff;
+}
+
+.tactical-view__empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-secondary, #8b949e);
+  font-size: 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.tactical-view__hint {
+  margin: 12px 0 0;
+  font-size: 11px;
+  color: var(--text-secondary, #8b949e);
+  text-align: center;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .tactical-view {
+    max-width: none;
+  }
+}

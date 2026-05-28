@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import EventosPartido from "./EventosPartido";
+import MatchTimeline from "./Timeline/MatchTimeline";
+import TacticalView from "./Tactical/TacticalView";
 import Lineups from "./Lineups";
 import EstadisticasPartido from "./EstadisticasPartido";
 import TablaCompeticion from "./TablaCompeticion";
@@ -60,6 +62,8 @@ export default function MatchCenter({ partido, onClose, domain = "club" }) {
 
   const tabs = [
     { id: "eventos", label: "Eventos" },
+    { id: "timeline", label: "Timeline" },
+    { id: "tactica", label: "Táctica" },
     { id: "alineaciones", label: "Alineaciones" },
     { id: "analisis", label: "Análisis" },
     { id: "clasificacion", label: "Clasificación" },
@@ -166,6 +170,12 @@ export default function MatchCenter({ partido, onClose, domain = "club" }) {
         <div className="match-center-content">
           {tabActiva === "eventos" && partido.fixture?.id && (
             <EventosPartido fixtureId={partido.fixture.id} partido={partido} />
+          )}
+          {tabActiva === "timeline" && partido.fixture?.id && (
+            <MatchTimeline fixtureId={partido.fixture.id} partido={partido} />
+          )}
+          {tabActiva === "tactica" && partido.fixture?.id && (
+            <TacticalView fixtureId={partido.fixture.id} partido={partido} />
           )}
           {tabActiva === "alineaciones" && partido.fixture?.id && (
             <Lineups
