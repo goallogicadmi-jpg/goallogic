@@ -10,6 +10,7 @@ export { default as BadgeEstado } from './Partidos/BadgeEstado';
 export { default as MatchCenter } from './Partidos/MatchCenter';
 export { default as EventosPartido } from './Partidos/EventosPartido';
 export { default as AlineacionesPartido } from './Partidos/AlineacionesPartido';
+export { default as Lineups } from './Partidos/Lineups';
 export { default as EstadisticasPartido } from './Partidos/EstadisticasPartido';
 
 // Componentes principales

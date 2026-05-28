@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import EventosPartido from "./EventosPartido";
-import AlineacionesPartido from "./AlineacionesPartido";
+import Lineups from "./Lineups";
 import EstadisticasPartido from "./EstadisticasPartido";
 import TablaCompeticion from "./TablaCompeticion";
 import EquipoDetalle from "../EquipoDetalle";
@@ -168,8 +168,8 @@ export default function MatchCenter({ partido, onClose, domain = "club" }) {
             <EventosPartido fixtureId={partido.fixture.id} partido={partido} />
           )}
           {tabActiva === "alineaciones" && partido.fixture?.id && (
-            <AlineacionesPartido 
-              fixtureId={partido.fixture.id} 
+            <Lineups
+              fixtureId={partido.fixture.id}
               partido={partido}
               onTeamClick={(teamId) => setEquipoSeleccionado(teamId)}
             />
