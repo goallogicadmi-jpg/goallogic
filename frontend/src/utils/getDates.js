@@ -3,21 +3,19 @@
  * @returns {Array} Array de objetos con información de fechas
  */
 export function getDateRange() {
-  // API-Football trabaja con fechas en UTC. Para evitar bugs de timezone
-  // (p.ej. partidos del 27 apareciendo como 26), generamos el rango en UTC.
-  const now = new Date();
-  const todayUtcMidnight = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  );
+  // La UI de "Partidos" es por día *local* (lo que el usuario percibe como "hoy").
+  // La API trabaja con fechas UTC, así que el fetch debe cubrir 1–2 días UTC y
+  // luego filtrar por rango local (ver helpers más abajo).
+  const today = new Date();
   const dates = [];
   
   for (let i = -3; i <= 3; i++) {
-    const date = new Date(todayUtcMidnight);
-    date.setUTCDate(todayUtcMidnight.getUTCDate() + i);
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
     
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(date.getUTCDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     
     dates.push({
       date: date,
@@ -35,10 +33,45 @@ export function getDateRange() {
  * @returns {string} Fecha en formato YYYY-MM-DD
  */
 export function getTodayDateString() {
-  // Importante: usar UTC para alinear con API-Football y evitar desfases.
+  // Fecha "hoy" en calendario local.
   const today = new Date();
-  const year = today.getUTCFullYear();
-  const month = String(today.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(today.getUTCDate()).padStart(2, '0');
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+/**
+ * Convierte YYYY-MM-DD a rango [inicio, fin] del día *local*.
+ * @param {string} dateStringLocal
+ */
+export function getLocalDayRange(dateStringLocal) {
+  const [y, m, d] = String(dateStringLocal).split("-").map((v) => Number(v));
+  const start = new Date(y, (m || 1) - 1, d || 1, 0, 0, 0, 0);
+  const end = new Date(y, (m || 1) - 1, d || 1, 23, 59, 59, 999);
+  return { start, end };
+}
+
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+/**
+ * Fecha UTC YYYY-MM-DD para un Date.
+ * @param {Date} date
+ */
+export function toUtcDateString(date) {
+  return `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}`;
+}
+
+/**
+ * Para un día local, devuelve qué YYYY-MM-DD (UTC) hay que pedir a la API.
+ * En la mayoría de TZs será 1 o 2 fechas UTC.
+ * @param {string} dateStringLocal
+ */
+export function getUtcDatesToFetchForLocalDay(dateStringLocal) {
+  const { start, end } = getLocalDayRange(dateStringLocal);
+  const startUtc = toUtcDateString(start);
+  const endUtc = toUtcDateString(end);
+  return startUtc === endUtc ? [startUtc] : [startUtc, endUtc];
 }
