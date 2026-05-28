@@ -3,16 +3,21 @@
  * @returns {Array} Array de objetos con información de fechas
  */
 export function getDateRange() {
-  const today = new Date();
+  // API-Football trabaja con fechas en UTC. Para evitar bugs de timezone
+  // (p.ej. partidos del 27 apareciendo como 26), generamos el rango en UTC.
+  const now = new Date();
+  const todayUtcMidnight = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  );
   const dates = [];
   
   for (let i = -3; i <= 3; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
+    const date = new Date(todayUtcMidnight);
+    date.setUTCDate(todayUtcMidnight.getUTCDate() + i);
     
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
     
     dates.push({
       date: date,
@@ -30,9 +35,10 @@ export function getDateRange() {
  * @returns {string} Fecha en formato YYYY-MM-DD
  */
 export function getTodayDateString() {
+  // Importante: usar UTC para alinear con API-Football y evitar desfases.
   const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
+  const year = today.getUTCFullYear();
+  const month = String(today.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(today.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
