@@ -134,7 +134,7 @@ export function rowToPitchY(row, formation) {
   const totalRows = lines.length + 1;
   const rowIndex = Math.max(0, row - 1);
   const rowRatio = totalRows <= 1 ? 0 : rowIndex / (totalRows - 1);
-  return 92 - rowRatio * 78;
+  return 92 - rowRatio * 82;
 }
 
 /**
@@ -172,7 +172,7 @@ const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
  * @param {Array<{ id: string|number, pitchX: number, pitchY: number }>} players
  * @param {number} minDistance
  */
-export function spreadOverlappingPlayers(players, minDistance = 7) {
+export function spreadOverlappingPlayers(players, minDistance = 9) {
   const result = players.map((p) => ({ ...p }));
 
   for (let pass = 0; pass < 16; pass += 1) {

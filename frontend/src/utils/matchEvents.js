@@ -428,6 +428,212 @@ export function getTimelineEventDescription(event, kind) {
 }
 
 /**
+ * Etiqueta legible del tipo de evento (tooltip / detalle).
+ * @param {TimelineEventKind} kind
+ */
+export function getTimelineEventTypeLabel(kind) {
+  switch (kind) {
+    case 'goal':
+      return 'Gol';
+    case 'goal_own':
+      return 'Gol en contra';
+    case 'goal_penalty':
+      return 'Penal anotado';
+    case 'penalty_missed':
+      return 'Penal fallado';
+    case 'card_yellow':
+      return 'Tarjeta amarilla';
+    case 'card_red':
+      return 'Tarjeta roja';
+    case 'card_second_yellow':
+      return 'Segunda amarilla';
+    case 'injury':
+      return 'Lesión';
+    case 'var':
+      return 'VAR';
+    case 'subst':
+      return 'Sustitución';
+    default:
+      return 'Evento';
+  }
+}
+
+/**
+ * Nombre corto estilo SofaScore: "W. Báez".
+ * @param {string|null|undefined} name
+ * @param {number} [maxLen]
+ */
+export function shortenDisplayName(name, maxLen = 16) {
+  if (!name) return '';
+  const trimmed = String(name).trim();
+  if (!trimmed) return '';
+  const parts = trimmed.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    const initial = parts[0].charAt(0).toUpperCase();
+    const last = parts[parts.length - 1];
+    const short = `${initial}. ${last}`;
+    if (short.length <= maxLen) return short;
+    return `${initial}. ${last.slice(0, Math.max(1, maxLen - 4))}`;
+  }
+  if (trimmed.length <= maxLen) return trimmed;
+  return `${trimmed.slice(0, maxLen - 1)}…`;
+}
+
+/**
+ * @param {string|null|undefined} name
+ * @param {number} [maxLen]
+ */
+export function shortenTeamName(name, maxLen = 14) {
+  if (!name) return '';
+  const trimmed = String(name).trim();
+  if (trimmed.length <= maxLen) return trimmed;
+  return `${trimmed.slice(0, maxLen - 1)}…`;
+}
+
+/**
+ * Texto de una línea para el timeline compacto.
+ * @param {Object} event
+ * @param {TimelineEventKind} kind
+ * @param {{ teamName?: string }} [meta]
+ */
+export function buildTimelineCompactLine(event, kind, meta = {}) {
+  const teamName = meta.teamName || '';
+  const shortPlayer = shortenDisplayName(event?.player?.name);
+  const shortTeam = shortenTeamName(teamName);
+  const detail = String(event?.detail || '').trim();
+
+  switch (kind) {
+    case 'subst': {
+      const shortOut = shortenDisplayName(event?.player?.name);
+      const shortIn = shortenDisplayName(event?.assist?.name);
+      if (shortOut && shortIn) return `${shortOut} → ${shortIn}`;
+      return shortOut || shortIn || 'Cambio';
+    }
+    case 'goal':
+    case 'goal_penalty':
+      return shortTeam ? `Gol ${shortTeam}` : shortPlayer || 'Gol';
+    case 'goal_own':
+      return shortPlayer ? `Gol e.c. ${shortPlayer}` : 'Gol en contra';
+    case 'penalty_missed':
+      return shortPlayer ? `Penal fallado ${shortPlayer}` : 'Penal fallado';
+    case 'card_yellow':
+    case 'card_red':
+    case 'card_second_yellow':
+    case 'injury':
+      return shortPlayer || getTimelineEventTypeLabel(kind);
+    case 'var':
+      if (detail) {
+        return detail.length > 24 ? `${detail.slice(0, 23)}…` : detail;
+      }
+      return 'VAR';
+    case 'generic':
+      if (shortPlayer) return shortPlayer;
+      if (detail) return detail.length > 24 ? `${detail.slice(0, 23)}…` : detail;
+      return 'Evento';
+    default:
+      return shortPlayer || shortTeam || 'Evento';
+  }
+}
+
+/**
+ * @param {Object} event
+ * @param {TimelineEventKind} kind
+ * @param {string} compactLine
+ * @param {{ teamName?: string }} [meta]
+ */
+export function shouldShowTimelineTooltip(event, kind, compactLine, meta = {}) {
+  const player = event?.player?.name || '';
+  const assist = event?.assist?.name || '';
+  const detail = String(event?.detail || '').trim();
+  const teamName = meta.teamName || '';
+
+  switch (kind) {
+    case 'card_yellow':
+    case 'card_red':
+    case 'card_second_yellow':
+    case 'injury':
+      return true;
+    case 'subst':
+      return (
+        (player && shortenDisplayName(player) !== player) ||
+        (assist && shortenDisplayName(assist) !== assist)
+      );
+    case 'goal':
+    case 'goal_penalty':
+      if (assist) return true;
+      if (player && !compactLine.includes(player)) {
+        const last = player.split(/\s+/).pop();
+        return !compactLine.includes(last);
+      }
+      return false;
+    case 'goal_own':
+      return Boolean(player && !compactLine.includes(player));
+    case 'penalty_missed':
+      return Boolean(player && shortenDisplayName(player) !== player);
+    case 'var':
+      return Boolean(detail && detail.length > compactLine.length);
+    case 'generic':
+      return Boolean(detail && detail !== compactLine);
+    default:
+      return Boolean(teamName && !compactLine.includes(teamName));
+  }
+}
+
+/**
+ * Tooltip con detalle completo; null si no aporta más que la línea compacta.
+ * @param {Object} event
+ * @param {TimelineEventKind} kind
+ * @param {string} compactLine
+ * @param {{ teamName?: string }} [meta]
+ */
+export function buildTimelineTooltip(event, kind, compactLine, meta = {}) {
+  if (!shouldShowTimelineTooltip(event, kind, compactLine, meta)) {
+    return null;
+  }
+
+  const minute = formatEventMinute(event);
+  const typeLabel = getTimelineEventTypeLabel(kind);
+  const player = event?.player?.name || '';
+  const assist = event?.assist?.name || '';
+  const detail = String(event?.detail || '').trim();
+  const teamName = meta.teamName || '';
+
+  const parts = [`${minute}'`];
+  if (typeLabel) parts.push(typeLabel);
+
+  if (kind === 'subst') {
+    if (player) parts.push(`${player} sale`);
+    if (assist) parts.push(`Entra ${assist}`);
+  } else {
+    if (player) parts.push(player);
+    if ((kind === 'goal' || kind === 'goal_penalty') && assist) {
+      parts.push(`Asistencia: ${assist}`);
+    }
+  }
+
+  if (detail && kind !== 'subst') {
+    const normDetail = detail.toLowerCase();
+    const normType = (typeLabel || '').toLowerCase();
+    const inCompact = compactLine.toLowerCase().includes(normDetail);
+    if (!inCompact && normDetail !== normType) {
+      parts.push(detail);
+    }
+  }
+
+  if (
+    teamName &&
+    (kind === 'goal' || kind === 'goal_penalty' || kind === 'goal_own') &&
+    !parts.includes(teamName)
+  ) {
+    parts.push(teamName);
+  }
+
+  const tooltip = parts.filter(Boolean).join(' · ');
+  if (!tooltip || tooltip === compactLine) return null;
+  return tooltip;
+}
+
+/**
  * @param {Object} event
  * @param {{ id?: number|string, name?: string, logo?: string }} homeMeta
  * @param {{ id?: number|string, name?: string, logo?: string }} awayMeta
@@ -467,16 +673,10 @@ export function normalizeTimelineEvent(event, homeMeta, awayMeta, teamColors = {
         : '#607d8b';
 
   const label = getTimelineEventDescription(event, kind);
-  const playerName = kind === 'subst' ? event?.player?.name : event?.player?.name;
+  const playerName = event?.player?.name || null;
   const assistName = event?.assist?.name || null;
-
-  let tooltip = `Min ${formatEventMinute(event)} — ${label}`;
-  if (playerName && kind !== 'subst') {
-    tooltip = `${tooltip} — ${playerName}`;
-  }
-  if ((kind === 'goal' || kind === 'goal_penalty') && assistName) {
-    tooltip = `${tooltip} (asistencia: ${assistName})`;
-  }
+  const compactLine = buildTimelineCompactLine(event, kind, { teamName });
+  const tooltip = buildTimelineTooltip(event, kind, compactLine, { teamName });
 
   return {
     id: buildTimelineEventId(event, kind),
@@ -487,8 +687,9 @@ export function normalizeTimelineEvent(event, homeMeta, awayMeta, teamColors = {
     sortMinute,
     minuteLabel: formatEventMinute(event),
     label,
+    compactLine,
     detail,
-    playerName: playerName || null,
+    playerName,
     playerOut: kind === 'subst' ? event?.player?.name || null : null,
     playerIn: kind === 'subst' ? event?.assist?.name || null : null,
     assistName,
@@ -499,6 +700,7 @@ export function normalizeTimelineEvent(event, homeMeta, awayMeta, teamColors = {
     side,
     isImportant: isImportantTimelineKind(kind),
     tooltip,
+    hasTooltip: Boolean(tooltip),
   };
 }
 

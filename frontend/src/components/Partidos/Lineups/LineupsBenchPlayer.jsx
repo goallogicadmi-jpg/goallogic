@@ -34,7 +34,11 @@ export default function LineupsBenchPlayer({
     >
       <span
         className="lineups-bench__avatar"
-        style={{ backgroundColor: teamColors.primary, color: teamColors.number }}
+        style={{
+          backgroundColor: teamColors.primary,
+          color: teamColors.number,
+          '--lineups-jersey': teamColors.primary,
+        }}
       >
         {showPhoto ? (
           <img

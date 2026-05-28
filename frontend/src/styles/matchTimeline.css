@@ -1,5 +1,5 @@
 /* ============================================
-   Match Timeline
+   Match Timeline — compacto estilo SofaScore
    ============================================ */
 
 .match-timeline {
@@ -24,7 +24,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .match-timeline__title {
@@ -60,8 +60,8 @@
 .match-timeline__horizontal-wrap {
   display: none;
   overflow-x: auto;
-  overflow-y: hidden;
-  padding-bottom: 8px;
+  overflow-y: visible;
+  padding-bottom: 12px;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
 }
@@ -69,8 +69,8 @@
 .match-timeline__horizontal {
   position: relative;
   min-width: 720px;
-  min-height: 220px;
-  padding: 12px 16px 20px;
+  min-height: 160px;
+  padding: 12px 16px 16px;
 }
 
 .match-timeline__axis {
@@ -102,14 +102,14 @@
   font-weight: 600;
   color: var(--text-secondary, #8b949e);
   white-space: nowrap;
-  max-width: 100px;
+  max-width: 90px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .match-timeline__horizontal-track {
   position: relative;
-  min-height: 200px;
+  min-height: 140px;
   z-index: 1;
 }
 
@@ -117,16 +117,17 @@
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 148px;
+  max-width: 118px;
+  width: max-content;
   z-index: 2;
 }
 
 .match-timeline-event--horizontal.match-timeline-event--home {
-  transform: translate(-50%, calc(-100% - 18px));
+  transform: translate(-50%, calc(-100% - 14px));
 }
 
 .match-timeline-event--horizontal.match-timeline-event--away {
-  transform: translate(-50%, 18px);
+  transform: translate(-50%, 14px);
 }
 
 .match-timeline-event--horizontal .match-timeline-event__connector {
@@ -134,19 +135,30 @@
   left: 50%;
   width: 2px;
   background: var(--match-timeline-team-color, #4fc3f7);
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
 .match-timeline-event--horizontal.match-timeline-event--home .match-timeline-event__connector {
-  bottom: -14px;
-  height: 14px;
+  bottom: -10px;
+  height: 10px;
   transform: translateX(-50%);
 }
 
 .match-timeline-event--horizontal.match-timeline-event--away .match-timeline-event__connector {
-  top: -14px;
-  height: 14px;
+  top: -10px;
+  height: 10px;
   transform: translateX(-50%);
+}
+
+.match-timeline-event--horizontal .match-timeline-event__tooltip {
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.match-timeline-event--horizontal.match-timeline-event--away .match-timeline-event__tooltip {
+  bottom: auto;
+  top: calc(100% + 6px);
 }
 
 /* —— Vertical (móvil) —— */
@@ -157,7 +169,7 @@
   border-left: 2px solid rgba(79, 195, 247, 0.25);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
 }
 
 .match-timeline__vertical > li {
@@ -168,7 +180,7 @@
   content: '';
   position: absolute;
   left: -17px;
-  top: 18px;
+  top: 12px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -178,44 +190,65 @@
 
 .match-timeline-event--vertical {
   position: relative;
+  max-width: 100%;
 }
 
 .match-timeline-event--vertical .match-timeline-event__connector {
   display: none;
 }
 
-/* —— Event card —— */
+.match-timeline-event--vertical .match-timeline-event__tooltip {
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+}
+
+/* —— Event card compacta —— */
+.match-timeline-event {
+  outline: none;
+}
+
 .match-timeline-event__card {
   display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-left: 3px solid var(--match-timeline-team-color, #4fc3f7);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  animation: matchTimelineFadeIn 0.4s ease-out;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.22);
+  max-width: 100%;
+  line-height: 1.35;
+  animation: matchTimelineFadeIn 0.35s ease-out;
 }
 
 .match-timeline-event--new .match-timeline-event__card {
-  animation: matchTimelineFadeIn 0.55s ease-out;
-  background: rgba(79, 195, 247, 0.1);
+  animation: matchTimelineFadeIn 0.45s ease-out;
+  background: rgba(79, 195, 247, 0.08);
 }
 
 .match-timeline-event--important .match-timeline-event__card {
   border-left-width: 4px;
-  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.25), 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
 .match-timeline-event--important.match-timeline-event--new .match-timeline-event__card {
-  animation: matchTimelineHighlight 0.7s ease-out;
+  animation: matchTimelineHighlight 0.65s ease-out;
+}
+
+.match-timeline-event--has-tooltip {
+  cursor: help;
+}
+
+.match-timeline-event--has-tooltip:focus-visible .match-timeline-event__card {
+  box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.45);
 }
 
 @keyframes matchTimelineFadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -226,11 +259,11 @@
 @keyframes matchTimelineHighlight {
   0% {
     opacity: 0;
-    transform: scale(0.92);
-    box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.6);
+    transform: scale(0.96);
+    box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.5);
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(250, 204, 21, 0);
+    box-shadow: 0 0 0 4px rgba(250, 204, 21, 0);
   }
   100% {
     opacity: 1;
@@ -240,48 +273,60 @@
 
 .match-timeline-event__minute {
   flex-shrink: 0;
-  min-width: 28px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--accent-orange, #f28a00);
-  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .match-timeline-event__icon {
   flex-shrink: 0;
-  font-size: 18px;
+  font-size: 14px;
   line-height: 1;
 }
 
-.match-timeline-event__body {
+.match-timeline-event__compact {
   min-width: 0;
   flex: 1;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary, #e8eaed);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.match-timeline-event__team-logo {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-  margin-bottom: 4px;
+.match-timeline-event__tooltip {
+  position: absolute;
+  z-index: 20;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(12, 16, 22, 0.96);
+  border: 1px solid rgba(79, 195, 247, 0.35);
+  font-size: 11px;
+  line-height: 1.45;
+  color: #fff;
+  white-space: normal;
+  max-width: 260px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  animation: matchTimelineTooltipIn 0.15s ease-out;
 }
 
-.match-timeline-event__label {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary, #fff);
+@keyframes matchTimelineTooltipIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.match-timeline-event__player {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: var(--text-secondary, #b3b8c2);
-}
-
-.match-timeline-event__team {
-  margin: 4px 0 0;
-  font-size: 10px;
-  color: var(--text-secondary, #8b949e);
+.match-timeline-event--horizontal .match-timeline-event__tooltip {
+  white-space: nowrap;
+  max-width: 280px;
 }
 
 @media (min-width: 900px) {
@@ -292,6 +337,10 @@
   .match-timeline__vertical {
     display: none;
   }
+
+  .match-timeline-event--horizontal .match-timeline-event__compact {
+    max-width: 72px;
+  }
 }
 
 @media (max-width: 899px) {
@@ -301,5 +350,14 @@
 
   .match-timeline__vertical {
     display: flex;
+  }
+
+  .match-timeline-event__card {
+    padding: 8px 12px;
+  }
+
+  .match-timeline-event__compact {
+    font-size: 12px;
+    max-width: calc(100vw - 88px);
   }
 }

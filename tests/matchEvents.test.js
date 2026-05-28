@@ -7,6 +7,9 @@ import {
   buildSubstitutionKey,
   buildTimelineFromEvents,
   buildTimelineEventId,
+  buildTimelineCompactLine,
+  buildTimelineTooltip,
+  shortenDisplayName,
   extractEventsResponse,
   extractPlayerPitchEvents,
   extractSubstitutionsFromEvents,
@@ -216,4 +219,76 @@ test('isImportantTimelineKind flags key events', () => {
 test('getTimelineMaxMinute defaults to 90 minimum', () => {
   assert.equal(getTimelineMaxMinute([{ sortMinute: 45 }]), 90);
   assert.equal(getTimelineMaxMinute([{ sortMinute: 102 }]), 102);
+});
+
+test('shortenDisplayName uses initial and surname', () => {
+  assert.equal(shortenDisplayName('Roberto Domínguez'), 'R. Domínguez');
+  assert.equal(shortenDisplayName('W. Báez'), 'W. Báez');
+});
+
+test('buildTimelineCompactLine formats compact rows', () => {
+  const card = {
+    type: 'Card',
+    detail: 'Yellow Card',
+    player: { name: 'Roberto Domínguez' },
+  };
+  assert.equal(buildTimelineCompactLine(card, 'card_yellow', {}), 'R. Domínguez');
+
+  const goal = {
+    type: 'Goal',
+    detail: 'Normal Goal',
+    player: { name: 'Striker' },
+    team: { name: 'Deportivo Recoleta' },
+  };
+  assert.equal(
+    buildTimelineCompactLine(goal, 'goal', { teamName: 'Deportivo Recoleta' }),
+    'Gol Deportivo Rec…'
+  );
+
+  const sub = {
+    type: 'subst',
+    player: { name: 'W. Báez' },
+    assist: { name: 'C. Figueredo' },
+  };
+  assert.equal(buildTimelineCompactLine(sub, 'subst', {}), 'W. Báez → C. Figueredo');
+});
+
+test('normalizeTimelineEvent exposes compactLine and conditional tooltip', () => {
+  const events = [
+    {
+      type: 'Card',
+      detail: 'Yellow Card',
+      time: { elapsed: 13 },
+      team: { id: 1 },
+      player: { id: 5, name: 'Roberto Domínguez' },
+    },
+    {
+      type: 'Goal',
+      detail: 'Normal Goal',
+      time: { elapsed: 42 },
+      team: { id: 1, name: 'Deportivo Recoleta' },
+      player: { id: 1, name: 'Striker' },
+      assist: { id: 2, name: 'Playmaker Name' },
+    },
+  ];
+  const timeline = buildTimelineFromEvents(events, { id: 1, name: 'Home' }, { id: 2, name: 'Away' });
+  assert.equal(timeline[0].compactLine, 'R. Domínguez');
+  assert.equal(timeline[0].hasTooltip, true);
+  assert.ok(timeline[0].tooltip.includes('Tarjeta amarilla'));
+
+  const goalEv = timeline[1];
+  assert.ok(goalEv.compactLine.startsWith('Gol '));
+  assert.equal(goalEv.hasTooltip, true);
+  assert.ok(goalEv.tooltip.includes('Asistencia'));
+});
+
+test('buildTimelineTooltip returns null without extra detail', () => {
+  const sub = {
+    type: 'subst',
+    player: { name: 'A. B' },
+    assist: { name: 'C. D' },
+  };
+  const compact = buildTimelineCompactLine(sub, 'subst', {});
+  const tip = buildTimelineTooltip(sub, 'subst', compact, {});
+  assert.equal(tip, null);
 });

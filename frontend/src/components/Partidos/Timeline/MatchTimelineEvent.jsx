@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
- * Tarjeta de un evento en el timeline del partido.
+ * Evento compacto del timeline (icono + minuto + texto corto).
  */
 export default function MatchTimelineEvent({
   event,
@@ -10,6 +10,8 @@ export default function MatchTimelineEvent({
   onAnimated,
   positionPercent,
 }) {
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
   useEffect(() => {
     if (!isNew) return undefined;
     const timer = setTimeout(() => onAnimated?.(event.id), 1400);
@@ -30,11 +32,21 @@ export default function MatchTimelineEvent({
     style.left = `${positionPercent}%`;
   }
 
+  const compactText = event.compactLine || event.label || '';
+
   return (
     <article
-      className={`match-timeline-event ${sideClass} ${layoutClass}${isNew ? ' match-timeline-event--new' : ''}${event.isImportant ? ' match-timeline-event--important' : ''}`}
+      className={`match-timeline-event ${sideClass} ${layoutClass}${isNew ? ' match-timeline-event--new' : ''}${event.isImportant ? ' match-timeline-event--important' : ''}${event.hasTooltip ? ' match-timeline-event--has-tooltip' : ''}`}
       style={style}
-      title={event.tooltip}
+      onMouseEnter={() => event.hasTooltip && setTooltipOpen(true)}
+      onMouseLeave={() => setTooltipOpen(false)}
+      onFocus={() => event.hasTooltip && setTooltipOpen(true)}
+      onBlur={() => setTooltipOpen(false)}
+      onClick={() => {
+        if (!event.hasTooltip) return;
+        setTooltipOpen((open) => !open);
+      }}
+      tabIndex={event.hasTooltip ? 0 : undefined}
     >
       <div className="match-timeline-event__connector" aria-hidden="true" />
       <div className="match-timeline-event__card">
@@ -42,24 +54,16 @@ export default function MatchTimelineEvent({
         <span className="match-timeline-event__icon" aria-hidden="true">
           {event.icon}
         </span>
-        <div className="match-timeline-event__body">
-          {event.teamLogo && (
-            <img src={event.teamLogo} alt="" className="match-timeline-event__team-logo" />
-          )}
-          <p className="match-timeline-event__label">{event.label}</p>
-          {event.playerName && event.kind !== 'subst' && (
-            <p className="match-timeline-event__player">{event.playerName}</p>
-          )}
-          {event.kind === 'subst' && (
-            <p className="match-timeline-event__player">
-              {event.playerOut} → {event.playerIn}
-            </p>
-          )}
-          {event.teamName && (
-            <p className="match-timeline-event__team">{event.teamName}</p>
-          )}
-        </div>
+        <span className="match-timeline-event__compact" title={!event.hasTooltip ? compactText : undefined}>
+          {compactText}
+        </span>
       </div>
+
+      {event.hasTooltip && tooltipOpen && (
+        <div className="match-timeline-event__tooltip" role="tooltip">
+          {event.tooltip}
+        </div>
+      )}
     </article>
   );
 }

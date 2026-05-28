@@ -162,7 +162,7 @@
 }
 
 .lineups-pitch--dense .lineups-player {
-  max-width: 58px;
+  max-width: 72px;
 }
 
 .lineups-pitch__marks {
@@ -186,13 +186,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 0;
+  gap: 0;
+  padding: 14px 0 0;
   margin: 0;
   border: none;
   background: transparent;
   cursor: pointer;
-  max-width: 72px;
+  max-width: 92px;
   z-index: 2;
   box-shadow: none !important;
 }
@@ -241,21 +241,26 @@
 }
 
 .lineups-player-events {
+  position: absolute;
+  top: 0;
+  left: 50%;
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  max-width: 58px;
-  min-height: 14px;
-  margin-bottom: 1px;
+  max-width: 68px;
+  min-height: 16px;
+  margin-bottom: 0;
   pointer-events: auto;
   z-index: 4;
+  transform: translate(-50%, -7px);
 }
 
 .lineups-player-events--compact {
-  max-width: 46px;
+  max-width: 58px;
   gap: 1px;
+  transform: translate(-50%, -5px);
 }
 
 .lineups-player-event {
@@ -328,7 +333,7 @@
 
 .lineups-player-event-anim {
   position: absolute;
-  inset: -7px;
+  inset: -10px;
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
@@ -336,15 +341,15 @@
 }
 
 .lineups-player-event-anim--compact {
-  inset: -5px;
+  inset: -8px;
 }
 
 .lineups-player-event-anim__icon {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  z-index: 2;
-  font-size: 11px;
+  top: -8px;
+  right: -8px;
+  z-index: 3;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
@@ -473,16 +478,20 @@
 .lineups-player__avatar {
   position: relative;
   z-index: 1;
-  width: 40px;
-  height: 40px;
+  width: 47px;
+  height: 47px;
   border-radius: 50%;
-  border: 2px solid var(--lineups-jersey-border, #000);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
   background: var(--lineups-jersey, #1565c0);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 0 4px rgba(0, 0, 0, 0.35),
+    0 0 0 1px color-mix(in srgb, var(--lineups-jersey, #1565c0) 55%, transparent);
+  flex-shrink: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .lineups-player__avatar img {
@@ -492,36 +501,41 @@
 }
 
 .lineups-player__placeholder {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--lineups-jersey-number, #fff);
 }
 
 .lineups-player__badge {
   position: absolute;
-  bottom: -2px;
-  right: -2px;
-  min-width: 18px;
-  height: 18px;
+  bottom: -1px;
+  right: -1px;
+  z-index: 2;
+  min-width: 19px;
+  height: 19px;
   padding: 0 4px;
-  border-radius: 9px;
+  border-radius: 10px;
   background: #0d0d0d;
   border: 1px solid rgba(255, 255, 255, 0.5);
   color: #fff;
   font-size: 10px;
   font-weight: 700;
-  line-height: 16px;
+  line-height: 17px;
   text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
 .lineups-player__name {
-  font-size: 10px;
+  margin-top: 5px;
+  font-size: 11.5px;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.25;
   text-align: center;
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
-  max-width: 76px;
+  color: #f2f2f2;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 6px rgba(0, 0, 0, 0.55);
+  max-width: 88px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -531,14 +545,25 @@
   display: none;
 }
 
+.lineups-player--compact {
+  padding-top: 12px;
+  max-width: 76px;
+}
+
 .lineups-player--compact .lineups-player__avatar {
-  width: 32px;
-  height: 32px;
+  width: 42px;
+  height: 42px;
+}
+
+.lineups-player--compact .lineups-player__placeholder {
+  font-size: 16px;
 }
 
 .lineups-player:hover .lineups-player__avatar {
   transform: scale(1.06);
-  transition: transform 0.15s ease;
+  box-shadow:
+    0 0 6px rgba(0, 0, 0, 0.4),
+    0 0 0 1px color-mix(in srgb, var(--lineups-jersey, #1565c0) 65%, transparent);
 }
 
 /* —— Banquillo —— */
@@ -591,16 +616,20 @@
 }
 
 .lineups-bench__avatar {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   overflow: hidden;
   flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 4px rgba(0, 0, 0, 0.35),
+    0 0 0 1px color-mix(in srgb, var(--lineups-jersey, #1565c0) 55%, transparent);
 }
 
 .lineups-bench__avatar img {
@@ -829,22 +858,45 @@
   }
 
   .lineups-player {
-    max-width: 62px;
+    max-width: 84px;
+    padding-top: 13px;
+  }
+
+  .lineups-pitch--dense .lineups-player {
+    max-width: 68px;
   }
 
   .lineups-player__avatar {
-    width: 32px;
-    height: 32px;
+    width: 39px;
+    height: 39px;
+    border-width: 1px;
+    box-shadow:
+      0 0 3px rgba(0, 0, 0, 0.3),
+      0 0 0 1px color-mix(in srgb, var(--lineups-jersey, #1565c0) 50%, transparent);
+  }
+
+  .lineups-player--compact .lineups-player__avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .lineups-player-events {
+    max-width: 60px;
+    transform: translate(-50%, -6px);
   }
 
   .lineups-player-event-anim {
-    inset: -5px;
+    inset: -8px;
+  }
+
+  .lineups-player-event-anim--compact {
+    inset: -7px;
   }
 
   .lineups-player-event-anim__icon {
-    font-size: 9px;
-    top: -2px;
-    right: -2px;
+    font-size: 10px;
+    top: -7px;
+    right: -7px;
   }
 
   .lineups-live-toast {
@@ -853,15 +905,27 @@
   }
 
   .lineups-player__badge {
-    min-width: 16px;
-    height: 16px;
+    min-width: 17px;
+    height: 17px;
     font-size: 9px;
-    line-height: 14px;
+    line-height: 15px;
   }
 
   .lineups-player__name {
-    font-size: 9px;
-    max-width: 58px;
+    margin-top: 5px;
+    font-size: 11px;
+    max-width: 72px;
+    line-height: 1.2;
+  }
+
+  .lineups-bench__avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+    border-width: 1px;
+    box-shadow:
+      0 0 3px rgba(0, 0, 0, 0.3),
+      0 0 0 1px color-mix(in srgb, var(--lineups-jersey, #1565c0) 50%, transparent);
   }
 
   .lineups-bench__list {
@@ -875,13 +939,18 @@
   }
 
   .lineups-player__avatar {
-    width: 28px;
-    height: 28px;
+    width: 38px;
+    height: 38px;
+  }
+
+  .lineups-player--compact .lineups-player__avatar {
+    width: 35px;
+    height: 35px;
   }
 
   .lineups-player__name {
-    font-size: 8px;
-    max-width: 52px;
+    font-size: 11px;
+    max-width: 68px;
   }
 
   .lineups-bench__list {
