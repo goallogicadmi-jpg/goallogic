@@ -53,11 +53,9 @@ export default function Lineups({ fixtureId, partido, onTeamClick, useMock = fal
   if (!hasLineups || (!home?.starters?.length && !away?.starters?.length)) {
     return (
       <div className="lineups lineups--empty">
-        <p>
-          Las alineaciones oficiales aún no están disponibles para este partido.
-        </p>
+        <p>Alineaciones aún no disponibles</p>
         <p className="lineups--empty-hint">
-          Suele publicarse cerca del horario de inicio.
+          Se publican habitualmente poco antes del inicio del partido.
         </p>
       </div>
     );

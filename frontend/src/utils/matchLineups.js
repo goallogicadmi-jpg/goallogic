@@ -104,6 +104,107 @@ export function getRowColumnCounts(startXI = []) {
 }
 
 /**
+ * Agrupa entradas del XI por fila de grid.
+ * @param {Array} startXI
+ * @returns {Map<number, Array<{ col: number, entry: Object }>>}
+ */
+export function groupStartXIByGridRow(startXI = []) {
+  const byRow = new Map();
+  startXI.forEach((entry) => {
+    const grid = entry?.player?.grid ?? entry?.grid;
+    if (!grid || !String(grid).includes(':')) return;
+    const [row, col] = String(grid).split(':').map((v) => parseInt(v, 10));
+    if (!row || !col) return;
+    if (!byRow.has(row)) byRow.set(row, []);
+    byRow.get(row).push({ col, entry });
+  });
+  byRow.forEach((items) => {
+    items.sort((a, b) => a.col - b.col);
+  });
+  return byRow;
+}
+
+/**
+ * Calcula Y según fila y formación.
+ * @param {number} row
+ * @param {string} formation
+ */
+export function rowToPitchY(row, formation) {
+  const lines = parseFormation(formation);
+  const totalRows = lines.length + 1;
+  const rowIndex = Math.max(0, row - 1);
+  const rowRatio = totalRows <= 1 ? 0 : rowIndex / (totalRows - 1);
+  return 92 - rowRatio * 78;
+}
+
+/**
+ * Posiciona titulares usando grid; reparte en fila por índice si hay huecos en columnas.
+ * @param {Array} startXI
+ * @param {string} formation
+ * @returns {Map<string|number, { pitchX: number, pitchY: number }>}
+ */
+export function assignPositionsFromGrid(startXI, formation) {
+  const positions = new Map();
+  const byRow = groupStartXIByGridRow(startXI);
+
+  byRow.forEach((items, row) => {
+    const count = items.length;
+    const pitchY = rowToPitchY(row, formation);
+
+    items.forEach((item, index) => {
+      const pitchX = ((index + 0.5) / Math.max(count, 1)) * 88 + 6;
+      const p = item.entry?.player || item.entry || {};
+      const id = p.id ?? `${p.name}-${p.number}`;
+      positions.set(id, {
+        pitchX: Math.min(94, Math.max(6, pitchX)),
+        pitchY: Math.min(94, Math.max(6, pitchY)),
+      });
+    });
+  });
+
+  return positions;
+}
+
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+/**
+ * Separa nodos que quedaron demasiado cerca (evita solapamiento visual).
+ * @param {Array<{ id: string|number, pitchX: number, pitchY: number }>} players
+ * @param {number} minDistance
+ */
+export function spreadOverlappingPlayers(players, minDistance = 7) {
+  const result = players.map((p) => ({ ...p }));
+
+  for (let pass = 0; pass < 16; pass += 1) {
+    let adjusted = false;
+
+    for (let i = 0; i < result.length; i += 1) {
+      for (let j = i + 1; j < result.length; j += 1) {
+        const dx = result[j].pitchX - result[i].pitchX;
+        const dy = result[j].pitchY - result[i].pitchY;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist >= minDistance || dist < 0.01) continue;
+
+        const push = (minDistance - dist) / 2;
+        const nx = dist < 0.01 ? 1 : dx / dist;
+        const ny = dist < 0.01 ? 0 : dy / dist;
+
+        result[i].pitchX = clamp(result[i].pitchX - nx * push, 6, 94);
+        result[i].pitchY = clamp(result[i].pitchY - ny * push, 6, 94);
+        result[j].pitchX = clamp(result[j].pitchX + nx * push, 6, 94);
+        result[j].pitchY = clamp(result[j].pitchY + ny * push, 6, 94);
+        adjusted = true;
+      }
+    }
+
+    if (!adjusted) break;
+  }
+
+  return result;
+}
+
+/**
  * Convierte grid API ("fila:col") a coordenadas % en cancha individual del equipo.
  * Portero (fila 1) abajo; ataque hacia arriba (vista profesional por equipo).
  *
@@ -234,6 +335,7 @@ export function normalizeLineupFromApi(apiLineup, teamMeta = {}) {
   const formation = apiLineup?.formation || '4-4-2';
   const startXI = apiLineup?.startXI || [];
   const rowColumnCounts = getRowColumnCounts(startXI);
+  const gridPositions = assignPositionsFromGrid(startXI, formation);
 
   const playerColors = apiLineup?.team?.colors?.player || {};
   const gkColors = apiLineup?.team?.colors?.goalkeeper || {};
@@ -245,13 +347,19 @@ export function normalizeLineupFromApi(apiLineup, teamMeta = {}) {
     gkPrimary: normalizeJerseyColor(gkColors.primary, DEFAULT_COLORS.gkPrimary),
   };
 
-  let starters = startXI.map((entry) =>
-    normalizePlayerEntry(entry, formation, rowColumnCounts)
-  );
+  let starters = startXI.map((entry) => {
+    const player = normalizePlayerEntry(entry, formation, rowColumnCounts);
+    const fromGrid = gridPositions.get(player.id);
+    if (fromGrid) {
+      return { ...player, ...fromGrid };
+    }
+    return player;
+  });
 
-  const missingCoords = starters.filter(
-    (p) => !p.grid || (p.pitchX === 50 && p.pitchY === 50)
-  );
+  const missingCoords = starters.filter((p) => {
+    if (!p.grid) return true;
+    return !gridPositions.has(p.id);
+  });
 
   if (missingCoords.length === starters.length) {
     starters = assignFallbackPitchPositions(starters, formation);
@@ -260,6 +368,8 @@ export function normalizeLineupFromApi(apiLineup, teamMeta = {}) {
     const positionedById = new Map(positioned.map((p) => [p.id, p]));
     starters = starters.map((p) => positionedById.get(p.id) || p);
   }
+
+  starters = spreadOverlappingPlayers(starters);
 
   const substitutes = (apiLineup?.substitutes || []).map((entry) => {
     const p = entry?.player || entry || {};

@@ -8,12 +8,15 @@ export default function LineupsPitch({
   side = 'home',
   onPlayerClick,
   compact = false,
+  startersCount = 0,
 }) {
   if (!team) return null;
 
+  const densePitch = startersCount >= 10;
+
   return (
     <div
-      className={`lineups-pitch lineups-pitch--${side}`}
+      className={`lineups-pitch lineups-pitch--${side}${densePitch ? ' lineups-pitch--dense' : ''}`}
       role="img"
       aria-label={`Cancha ${team.name}, formación ${team.formation}`}
     >
@@ -32,7 +35,7 @@ export default function LineupsPitch({
             player={player}
             teamColors={team.colors}
             onClick={onPlayerClick}
-            compact={compact}
+            compact={compact || densePitch}
           />
         ))}
       </div>

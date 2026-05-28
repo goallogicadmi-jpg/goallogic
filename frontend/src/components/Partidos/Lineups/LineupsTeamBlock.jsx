@@ -60,6 +60,7 @@ export default function LineupsTeamBlock({
         side={side}
         onPlayerClick={onPlayerClick}
         compact={compactPitch}
+        startersCount={team.starters?.length || 0}
       />
 
       {team.substitutes?.length > 0 && (
