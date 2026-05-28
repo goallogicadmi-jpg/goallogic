@@ -1,4 +1,8 @@
 import { authFetch } from '../setupApiAuth.js';
+import {
+  filterFixturesByLocalDay,
+  getUtcDatesToFetchForLocalDay,
+} from '../utils/getDates.js';
 
 export async function analizarPartido(liga, local, visitante) {
 const res = await authFetch(`/api/analizar?liga=${liga}&local=${local}&visitante=${visitante}`);
@@ -98,8 +102,8 @@ export async function getFixturesByDomain(domain = "club", date, competitionId =
   return getMatchesFeed(domain, { date, competitionId });
 }
 
-export async function getMatchesFeed(scope = "club", { date, competitionId = null } = {}) {
-  const params = new URLSearchParams({ date });
+async function fetchMatchesFeedForUtcDate(scope, utcDate, competitionId = null) {
+  const params = new URLSearchParams({ date: utcDate });
   if (competitionId) {
     params.set("competitionId", competitionId);
   }
@@ -110,7 +114,27 @@ export async function getMatchesFeed(scope = "club", { date, competitionId = nul
   }
 
   const payload = await res.json();
-  return normalizeDomainFixturesPayload(payload).map((fixture) => ({
+  return normalizeDomainFixturesPayload(payload);
+}
+
+/**
+ * Feed de partidos para un día de calendario LOCAL.
+ * Pide 1–N fechas UTC a la API y filtra por rango local [start, end].
+ */
+export async function getMatchesFeed(scope = "club", { date, competitionId = null } = {}) {
+  if (!date) {
+    return [];
+  }
+
+  const utcDates = getUtcDatesToFetchForLocalDay(date);
+  const batches = await Promise.all(
+    utcDates.map((utcDate) => fetchMatchesFeedForUtcDate(scope, utcDate, competitionId))
+  );
+
+  const merged = batches.flat();
+  const filtered = filterFixturesByLocalDay(merged, date);
+
+  return filtered.map((fixture) => ({
     ...fixture,
     domain: fixture.domain || (scope === "all" ? null : scope),
   }));
@@ -407,6 +431,18 @@ export async function getFixturesByDate(date, leagueId = null) {
     console.error("❌ Error obteniendo partidos por fecha:", error);
     throw error;
   }
+}
+
+/**
+ * Partidos para un día de calendario LOCAL (multi-fetch UTC + filtro local).
+ * @param {string} dateLocal YYYY-MM-DD local
+ * @param {number|string|null} leagueId
+ */
+export async function getFixturesByDateForLocalDay(dateLocal, leagueId = null) {
+  const utcDates = getUtcDatesToFetchForLocalDay(dateLocal);
+  const payloads = await Promise.all(utcDates.map((d) => getFixturesByDate(d, leagueId)));
+  const merged = payloads.flatMap((p) => (Array.isArray(p?.response) ? p.response : []));
+  return { response: filterFixturesByLocalDay(merged, dateLocal) };
 }
 
 // ======================================================

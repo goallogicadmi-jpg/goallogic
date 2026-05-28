@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { getFixturesByDate } from "../api/api";
-import { getDateRange, getLocalDayRange, getTodayDateString, getUtcDatesToFetchForLocalDay } from "../utils/getDates";
+import { getFixturesByDateForLocalDay } from "../api/api";
+import { getDateRange, getTodayDateString } from "../utils/getDates";
 
 export default function Matches() {
   const [partidos, setPartidos] = useState([]);
@@ -30,29 +30,8 @@ export default function Matches() {
     setLoading(true);
     setError(null);
     try {
-      // La API recibe YYYY-MM-DD (UTC). Para un día *local* puede requerir 1–2 fechas UTC.
-      const utcDates = getUtcDatesToFetchForLocalDay(date);
-      const { start, end } = getLocalDayRange(date);
-
-      const payloads = await Promise.all(utcDates.map((d) => getFixturesByDate(d)));
-      const merged = payloads.flatMap((p) => (Array.isArray(p?.response) ? p.response : []));
-
-      // Deduplicar por fixture id (si pedimos 2 días UTC).
-      const byId = new Map();
-      merged.forEach((fx) => {
-        const id = fx?.fixture?.id ?? fx?.fixture?.timestamp ?? JSON.stringify(fx?.fixture || fx);
-        if (!byId.has(String(id))) byId.set(String(id), fx);
-      });
-
-      // Filtrar por rango local [00:00, 23:59] del día seleccionado.
-      const filtered = Array.from(byId.values()).filter((fx) => {
-        const iso = fx?.fixture?.date;
-        if (!iso) return false;
-        const ms = new Date(iso).getTime();
-        return ms >= start.getTime() && ms <= end.getTime();
-      });
-
-      setPartidos(filtered);
+      const data = await getFixturesByDateForLocalDay(date);
+      setPartidos(Array.isArray(data?.response) ? data.response : []);
     } catch (error) {
       console.error("Error obteniendo partidos:", error);
       setError("Error al cargar los partidos");

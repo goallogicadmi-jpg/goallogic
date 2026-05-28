@@ -1,63 +1,29 @@
 /**
- * Genera un array de 7 fechas consecutivas (3 antes, hoy, 3 después)
- * @returns {Array} Array de objetos con información de fechas
+ * Fechas para la vista "Partidos del día".
+ * UI = calendario local del usuario. API-Football = fechas UTC (YYYY-MM-DD).
  */
-export function getDateRange() {
-  // La UI de "Partidos" es por día *local* (lo que el usuario percibe como "hoy").
-  // La API trabaja con fechas UTC, así que el fetch debe cubrir 1–2 días UTC y
-  // luego filtrar por rango local (ver helpers más abajo).
-  const today = new Date();
-  const dates = [];
-  
-  for (let i = -3; i <= 3; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-    
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    
-    dates.push({
-      date: date,
-      dateString: `${year}-${month}-${day}`, // YYYY-MM-DD para API
-      display: `${day}/${month}`, // DD/MM para mostrar
-      isToday: i === 0
-    });
-  }
-  
-  return dates;
+
+const LIVE_FIXTURE_STATUSES = new Set([
+  '1H', '2H', 'HT', 'ET', 'BT', 'P', 'SUSP', 'INT', 'LIVE',
+]);
+
+function pad2(n) {
+  return String(n).padStart(2, '0');
 }
 
 /**
- * Obtiene la fecha actual en formato YYYY-MM-DD
- * @returns {string} Fecha en formato YYYY-MM-DD
+ * Fecha local YYYY-MM-DD desde un Date (calendario del navegador).
+ * @param {Date} date
  */
-export function getTodayDateString() {
-  // Fecha "hoy" en calendario local.
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
+export function toLocalDateString(date = new Date()) {
+  const year = date.getFullYear();
+  const month = pad2(date.getMonth() + 1);
+  const day = pad2(date.getDate());
   return `${year}-${month}-${day}`;
 }
 
 /**
- * Convierte YYYY-MM-DD a rango [inicio, fin] del día *local*.
- * @param {string} dateStringLocal
- */
-export function getLocalDayRange(dateStringLocal) {
-  const [y, m, d] = String(dateStringLocal).split("-").map((v) => Number(v));
-  const start = new Date(y, (m || 1) - 1, d || 1, 0, 0, 0, 0);
-  const end = new Date(y, (m || 1) - 1, d || 1, 23, 59, 59, 999);
-  return { start, end };
-}
-
-function pad2(n) {
-  return String(n).padStart(2, "0");
-}
-
-/**
- * Fecha UTC YYYY-MM-DD para un Date.
+ * Fecha UTC YYYY-MM-DD desde un Date.
  * @param {Date} date
  */
 export function toUtcDateString(date) {
@@ -65,13 +31,122 @@ export function toUtcDateString(date) {
 }
 
 /**
- * Para un día local, devuelve qué YYYY-MM-DD (UTC) hay que pedir a la API.
- * En la mayoría de TZs será 1 o 2 fechas UTC.
+ * Genera un array de 7 fechas consecutivas (3 antes, hoy, 3 después) en calendario local.
+ * @returns {Array<{ date: Date, dateString: string, display: string, isToday: boolean }>}
+ */
+export function getDateRange() {
+  const today = new Date();
+  const dates = [];
+
+  for (let i = -3; i <= 3; i += 1) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+
+    const dateString = toLocalDateString(date);
+    const display = `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}`;
+
+    dates.push({
+      date,
+      dateString,
+      display,
+      isToday: i === 0,
+    });
+  }
+
+  return dates;
+}
+
+/**
+ * Fecha de hoy en calendario local (única fuente de verdad para "Hoy").
+ * @returns {string} YYYY-MM-DD
+ */
+export function getTodayDateString() {
+  return toLocalDateString(new Date());
+}
+
+/**
+ * Rango [inicio, fin] del día en hora local (00:00:00.000 – 23:59:59.999).
+ * @param {string} dateStringLocal YYYY-MM-DD
+ */
+export function getLocalDayRange(dateStringLocal) {
+  const [y, m, d] = String(dateStringLocal).split('-').map((v) => Number(v));
+  const start = new Date(y, (m || 1) - 1, d || 1, 0, 0, 0, 0);
+  const end = new Date(y, (m || 1) - 1, d || 1, 23, 59, 59, 999);
+  return { start, end };
+}
+
+/**
+ * Todas las fechas UTC (YYYY-MM-DD) que cubren un día local completo.
  * @param {string} dateStringLocal
  */
 export function getUtcDatesToFetchForLocalDay(dateStringLocal) {
   const { start, end } = getLocalDayRange(dateStringLocal);
-  const startUtc = toUtcDateString(start);
-  const endUtc = toUtcDateString(end);
-  return startUtc === endUtc ? [startUtc] : [startUtc, endUtc];
+  const utcDates = new Set();
+
+  utcDates.add(toUtcDateString(start));
+  utcDates.add(toUtcDateString(end));
+
+  const stepMs = 6 * 60 * 60 * 1000;
+  for (let t = start.getTime(); t <= end.getTime(); t += stepMs) {
+    utcDates.add(toUtcDateString(new Date(t)));
+  }
+
+  return Array.from(utcDates).sort();
+}
+
+/**
+ * @param {Object} fixture
+ */
+export function isLiveFixture(fixture) {
+  const status = String(fixture?.fixture?.status?.short || '').toUpperCase();
+  return LIVE_FIXTURE_STATUSES.has(status);
+}
+
+/**
+ * @param {Object} fixture
+ * @param {string} dateStringLocal
+ */
+export function isFixtureInLocalDay(fixture, dateStringLocal) {
+  const iso = fixture?.fixture?.date;
+  if (!iso) return false;
+
+  const kickoffMs = new Date(iso).getTime();
+  if (Number.isNaN(kickoffMs)) return false;
+
+  const { start, end } = getLocalDayRange(dateStringLocal);
+  const startMs = start.getTime();
+  const endMs = end.getTime();
+
+  // Único criterio: kickoff dentro del rango del día local.
+  // Esto evita mezcla 26/27 y hace que UI y datos siempre coincidan.
+  return kickoffMs >= startMs && kickoffMs <= endMs;
+}
+
+/**
+ * @param {Array} fixtures
+ */
+export function dedupeFixtures(fixtures) {
+  const byId = new Map();
+
+  (fixtures || []).forEach((fixture) => {
+    const id = fixture?.fixture?.id;
+    if (id == null) return;
+    const key = String(id);
+    if (!byId.has(key)) {
+      byId.set(key, fixture);
+    }
+  });
+
+  return Array.from(byId.values());
+}
+
+/**
+ * Filtra fixtures por día local (único criterio de pertenencia al día).
+ * @param {Array} fixtures
+ * @param {string} dateStringLocal YYYY-MM-DD
+ */
+export function filterFixturesByLocalDay(fixtures, dateStringLocal) {
+  return dedupeFixtures(fixtures).filter((fixture) =>
+    isFixtureInLocalDay(fixture, dateStringLocal)
+  );
 }

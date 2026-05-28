@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import Toast from "../components/Toast";
@@ -23,7 +23,7 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
   const [partidos, setPartidos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(getTodayDateString());
+  const [selectedDate, setSelectedDate] = useState(null);
   const [filtros, setFiltros] = useState({
     competitionId: null,
     country: null,
@@ -35,23 +35,30 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
   const [favoritosActualizados, setFavoritosActualizados] = useState(0);
 
   const cacheRef = useRef({});
-  const dates = useMemo(() => getDateRange(), []);
+  const [dates, setDates] = useState([]);
   const resolvedScope = scope === "all" ? "all" : (domain || scope || "club");
+
+  useEffect(() => {
+    setDates(getDateRange());
+    setSelectedDate(getTodayDateString());
+  }, []);
 
   const loadMatches = useCallback(async (date) => {
     try {
       setLoading(true);
       setError(null);
 
-      const cacheKey = `${resolvedScope}:${date}`;
+      const cacheKey = `${resolvedScope}:local:${date}`;
       if (cacheRef.current[cacheKey]) {
         setPartidos(cacheRef.current[cacheKey]);
+        setLoading(false);
         return;
       }
 
       const fixtures = await getMatchesFeed(resolvedScope, { date });
-      cacheRef.current[cacheKey] = fixtures;
-      setPartidos(Array.isArray(fixtures) ? fixtures : []);
+      const list = Array.isArray(fixtures) ? fixtures : [];
+      cacheRef.current[cacheKey] = list;
+      setPartidos(list);
     } catch (err) {
       console.error(`Error cargando partidos de ${resolvedScope}:`, err);
       setError("Hubo un problema al cargar los partidos del feed solicitado.");
@@ -140,7 +147,7 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
       </div>
 
       <div className="fechas-container">
-        {dates.map((dateObj) => {
+        {dates.length > 0 && dates.map((dateObj) => {
           const isSelected = dateObj.dateString === selectedDate;
 
           return (
