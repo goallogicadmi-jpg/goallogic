@@ -601,5 +601,25 @@
       "hasStandings": true,
       "hasKnockout": true
     }
+  },
+  {
+    "id": 10,
+    "name": "International Friendlies",
+    "country": "World",
+    "logo": "https://media.api-sports.io/football/leagues/10.png",
+    "domain": "selection",
+    "type": "Friendly",
+    "format": "friendly",
+    "participantType": "national_team",
+    "priority": 10,
+    "seasonMode": "calendar_year",
+    "features": {
+      "hasTransfers": false,
+      "hasInjuries": false,
+      "hasLeagueStats": false,
+      "hasSquad": true,
+      "hasStandings": false,
+      "hasKnockout": false
+    }
   }
 ]

@@ -7,6 +7,12 @@ const {
   getCompetitionById,
   getCompetitionByIdAndDomain,
 } = require("../utils/competitionCatalog");
+const {
+  resolveCompetitionForScopedFixture,
+  buildInternationalFriendlyCompetitionMeta,
+  getSupplementarySelectionLeagueIds,
+  dedupeRawFixtures,
+} = require("../utils/internationalFriendlyFixtures");
 
 const apiHeaders = {
   "x-apisports-key": process.env.API_KEY,
@@ -93,12 +99,85 @@ function sortFixtures(fixtures = []) {
   });
 }
 
+function resolveRequestedCompetition(competitionId, scope) {
+  const competition = getCompetitionForScope(competitionId, scope);
+  if (competition) return competition;
+
+  if ((scope === "selection" || scope === "all") && Number(competitionId) === 10) {
+    return buildInternationalFriendlyCompetitionMeta({ league: { id: 10 } });
+  }
+
+  if ((scope === "selection" || scope === "all") && Number(competitionId) === 1) {
+    const wc = getCompetitionById(1);
+    if (wc) return wc;
+    return {
+      id: 1,
+      name: "World Cup",
+      country: "World",
+      logo: "/competition-logos/world-cup.svg",
+      domain: "selection",
+      type: "Cup",
+      format: "group_and_knockout",
+      participantType: "national_team",
+      priority: 1,
+      seasonMode: "calendar_year",
+      features: {
+        hasTransfers: false,
+        hasInjuries: false,
+        hasLeagueStats: true,
+        hasSquad: true,
+        hasStandings: true,
+        hasKnockout: true,
+      },
+    };
+  }
+
+  return null;
+}
+
+async function fetchRawFixturesFromApi(date, leagueId = null) {
+  const url = leagueId
+    ? `https://v3.football.api-sports.io/fixtures?date=${date}&league=${leagueId}&season=${new Date(`${date}T12:00:00Z`).getUTCFullYear()}`
+    : `https://v3.football.api-sports.io/fixtures?date=${date}`;
+
+  const response = await axios.get(url, { headers: apiHeaders });
+  return response.data?.response || [];
+}
+
+/**
+ * Para selection/all: combina listado general + fetch explícito de amistosos (10) y Mundial (1).
+ */
+async function fetchMergedFixturesForDate(date, scope) {
+  const supplementaryIds = getSupplementarySelectionLeagueIds(scope);
+
+  if (!supplementaryIds.length) {
+    return fetchRawFixturesFromApi(date);
+  }
+
+  const requests = [
+    fetchRawFixturesFromApi(date),
+    ...supplementaryIds.map((leagueId) => fetchRawFixturesFromApi(date, leagueId)),
+  ];
+
+  const batches = await Promise.all(requests);
+  return dedupeRawFixtures(batches.flat());
+}
+
+function mapScopedFixtures(rawFixtures, competitionLookup, scope) {
+  return (rawFixtures || [])
+    .map((fixture) => {
+      const competition = resolveCompetitionForScopedFixture(fixture, competitionLookup, scope);
+      if (!competition) return null;
+      return enrichFixtureWithCompetitionMeta(fixture, competition);
+    })
+    .filter(Boolean);
+}
+
 async function fetchScopedFixtures({ scope, date, competitionId }) {
   const competitionLookup = createCompetitionLookupForScope(scope);
-  const allowedIds = new Set(competitionLookup.keys());
 
   if (competitionId) {
-    const competition = getCompetitionForScope(competitionId, scope);
+    const competition = resolveRequestedCompetition(competitionId, scope);
     if (!competition) {
       return {
         error: {
@@ -111,16 +190,13 @@ async function fetchScopedFixtures({ scope, date, competitionId }) {
       };
     }
 
+    const season = new Date(`${date}T12:00:00Z`).getUTCFullYear();
     const response = await axios.get(
-      `https://v3.football.api-sports.io/fixtures?date=${date}&league=${competitionId}`,
+      `https://v3.football.api-sports.io/fixtures?date=${date}&league=${competitionId}&season=${season}`,
       { headers: apiHeaders }
     );
 
-    const fixtures = (response.data.response || [])
-      .filter((fixture) => allowedIds.has(Number(fixture.league?.id)))
-      .map((fixture) =>
-        enrichFixtureWithCompetitionMeta(fixture, competitionLookup.get(Number(fixture.league?.id)))
-      );
+    const fixtures = mapScopedFixtures(response.data.response || [], competitionLookup, scope);
 
     return {
       success: true,
@@ -128,15 +204,8 @@ async function fetchScopedFixtures({ scope, date, competitionId }) {
     };
   }
 
-  const response = await axios.get(`https://v3.football.api-sports.io/fixtures?date=${date}`, {
-    headers: apiHeaders,
-  });
-
-  const fixtures = (response.data.response || [])
-    .filter((fixture) => allowedIds.has(Number(fixture.league?.id)))
-    .map((fixture) =>
-      enrichFixtureWithCompetitionMeta(fixture, competitionLookup.get(Number(fixture.league?.id)))
-    );
+  const rawFixtures = await fetchMergedFixturesForDate(date, scope);
+  const fixtures = mapScopedFixtures(rawFixtures, competitionLookup, scope);
 
   return {
     success: true,
