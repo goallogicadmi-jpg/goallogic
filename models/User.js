@@ -48,6 +48,31 @@ const userSchema = new mongoose.Schema({
     trim: true,
     default: ''
   },
+  /** Tipo de cuenta: usuario estándar o familiar (acceso gratuito permanente). */
+  tipo: {
+    type: String,
+    enum: ['usuario', 'familia'],
+    default: 'usuario',
+    index: true,
+  },
+  /** Plan comercial: free-family = acceso gratuito sin Stripe. */
+  plan: {
+    type: String,
+    trim: true,
+    default: null,
+    index: true,
+  },
+  /** Si true, nunca se solicita pago ni se revoca premium vía Stripe. */
+  billingLocked: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
+  /** Modal de bienvenida familiar ya mostrado. */
+  welcomeShown: {
+    type: Boolean,
+    default: false,
+  },
   premium: {
     type: Boolean,
     default: false,

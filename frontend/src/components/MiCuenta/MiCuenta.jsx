@@ -44,6 +44,9 @@ const MiCuenta = () => {
     user &&
     !isAdmin &&
     !isMainAdmin &&
+    !user.billingLocked &&
+    user.tipo !== 'familia' &&
+    user.plan !== 'free-family' &&
     (showPremiumBanner || user.premium !== true);
 
   // Redirigir administradores al panel de administración

@@ -234,3 +234,24 @@ export const getAdminProModules = async () => {
   }
   return response;
 };
+
+/** Lista usuarios del plan familiar (solo admin principal). */
+export const getFamilyUsers = async () => {
+  const response = await fetchWithAuth('/api/admin/family/users', { method: 'GET' });
+  if (!response.success) {
+    throw new Error(response.message || 'Error al obtener usuarios familiares');
+  }
+  return response.data;
+};
+
+/** Crea usuario familiar con acceso gratuito permanente. */
+export const createFamilyUser = async (payload) => {
+  const response = await fetchWithAuth('/api/admin/family/users', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  if (!response.success) {
+    throw new Error(response.message || 'Error al crear usuario familiar');
+  }
+  return response.data;
+};

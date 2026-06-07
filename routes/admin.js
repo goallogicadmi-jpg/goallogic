@@ -95,7 +95,7 @@ function buildAdminUsersFilter(query) {
 }
 
 const USER_LIST_SELECT =
-  '_id nombre apellido email telefono role isMainAdmin premium premium_since stripe_customer_id stripe_subscription_id created_at updated_at';
+  '_id nombre apellido email telefono role isMainAdmin premium premium_since stripe_customer_id stripe_subscription_id tipo plan billingLocked welcomeShown created_at updated_at';
 
 /**
  * GET /api/admin/users
@@ -356,6 +356,13 @@ router.put('/user/:id/premium', auth, checkMainAdmin, async (req, res) => {
       return res.status(403).json({
         success: false,
         message: 'No se puede modificar el premium del administrador principal',
+      });
+    }
+
+    if (user.billingLocked === true || user.tipo === 'familia' || user.plan === 'free-family') {
+      return res.status(403).json({
+        success: false,
+        message: 'No se puede modificar el premium de una cuenta familiar con facturación bloqueada',
       });
     }
 

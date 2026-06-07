@@ -28,6 +28,14 @@ export const ADMIN_NAV_GROUPS = [
         description: 'Listado, premium, Stripe y actividad',
       },
       {
+        id: 'familia',
+        path: '/admin/familia',
+        label: 'Familia',
+        icon: '👨‍👩‍👧‍👦',
+        description: 'Cuentas familiares con acceso gratuito',
+        mainAdminOnly: true,
+      },
+      {
         id: 'stripe',
         path: '/admin/stripe',
         label: 'Ingresos Stripe',

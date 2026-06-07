@@ -23,14 +23,24 @@ export const useUser = () => {
 function mapSessionUser(sessionUser) {
   if (!sessionUser) return null;
   const id = String(sessionUser.id ?? sessionUser.user_id);
+  const isFamily =
+    sessionUser.tipo === 'familia' ||
+    sessionUser.plan === 'free-family' ||
+    sessionUser.billingLocked === true;
+
   return {
     ...sessionUser,
     id,
     user_id: id,
     role: sessionUser.role || 'usuario',
     isMainAdmin: sessionUser.isMainAdmin || false,
-    premium: sessionUser.premium === true,
+    premium: sessionUser.premium === true || isFamily,
     legalAccepted: sessionUser.legalAccepted === true,
+    tipo: sessionUser.tipo || 'usuario',
+    plan: sessionUser.plan || null,
+    billingLocked: sessionUser.billingLocked === true || isFamily,
+    welcomeShown: sessionUser.welcomeShown === true,
+    isFamilyAccount: isFamily,
   };
 }
 

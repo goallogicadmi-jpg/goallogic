@@ -14,6 +14,9 @@ export function getRoleBadge(user) {
 }
 
 export function getPremiumBadge(user) {
+  if (user?.tipo === 'familia' || user?.plan === 'free-family') {
+    return { text: 'Familia', className: 'badge-premium-on' };
+  }
   if (user?.premium === true) {
     return { text: 'Premium', className: 'badge-premium-on' };
   }

@@ -2803,6 +2803,8 @@ const adminSettingsRoutes = require('./routes/adminSettings.js');
 app.use('/api/admin/settings', adminSettingsRoutes);
 const adminMessagesRoutes = require('./routes/adminMessages.js');
 app.use('/api/admin/messages', adminMessagesRoutes);
+const familyAdminRoutes = require('./routes/familyAdmin.js');
+app.use('/api/admin/family', familyAdminRoutes);
 const settingsPublicRoutes = require('./routes/settingsPublic.js');
 app.use('/api/settings', settingsPublicRoutes);
 

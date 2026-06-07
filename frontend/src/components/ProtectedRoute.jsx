@@ -33,7 +33,9 @@ export function ProtectedRoute({ children }) {
   }
 
   const adminBypass = isAdmin || isMainAdmin;
-  const needsPremium = user.premium !== true && !adminBypass;
+  const isFamilyAccount =
+    user.billingLocked === true || user.tipo === 'familia' || user.plan === 'free-family';
+  const needsPremium = user.premium !== true && !adminBypass && !isFamilyAccount;
 
   if (needsPremium) {
     return (

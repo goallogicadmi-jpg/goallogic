@@ -131,6 +131,16 @@ async function setPremiumActive(userId, stripePatch = {}) {
 
 async function setPremiumInactive(userId) {
   if (!isValidUserId(userId)) return false;
+
+  const user = await User.findById(userId).select('billingLocked tipo plan email').lean();
+  if (user?.billingLocked === true || user?.tipo === 'familia' || user?.plan === 'free-family') {
+    logger.log('webhook', 'stripe_webhook_skip_deactivate_billing_locked', {
+      userId: String(userId),
+      email: user?.email,
+    });
+    return false;
+  }
+
   await User.updateOne(
     { _id: userId },
     {

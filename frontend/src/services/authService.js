@@ -192,6 +192,30 @@ export async function acceptLegalNotice() {
 }
 
 /**
+ * Marca el modal de bienvenida familiar como visto.
+ */
+export async function markFamilyWelcomeShown() {
+  const token = getToken();
+  if (!token) {
+    throw new Error('No hay token de autenticación');
+  }
+
+  const response = await fetch(resolveApiUrl('/api/auth/welcome-shown'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Error al registrar bienvenida');
+  }
+  return data;
+}
+
+/**
  * Solicita enlace de recuperación de contraseña.
  */
 export async function requestPasswordReset(email) {

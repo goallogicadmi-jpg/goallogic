@@ -13,6 +13,7 @@ const { sanitizeRegisterBody, sanitizeLoginBody, sanitizeEmail } = require('../u
 const { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } = require('../utils/passwordPolicy');
 const metrics = require('../utils/metrics');
 const { mongoUriHint, stripeApiModeFromEnv } = require('../utils/mongoUriHint');
+const { isFamilyUser } = require('../utils/familyUser');
 
 const router = express.Router();
 
@@ -33,6 +34,15 @@ const loginLimiter = rateLimit({
 });
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '2h';
+
+function serializeAuthUserFields(user) {
+  return {
+    tipo: user.tipo || 'usuario',
+    plan: user.plan || null,
+    billingLocked: user.billingLocked === true || isFamilyUser(user),
+    welcomeShown: user.welcomeShown === true,
+  };
+}
 
 /**
  * POST /api/auth/register
@@ -239,7 +249,8 @@ router.post('/login', loginLimiter, async (req, res) => {
         role: user.role || 'usuario',
         isMainAdmin: user.isMainAdmin || false,
         premium: user.premium === true,
-        legalAccepted: user.legalAccepted === true
+        legalAccepted: user.legalAccepted === true,
+        ...serializeAuthUserFields(user),
       }
     });
 
@@ -319,7 +330,7 @@ router.post('/change-password', auth, async (req, res) => {
 router.get('/session', authJwt, async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
-      .select('nombre apellido email role isMainAdmin premium legalAccepted legalAcceptedAt')
+      .select('nombre apellido email role isMainAdmin premium legalAccepted legalAcceptedAt tipo plan billingLocked welcomeShown')
       .lean();
 
     if (!user) {
@@ -339,6 +350,7 @@ router.get('/session', authJwt, async (req, res) => {
         premium: user.premium === true,
         legalAccepted: user.legalAccepted === true,
         legalAcceptedAt: user.legalAcceptedAt || null,
+        ...serializeAuthUserFields(user),
       },
     });
   } catch (error) {
@@ -386,6 +398,48 @@ router.post('/accept-legal', authJwt, async (req, res) => {
 });
 
 /**
+ * POST /api/auth/welcome-shown
+ * Marca el modal de bienvenida familiar como visto.
+ */
+router.post('/welcome-shown', authJwt, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
+
+    if (!isFamilyUser(user)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Este usuario no pertenece al plan familiar',
+      });
+    }
+
+    if (user.welcomeShown === true) {
+      return res.json({
+        success: true,
+        welcomeShown: true,
+        message: 'Bienvenida ya registrada',
+      });
+    }
+
+    user.welcomeShown = true;
+    await user.save();
+
+    logger.info('auth_family_welcome_shown', { userId: String(user._id), ip: req.ip });
+
+    res.json({
+      success: true,
+      welcomeShown: true,
+      message: 'Bienvenida registrada',
+    });
+  } catch (error) {
+    logger.error('auth_welcome_shown_error', { message: error.message });
+    res.status(500).json({ success: false, message: 'Error al registrar bienvenida' });
+  }
+});
+
+/**
  * GET /api/auth/me
  * Obtiene el perfil completo del usuario autenticado
  * Requiere: token válido en header Authorization
@@ -412,7 +466,7 @@ router.get('/me', authJwt, async (req, res) => {
     const [user, favorites, simulatorState] = await Promise.all([
       User.findById(userId)
         .select(
-          'nombre apellido email telefono pais ciudad direccion codigo_postal idioma timezone equipo_favorito ligas_favoritas role isMainAdmin premium legalAccepted legalAcceptedAt created_at updated_at'
+          'nombre apellido email telefono pais ciudad direccion codigo_postal idioma timezone equipo_favorito ligas_favoritas role isMainAdmin premium legalAccepted legalAcceptedAt tipo plan billingLocked welcomeShown created_at updated_at'
         )
         .lean(),
       // Obtener favoritos
@@ -495,6 +549,7 @@ router.get('/me', authJwt, async (req, res) => {
         premium: user.premium === true,
         legalAccepted: user.legalAccepted === true,
         legalAcceptedAt: user.legalAcceptedAt || null,
+        ...serializeAuthUserFields(user),
         created_at: user.created_at,
         updated_at: user.updated_at
       },

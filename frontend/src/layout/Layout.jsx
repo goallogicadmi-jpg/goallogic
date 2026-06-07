@@ -8,6 +8,7 @@ import ComunidadButton from "../components/ComunidadButton";
 import Toast from "../components/Toast";
 import SiteFooter from "../components/legal/SiteFooter";
 import LegalAcceptanceGate from "../components/legal/LegalAcceptanceGate";
+import FamilyWelcomeGate from "../components/Familia/FamilyWelcomeGate";
 import CmsGlobalBanner from "../components/Cms/CmsGlobalBanner";
 import OperationalSettingsBanner from "../components/OperationalSettingsBanner";
 import {
@@ -594,7 +595,9 @@ export default function Layout() {
       <main className="layout-page-shell">
         <div className="app-container">
           <LegalAcceptanceGate>
-            <Outlet />
+            <FamilyWelcomeGate>
+              <Outlet />
+            </FamilyWelcomeGate>
           </LegalAcceptanceGate>
         </div>
       </main>
