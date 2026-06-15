@@ -101,7 +101,7 @@ async function fetchPreferredSeasonYearForLeague(leagueId) {
 
 export default function Predicciones() {
   const location = useLocation();
-  const { homeTeam, awayTeam, leagueId, fixtureId: routeFixtureId, domain: routeDomainRaw } = location.state || {};
+  const { homeTeam, awayTeam, leagueId, season: routeSeason, fixtureId: routeFixtureId, domain: routeDomainRaw } = location.state || {};
   const routePredictionDomain = normalizeRoutePredictionDomain(routeDomainRaw);
 
   // Estados para ligas (global)
@@ -369,8 +369,8 @@ export default function Predicciones() {
     setDatosAdicionales(null);
 
     const [statsSeasonA, statsSeasonB] = await Promise.all([
-      fetchPreferredSeasonYearForLeague(ligaA),
-      fetchPreferredSeasonYearForLeague(ligaB),
+      routeSeason != null ? Promise.resolve(String(routeSeason)) : fetchPreferredSeasonYearForLeague(ligaA),
+      routeSeason != null ? Promise.resolve(String(routeSeason)) : fetchPreferredSeasonYearForLeague(ligaB),
     ]);
 
     try {

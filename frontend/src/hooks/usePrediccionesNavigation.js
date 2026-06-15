@@ -22,6 +22,7 @@ export function usePrediccionesNavigation(defaultDomain = 'club', defaultLeagueI
       const awayTeam = partido?.teams?.away;
       const matchDomain = partido?.domain || defaultDomain;
       const leagueId = partido?.league?.id ?? defaultLeagueId;
+      const season = partido?.league?.season ?? null;
 
       if (!homeTeam || !awayTeam) {
         return;
@@ -31,6 +32,7 @@ export function usePrediccionesNavigation(defaultDomain = 'club', defaultLeagueI
         state: {
           domain: matchDomain,
           leagueId,
+          season,
           fixtureId: partido.fixture?.id ?? null,
           fromMatchesRoute: window.location.pathname,
           homeTeam: {

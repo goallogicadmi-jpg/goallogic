@@ -6,6 +6,7 @@ import {
   getAdvancedMetricLabelStyle,
 } from '../../constants/advancedMetricLabels';
 import { calculateFinalGoalLogicProbabilities } from '../../utils/calculateGoalLogicProbability';
+import { resolveDisplayXg } from '../../utils/xgDisplayUtils';
 import { PREDICCIONES_TITLES } from '../../constants/prediccionesSectionTitles';
 import PrediccionesSectionTitle from './PrediccionesSectionTitle';
 import {
@@ -35,9 +36,16 @@ export default function ResumenEjecutivo({ predicciones, equipoA, equipoB, fixtu
       })
     : null;
 
-  // Calcular probabilidades básicas (solo visual, no modifica lógica)
-  const totalGolesEsperados = predicciones.promedioTotalGolesEsperados || 
-    ((equipoA?.promedioGolesFavor || 0) + (equipoB?.promedioGolesFavor || 0)).toFixed(2);
+  // Goles esperados totales: promedios combinados o suma de xG estimados por equipo
+  const totalFromPredicciones = Number(predicciones.promedioTotalGolesEsperados);
+  const xgTotalA = resolveDisplayXg(equipoA).value;
+  const xgTotalB = resolveDisplayXg(equipoB).value;
+  const totalGolesEsperados =
+    Number.isFinite(totalFromPredicciones) && totalFromPredicciones > 0
+      ? totalFromPredicciones.toFixed(2)
+      : xgTotalA != null && xgTotalB != null
+        ? (xgTotalA + xgTotalB).toFixed(2)
+        : ((equipoA?.promedioGolesFavor || 0) + (equipoB?.promedioGolesFavor || 0)).toFixed(2);
   
   const diferenciaForma = predicciones.puntosFormaA - predicciones.puntosFormaB;
   const equipoFavorito = diferenciaForma > 2 ? 'A' : diferenciaForma < -2 ? 'B' : null;

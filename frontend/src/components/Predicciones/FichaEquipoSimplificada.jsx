@@ -7,6 +7,12 @@ import {
   getAdvancedMetricLabelStyle,
 } from '../../constants/advancedMetricLabels';
 import { IconChevronDown } from './PrediccionesIcons';
+import {
+  resolveDisplayXg,
+  resolveDisplayXga,
+  formatXgPromedioLabel,
+  formatXgaPromedioLabel,
+} from '../../utils/xgDisplayUtils';
 
 /**
  * FichaEquipoSimplificada - Versión simplificada de FichaEquipo con acordeón
@@ -49,6 +55,8 @@ export default function FichaEquipoSimplificada({ equipo, tipo }) {
   };
 
   const tendencias = calcularTendencias();
+  const xgDisplay = resolveDisplayXg(equipo);
+  const xgaDisplay = resolveDisplayXga(equipo);
 
   const containerStyle = {
     backgroundColor: tokens.colors.bgCard,
@@ -192,6 +200,22 @@ export default function FichaEquipoSimplificada({ equipo, tipo }) {
             <div style={statValueStyle}>{equipo.promedioGolesContra.toFixed(2)}</div>
           </div>
         )}
+        <div style={statCardStyle}>
+          <div className={ADVANCED_METRIC_LABEL_CLASS} style={statLabelStyle}>
+            {formatXgPromedioLabel(xgDisplay.source)}
+          </div>
+          <div style={statValueStyle}>
+            {xgDisplay.value != null ? xgDisplay.value.toFixed(2) : 'N/D'}
+          </div>
+        </div>
+        <div style={statCardStyle}>
+          <div className={ADVANCED_METRIC_LABEL_CLASS} style={statLabelStyle}>
+            {formatXgaPromedioLabel(xgaDisplay.source)}
+          </div>
+          <div style={statValueStyle}>
+            {xgaDisplay.value != null ? xgaDisplay.value.toFixed(2) : 'N/D'}
+          </div>
+        </div>
       </div>
 
       {/* Forma reciente */}

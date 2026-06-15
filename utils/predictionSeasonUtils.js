@@ -78,20 +78,29 @@ async function fetchTeamStatisticsWithSeasonFallback({
   apiHeaders,
 }) {
   const seasonsToTry = buildSeasonFallbackChain(leagueId, season);
-  let lastStats = null;
-  let lastSeasonTried = season;
+  /** Preferir la edición con más partidos (evita quedarse en WC 2026 con 1 PJ). */
+  let best = {
+    estadisticas: null,
+    seasonUsed: season,
+    played: -1,
+    fallbackApplied: false,
+  };
 
   for (const trySeason of seasonsToTry) {
-    lastSeasonTried = trySeason;
     try {
       const response = await axios.get(
         `https://v3.football.api-sports.io/teams/statistics?team=${teamId}&league=${leagueId}&season=${trySeason}`,
         { headers: apiHeaders }
       );
       const stats = response.data?.response || null;
-      lastStats = stats;
-      if (stats && teamStatisticsHasPlayedData(stats)) {
-        return { estadisticas: stats, seasonUsed: trySeason, fallbackApplied: trySeason !== season };
+      const played = Number(stats?.fixtures?.played?.total ?? 0);
+      if (played > best.played) {
+        best = {
+          estadisticas: stats,
+          seasonUsed: trySeason,
+          played,
+          fallbackApplied: trySeason !== season,
+        };
       }
     } catch {
       // siguiente temporada
@@ -99,9 +108,9 @@ async function fetchTeamStatisticsWithSeasonFallback({
   }
 
   return {
-    estadisticas: lastStats,
-    seasonUsed: lastSeasonTried,
-    fallbackApplied: lastSeasonTried !== season,
+    estadisticas: best.estadisticas,
+    seasonUsed: best.seasonUsed,
+    fallbackApplied: best.fallbackApplied,
   };
 }
 
@@ -115,7 +124,24 @@ function estimateXgFromGoalAverage(goalsPerGame) {
 }
 
 /**
- * Resuelve xG ofensivo: API de fixtures → promedio de goles → ultimosPartidos.
+ * Promedio de goles efectivo: stats de liga → ultimosPartidos.
+ */
+function resolveEffectiveGoalAverages(promedioGolesFavor, promedioGolesContra, ultimosPartidos) {
+  const ultimosAvg = avgGoalsFromUltimosPartidos(ultimosPartidos);
+  const promF = Number(promedioGolesFavor);
+  const promC = Number(promedioGolesContra);
+
+  const goalAvgFor =
+    Number.isFinite(promF) && promF > 0 ? promF : ultimosAvg.forAvg;
+  const goalAvgAgainst =
+    Number.isFinite(promC) && promC > 0 ? promC : ultimosAvg.againstAvg;
+
+  return { goalAvgFor, goalAvgAgainst };
+}
+
+/**
+ * Resuelve xG para predicciones: prioriza promedios de goles (API o ultimosPartidos).
+ * El xG de fixtures/statistics solo se usa si no hay promedios utilizables.
  */
 function resolveXgMetrics({
   xGFromFixtures,
@@ -129,40 +155,28 @@ function resolveXgMetrics({
   let xGSource = null;
   let xGASource = null;
 
-  if (xGFromFixtures != null && xGFromFixtures > 0) {
+  const { goalAvgFor, goalAvgAgainst } = resolveEffectiveGoalAverages(
+    promedioGolesFavor,
+    promedioGolesContra,
+    ultimosPartidos
+  );
+
+  const fromGoalsFor = estimateXgFromGoalAverage(goalAvgFor);
+  if (fromGoalsFor != null) {
+    xG = fromGoalsFor;
+    xGSource = 'estimated';
+  } else if (xGFromFixtures != null && xGFromFixtures > 0) {
     xG = parseFloat(Number(xGFromFixtures).toFixed(2));
     xGSource = 'api';
-  } else {
-    const fromProm = estimateXgFromGoalAverage(promedioGolesFavor);
-    if (fromProm != null) {
-      xG = fromProm;
-      xGSource = 'estimated';
-    } else {
-      const avg = avgGoalsFromUltimosPartidos(ultimosPartidos);
-      const fromFixtures = estimateXgFromGoalAverage(avg.forAvg);
-      if (fromFixtures != null) {
-        xG = fromFixtures;
-        xGSource = 'estimated';
-      }
-    }
   }
 
-  if (xGAFromFixtures != null && xGAFromFixtures > 0) {
+  const fromGoalsAgainst = estimateXgFromGoalAverage(goalAvgAgainst);
+  if (fromGoalsAgainst != null) {
+    xGA = fromGoalsAgainst;
+    xGASource = 'estimated';
+  } else if (xGAFromFixtures != null && xGAFromFixtures > 0) {
     xGA = parseFloat(Number(xGAFromFixtures).toFixed(2));
     xGASource = 'api';
-  } else {
-    const fromProm = estimateXgFromGoalAverage(promedioGolesContra);
-    if (fromProm != null) {
-      xGA = fromProm;
-      xGASource = 'estimated';
-    } else {
-      const avg = avgGoalsFromUltimosPartidos(ultimosPartidos);
-      const fromFixtures = estimateXgFromGoalAverage(avg.againstAvg);
-      if (fromFixtures != null) {
-        xGA = fromFixtures;
-        xGASource = 'estimated';
-      }
-    }
   }
 
   return { xG, xGA, xGSource, xGASource };
@@ -203,5 +217,6 @@ module.exports = {
   fetchLeagueTeamsWithSeasonFallback,
   estimateXgFromGoalAverage,
   resolveXgMetrics,
+  resolveEffectiveGoalAverages,
   teamStatisticsHasPlayedData,
 };

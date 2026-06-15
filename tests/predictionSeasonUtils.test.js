@@ -36,6 +36,20 @@ test('resolveXgMetrics estimates when API xG missing', () => {
   assert.equal(result.xGA, 1.05);
 });
 
+test('resolveXgMetrics prefers goal averages over fixture xG', () => {
+  const result = resolveXgMetrics({
+    xGFromFixtures: 0.32,
+    xGAFromFixtures: 0.28,
+    promedioGolesFavor: 2.29,
+    promedioGolesContra: 0.8,
+    ultimosPartidos: [],
+  });
+  assert.equal(result.xGSource, 'estimated');
+  assert.equal(result.xG, 2.4);
+  assert.equal(result.xGASource, 'estimated');
+  assert.equal(result.xGA, 0.84);
+});
+
 test('resolveCatalogSeasonFallback uses calendar year', () => {
   const season = resolveCatalogSeasonFallback(9, () => ({ seasonMode: 'calendar_year' }));
   assert.equal(season, new Date().getFullYear());
