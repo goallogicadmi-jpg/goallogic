@@ -23,6 +23,12 @@ import {
   ADVANCED_METRIC_LABEL_CLASS,
   getAdvancedMetricLabelStyle,
 } from "../constants/advancedMetricLabels";
+import {
+  resolveDisplayXg,
+  resolveDisplayXga,
+  formatXgPromedioLabel,
+  formatXgaPromedioLabel,
+} from "../utils/xgDisplayUtils";
 import "../styles/predicciones.css";
 import { GoalLogicTitle } from "../components/GoalLogicTitle";
 // Componentes visuales reorganizados (solo presentación)
@@ -370,8 +376,8 @@ export default function Predicciones() {
     try {
       // Cargar datos detallados de ambos equipos en paralelo
       const [responseA, responseB] = await Promise.all([
-        axios.get(`/api/equipos/${equipoA.id}/detalle?leagueId=${ligaA}`),
-        axios.get(`/api/equipos/${equipoB.id}/detalle?leagueId=${ligaB}`)
+        axios.get(`/api/equipos/${equipoA.id}/detalle?leagueId=${ligaA}&season=${statsSeasonA}`),
+        axios.get(`/api/equipos/${equipoB.id}/detalle?leagueId=${ligaB}&season=${statsSeasonB}`)
       ]);
 
       if (responseA.data.success && responseB.data.success) {
@@ -880,33 +886,38 @@ function ComparacionDatosReales({ predicciones, equipoA, equipoB, datosAdicional
   }, []);
 
   // Calcular eficiencias
+  const xgDisplayA = useMemo(() => resolveDisplayXg(equipoA), [equipoA]);
+  const xgDisplayB = useMemo(() => resolveDisplayXg(equipoB), [equipoB]);
+  const xgaDisplayA = useMemo(() => resolveDisplayXga(equipoA), [equipoA]);
+  const xgaDisplayB = useMemo(() => resolveDisplayXga(equipoB), [equipoB]);
+
   const eficienciaOfensivaA = useMemo(() => {
-    const xG = equipoA?.estadisticasOfensivas?.xG || 0;
+    const xG = xgDisplayA.value || 0;
     const goles = equipoA?.promedioGolesFavor || 0;
     if (xG === 0) return null;
     return ((goles / xG) * 100).toFixed(1);
-  }, [equipoA]);
+  }, [equipoA, xgDisplayA]);
 
   const eficienciaOfensivaB = useMemo(() => {
-    const xG = equipoB?.estadisticasOfensivas?.xG || 0;
+    const xG = xgDisplayB.value || 0;
     const goles = equipoB?.promedioGolesFavor || 0;
     if (xG === 0) return null;
     return ((goles / xG) * 100).toFixed(1);
-  }, [equipoB]);
+  }, [equipoB, xgDisplayB]);
 
   const eficienciaDefensivaA = useMemo(() => {
-    const xGA = equipoA?.estadisticasDefensivas?.xGA || 0;
+    const xGA = xgaDisplayA.value || 0;
     const golesRecibidos = equipoA?.promedioGolesContra || 0;
     if (xGA === 0) return null;
     return ((golesRecibidos / xGA) * 100).toFixed(1);
-  }, [equipoA]);
+  }, [equipoA, xgaDisplayA]);
 
   const eficienciaDefensivaB = useMemo(() => {
-    const xGA = equipoB?.estadisticasDefensivas?.xGA || 0;
+    const xGA = xgaDisplayB.value || 0;
     const golesRecibidos = equipoB?.promedioGolesContra || 0;
     if (xGA === 0) return null;
     return ((golesRecibidos / xGA) * 100).toFixed(1);
-  }, [equipoB]);
+  }, [equipoB, xgaDisplayB]);
 
   // Calcular tendencia de forma
   const tendenciaForma = useMemo(() => {
@@ -1087,14 +1098,14 @@ function ComparacionDatosReales({ predicciones, equipoA, equipoB, datosAdicional
                 {(equipoA?.promedioGolesFavor || 0).toFixed(2)}
               </div>
             </div>
-            {equipoA?.estadisticasOfensivas?.xG !== null && equipoA?.estadisticasOfensivas?.xG !== undefined && (
-              <div style={metricaStyle}>
-                <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.xGPromedio}</span>
-                <div style={metricaValorStyle}>
-                  {equipoA.estadisticasOfensivas.xG.toFixed(2)}
-                </div>
+            <div style={metricaStyle}>
+              <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>
+                {formatXgPromedioLabel(xgDisplayA.source)}
+              </span>
+              <div style={metricaValorStyle}>
+                {xgDisplayA.value != null ? xgDisplayA.value.toFixed(2) : 'N/D'}
               </div>
-            )}
+            </div>
             <div style={metricaStyle}>
               <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.over25}</span>
               <div style={metricaValorStyle}>{predicciones.over25A}%</div>
@@ -1116,14 +1127,14 @@ function ComparacionDatosReales({ predicciones, equipoA, equipoB, datosAdicional
                 {(equipoB?.promedioGolesFavor || 0).toFixed(2)}
               </div>
             </div>
-            {equipoB?.estadisticasOfensivas?.xG !== null && equipoB?.estadisticasOfensivas?.xG !== undefined && (
-              <div style={metricaStyle}>
-                <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.xGPromedio}</span>
-                <div style={metricaValorStyle}>
-                  {equipoB.estadisticasOfensivas.xG.toFixed(2)}
-                </div>
+            <div style={metricaStyle}>
+              <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>
+                {formatXgPromedioLabel(xgDisplayB.source)}
+              </span>
+              <div style={metricaValorStyle}>
+                {xgDisplayB.value != null ? xgDisplayB.value.toFixed(2) : 'N/D'}
               </div>
-            )}
+            </div>
             <div style={metricaStyle}>
               <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.over25}</span>
               <div style={metricaValorStyle}>{predicciones.over25B}%</div>
@@ -1155,14 +1166,14 @@ function ComparacionDatosReales({ predicciones, equipoA, equipoB, datosAdicional
                 {(equipoA?.promedioGolesContra || 0).toFixed(2)}
               </div>
             </div>
-            {equipoA?.estadisticasDefensivas?.xGA !== null && equipoA?.estadisticasDefensivas?.xGA !== undefined && (
-              <div style={metricaStyle}>
-                <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.xGAPromedio}</span>
-                <div style={metricaValorStyle}>
-                  {equipoA.estadisticasDefensivas.xGA.toFixed(2)}
-                </div>
+            <div style={metricaStyle}>
+              <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>
+                {formatXgaPromedioLabel(xgaDisplayA.source)}
+              </span>
+              <div style={metricaValorStyle}>
+                {xgaDisplayA.value != null ? xgaDisplayA.value.toFixed(2) : 'N/D'}
               </div>
-            )}
+            </div>
             <div style={metricaStyle}>
               <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.cleanSheets}</span>
               <div style={metricaValorStyle}>{predicciones.cleanSheetsA}%</div>
@@ -1199,14 +1210,14 @@ function ComparacionDatosReales({ predicciones, equipoA, equipoB, datosAdicional
                 {(equipoB?.promedioGolesContra || 0).toFixed(2)}
               </div>
             </div>
-            {equipoB?.estadisticasDefensivas?.xGA !== null && equipoB?.estadisticasDefensivas?.xGA !== undefined && (
-              <div style={metricaStyle}>
-                <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.xGAPromedio}</span>
-                <div style={metricaValorStyle}>
-                  {equipoB.estadisticasDefensivas.xGA.toFixed(2)}
-                </div>
+            <div style={metricaStyle}>
+              <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>
+                {formatXgaPromedioLabel(xgaDisplayB.source)}
+              </span>
+              <div style={metricaValorStyle}>
+                {xgaDisplayB.value != null ? xgaDisplayB.value.toFixed(2) : 'N/D'}
               </div>
-            )}
+            </div>
             <div style={metricaStyle}>
               <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.cleanSheets}</span>
               <div style={metricaValorStyle}>{predicciones.cleanSheetsB}%</div>
@@ -1504,12 +1515,17 @@ function FichaEquipo({ equipo, tipo }) {
                     <span className="stat-value">{equipo.estadisticasOfensivas.tirosAlArcoPromedio?.toFixed(1)}</span>
                   </div>
                 )}
-                {equipo.estadisticasOfensivas.xG !== null && (
-                  <div className="ficha-stat">
-                    <span className="stat-label">{ML.xGPromedio}:</span>
-                    <span className="stat-value">{equipo.estadisticasOfensivas.xG?.toFixed(2)}</span>
-                  </div>
-                )}
+                <div className="ficha-stat">
+                  <span className="stat-label">
+                    {formatXgPromedioLabel(
+                      equipo.estadisticasOfensivas?.xGSource
+                        || (resolveDisplayXg(equipo).source)
+                    )}:
+                  </span>
+                  <span className="stat-value">
+                    {(resolveDisplayXg(equipo).value ?? equipo.estadisticasOfensivas?.xG)?.toFixed(2) ?? 'N/D'}
+                  </span>
+                </div>
               </div>
             </div>
           )}
@@ -1529,12 +1545,17 @@ function FichaEquipo({ equipo, tipo }) {
                     <span className="stat-value">{equipo.estadisticasDefensivas.tirosEnContraPromedio?.toFixed(1)}</span>
                   </div>
                 )}
-                {equipo.estadisticasDefensivas.xGA !== null && (
-                  <div className="ficha-stat">
-                    <span className="stat-label">{ML.xGAPromedio}:</span>
-                    <span className="stat-value">{equipo.estadisticasDefensivas.xGA?.toFixed(2)}</span>
-                  </div>
-                )}
+                <div className="ficha-stat">
+                  <span className="stat-label">
+                    {formatXgaPromedioLabel(
+                      equipo.estadisticasDefensivas?.xGASource
+                        || (resolveDisplayXga(equipo).source)
+                    )}:
+                  </span>
+                  <span className="stat-value">
+                    {(resolveDisplayXga(equipo).value ?? equipo.estadisticasDefensivas?.xGA)?.toFixed(2) ?? 'N/D'}
+                  </span>
+                </div>
               </div>
             </div>
           )}

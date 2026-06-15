@@ -5,6 +5,12 @@ import {
   ADVANCED_METRIC_LABEL_CLASS,
   getAdvancedMetricLabelStyle,
 } from '../../constants/advancedMetricLabels';
+import {
+  resolveDisplayXg,
+  resolveDisplayXga,
+  formatXgPromedioLabel,
+  formatXgaPromedioLabel,
+} from '../../utils/xgDisplayUtils';
 import { buildConclusionesComparativaEquipos } from '../../utils/conclusionesCopy';
 import { PREDICCIONES_TITLES } from '../../constants/prediccionesSectionTitles';
 import PrediccionesSectionTitle from './PrediccionesSectionTitle';
@@ -40,34 +46,38 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Calcular eficiencias (misma lógica, solo visual)
+  const xgDisplayA = useMemo(() => resolveDisplayXg(equipoA), [equipoA]);
+  const xgDisplayB = useMemo(() => resolveDisplayXg(equipoB), [equipoB]);
+  const xgaDisplayA = useMemo(() => resolveDisplayXga(equipoA), [equipoA]);
+  const xgaDisplayB = useMemo(() => resolveDisplayXga(equipoB), [equipoB]);
+
   const eficienciaOfensivaA = useMemo(() => {
-    const xG = equipoA?.estadisticasOfensivas?.xG || 0;
+    const xG = xgDisplayA.value || 0;
     const goles = equipoA?.promedioGolesFavor || 0;
     if (xG === 0) return null;
     return ((goles / xG) * 100).toFixed(1);
-  }, [equipoA]);
+  }, [equipoA, xgDisplayA]);
 
   const eficienciaOfensivaB = useMemo(() => {
-    const xG = equipoB?.estadisticasOfensivas?.xG || 0;
+    const xG = xgDisplayB.value || 0;
     const goles = equipoB?.promedioGolesFavor || 0;
     if (xG === 0) return null;
     return ((goles / xG) * 100).toFixed(1);
-  }, [equipoB]);
+  }, [equipoB, xgDisplayB]);
 
   const eficienciaDefensivaA = useMemo(() => {
-    const xGA = equipoA?.estadisticasDefensivas?.xGA || 0;
+    const xGA = xgaDisplayA.value || 0;
     const golesRecibidos = equipoA?.promedioGolesContra || 0;
     if (xGA === 0) return null;
     return ((golesRecibidos / xGA) * 100).toFixed(1);
-  }, [equipoA]);
+  }, [equipoA, xgaDisplayA]);
 
   const eficienciaDefensivaB = useMemo(() => {
-    const xGA = equipoB?.estadisticasDefensivas?.xGA || 0;
+    const xGA = xgaDisplayB.value || 0;
     const golesRecibidos = equipoB?.promedioGolesContra || 0;
     if (xGA === 0) return null;
     return ((golesRecibidos / xGA) * 100).toFixed(1);
-  }, [equipoB]);
+  }, [equipoB, xgaDisplayB]);
 
   const insights = useMemo(
     () => buildConclusionesComparativaEquipos(predicciones, equipoA, equipoB),
@@ -299,14 +309,14 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                   {(equipoA?.promedioGolesFavor || 0).toFixed(2)}
                 </div>
               </div>
-              {equipoA?.estadisticasOfensivas?.xG !== null && equipoA?.estadisticasOfensivas?.xG !== undefined && (
-                <div style={metricaStyle}>
-                  <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.xGPromedio}</span>
-                  <div style={metricaValorStyle}>
-                    {equipoA.estadisticasOfensivas.xG.toFixed(2)}
-                  </div>
+              <div style={metricaStyle}>
+                <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>
+                  {formatXgPromedioLabel(xgDisplayA.source)}
+                </span>
+                <div style={metricaValorStyle}>
+                  {xgDisplayA.value != null ? xgDisplayA.value.toFixed(2) : 'N/D'}
                 </div>
-              )}
+              </div>
               <div style={metricaStyle}>
                 <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.over25}</span>
                 <div style={metricaValorStyle}>{predicciones.over25A}%</div>
@@ -331,14 +341,14 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                   {(equipoB?.promedioGolesFavor || 0).toFixed(2)}
                 </div>
               </div>
-              {equipoB?.estadisticasOfensivas?.xG !== null && equipoB?.estadisticasOfensivas?.xG !== undefined && (
-                <div style={metricaStyle}>
-                  <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.xGPromedio}</span>
-                  <div style={metricaValorStyle}>
-                    {equipoB.estadisticasOfensivas.xG.toFixed(2)}
-                  </div>
+              <div style={metricaStyle}>
+                <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>
+                  {formatXgPromedioLabel(xgDisplayB.source)}
+                </span>
+                <div style={metricaValorStyle}>
+                  {xgDisplayB.value != null ? xgDisplayB.value.toFixed(2) : 'N/D'}
                 </div>
-              )}
+              </div>
               <div style={metricaStyle}>
                 <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.over25}</span>
                 <div style={metricaValorStyle}>{predicciones.over25B}%</div>
@@ -362,8 +372,8 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
         // Calcular valores para comparación - NORMALIZAR TIPOS
         const golesRecibidosA = parseFloat(equipoA?.promedioGolesContra) || 0;
         const golesRecibidosB = parseFloat(equipoB?.promedioGolesContra) || 0;
-        const xGAA = parseFloat(equipoA?.estadisticasDefensivas?.xGA) || 0;
-        const xGAB = parseFloat(equipoB?.estadisticasDefensivas?.xGA) || 0;
+        const xGAA = xgaDisplayA.value != null ? parseFloat(xgaDisplayA.value) : 0;
+        const xGAB = xgaDisplayB.value != null ? parseFloat(xgaDisplayB.value) : 0;
         const cleanSheetsA = parseFloat(predicciones.cleanSheetsA) || 0;
         const cleanSheetsB = parseFloat(predicciones.cleanSheetsB) || 0;
         const eficienciaDefA = eficienciaDefensivaA ? parseFloat(eficienciaDefensivaA) : null;
@@ -410,17 +420,17 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                   {golesRecibidosA.toFixed(2)}
                 </div>
               </div>
-              {equipoA?.estadisticasDefensivas?.xGA !== null && equipoA?.estadisticasDefensivas?.xGA !== undefined && (
-                <div style={metricaStyle}>
-                  <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.xGAPromedio}</span>
-                  <div style={{ 
-                    ...metricaValorStyle, 
-                    color: obtenerColorMetrica(xGAA, xGAB, false, true, 'xGA - Equipo A')
-                  }}>
-                    {xGAA.toFixed(2)}
-                  </div>
+              <div style={metricaStyle}>
+                <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>
+                  {formatXgaPromedioLabel(xgaDisplayA.source)}
+                </span>
+                <div style={{ 
+                  ...metricaValorStyle, 
+                  color: xGAA > 0 ? obtenerColorMetrica(xGAA, xGAB, false, true, 'xGA - Equipo A') : metricaValorStyle.color
+                }}>
+                  {xGAA > 0 ? xGAA.toFixed(2) : 'N/D'}
                 </div>
-              )}
+              </div>
               <div style={metricaStyle}>
                 <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.cleanSheets}</span>
                 <div style={{ 
@@ -469,17 +479,17 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                   {golesRecibidosB.toFixed(2)}
                 </div>
               </div>
-              {equipoB?.estadisticasDefensivas?.xGA !== null && equipoB?.estadisticasDefensivas?.xGA !== undefined && (
-                <div style={metricaStyle}>
-                  <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.xGAPromedio}</span>
-                  <div style={{ 
-                    ...metricaValorStyle, 
-                    color: obtenerColorMetrica(xGAA, xGAB, false, false, 'xGA - Equipo B')
-                  }}>
-                    {xGAB.toFixed(2)}
-                  </div>
+              <div style={metricaStyle}>
+                <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>
+                  {formatXgaPromedioLabel(xgaDisplayB.source)}
+                </span>
+                <div style={{ 
+                  ...metricaValorStyle, 
+                  color: xGAB > 0 ? obtenerColorMetrica(xGAA, xGAB, false, false, 'xGA - Equipo B') : metricaValorStyle.color
+                }}>
+                  {xGAB > 0 ? xGAB.toFixed(2) : 'N/D'}
                 </div>
-              )}
+              </div>
               <div style={metricaStyle}>
                 <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.cleanSheets}</span>
                 <div style={{ 

@@ -15,6 +15,13 @@ const {
 const { initSystemSettingsCache } = require('./utils/systemSettingsService');
 const maintenanceModeGuard = require('./middleware/maintenanceMode');
 const { buildPredictionsLeagues } = require('./utils/predictionsLeagues');
+const {
+  resolveCatalogSeasonFallback,
+  avgGoalsFromUltimosPartidos,
+  fetchTeamStatisticsWithSeasonFallback,
+  fetchLeagueTeamsWithSeasonFallback,
+  resolveXgMetrics,
+} = require('./utils/predictionSeasonUtils');
 const { findUpcomingFixtureBetweenTeams, normalizeTeamId } = require('./utils/upcomingFixtureUtils');
 const { dedupeInjuriesByPlayer, buildInjuriesQueryPlans } = require('./utils/injuriesApiUtils');
 const { logUpstream, GENERIC_API_ERROR } = require('./utils/upstreamError');
@@ -272,6 +279,8 @@ async function connectToMongoDB() {
             startCommunityPostCleanup();
             const { startMessageCampaignWorker } = require('./jobs/messageCampaignWorker');
             startMessageCampaignWorker();
+            const { startTrialExpirationWorker } = require('./jobs/trialExpirationWorker');
+            startTrialExpirationWorker();
             
             // Crear administrador principal por defecto
             try {
@@ -2805,6 +2814,10 @@ const adminMessagesRoutes = require('./routes/adminMessages.js');
 app.use('/api/admin/messages', adminMessagesRoutes);
 const familyAdminRoutes = require('./routes/familyAdmin.js');
 app.use('/api/admin/family', familyAdminRoutes);
+const userPlanRoutes = require('./routes/userPlan.js');
+app.use('/api/user', userPlanRoutes);
+const trialCronRoutes = require('./routes/trialCron.js');
+app.use('/api/trial', trialCronRoutes);
 const settingsPublicRoutes = require('./routes/settingsPublic.js');
 app.use('/api/settings', settingsPublicRoutes);
 
@@ -2930,60 +2943,25 @@ app.get('/api/ligas/:id/equipos', async (req, res) => {
                 season = await getCurrentSeasonFromAPI(leagueId);
                 console.log(`🔍 [LIGAS/EQUIPOS] Temporada obtenida de API: ${season}`);
             } catch (err) {
-                const catalogMeta = getCompetitionById(leagueId);
-                const today = new Date();
-                const currentYear = today.getFullYear();
-                const currentMonth = today.getMonth() + 1;
-                if (catalogMeta?.seasonMode === "calendar_year") {
-                    season = currentYear;
-                } else {
-                    season = currentMonth >= 8 ? currentYear : currentYear - 1;
-                }
+                season = resolveCatalogSeasonFallback(leagueId, getCompetitionById);
                 console.log(`⚠️ [LIGAS/EQUIPOS] Fallback de temporada: ${season}`);
             }
         }
 
-        // Intentar obtener equipos con la temporada obtenida
-        let response;
-        try {
-            response = await axios.get(
-                `https://v3.football.api-sports.io/teams?league=${leagueId}&season=${season}`,
-                { headers: apiHeaders }
-            );
-
-            console.log(`🔍 [LIGAS/EQUIPOS] Respuesta API - Status: ${response.status}`);
-            console.log(`🔍 [LIGAS/EQUIPOS] Tiene response?: ${!!response.data?.response}`);
-            console.log(`🔍 [LIGAS/EQUIPOS] Es array?: ${Array.isArray(response.data?.response)}`);
-            console.log(`🔍 [LIGAS/EQUIPOS] Cantidad: ${response.data?.response?.length || 0}`);
-
-            // Si no hay equipos, intentar con la temporada anterior
-            if (!response.data?.response || response.data.response.length === 0) {
-                console.log(`⚠️ [LIGAS/EQUIPOS] No se encontraron equipos con temporada ${season}, intentando con ${season - 1}`);
-                try {
-                    response = await axios.get(
-                        `https://v3.football.api-sports.io/teams?league=${leagueId}&season=${season - 1}`,
-                        { headers: apiHeaders }
-                    );
-                    console.log(`🔍 [LIGAS/EQUIPOS] Respuesta con temporada ${season - 1} - Cantidad: ${response.data?.response?.length || 0}`);
-                } catch (err2) {
-                    console.warn(`⚠️ [LIGAS/EQUIPOS] Error al intentar temporada anterior:`, err2.message);
-                }
-            }
-        } catch (err) {
-            console.error(`❌ [LIGAS/EQUIPOS] Error al obtener equipos con temporada ${season}:`, err.message);
-            // Intentar con temporada anterior como último recurso
-            try {
-                response = await axios.get(
-                    `https://v3.football.api-sports.io/teams?league=${leagueId}&season=${season - 1}`,
-                    { headers: apiHeaders }
-                );
-                console.log(`🔍 [LIGAS/EQUIPOS] Respuesta con temporada ${season - 1} (fallback) - Cantidad: ${response.data?.response?.length || 0}`);
-            } catch (err2) {
-                throw err; // Lanzar el error original
-            }
+        const { response, seasonUsed } = await fetchLeagueTeamsWithSeasonFallback({
+            leagueId,
+            season,
+            axios,
+            apiHeaders,
+        });
+        if (seasonUsed !== season) {
+            console.log(`🔄 [LIGAS/EQUIPOS] Temporada ajustada ${season} → ${seasonUsed}`);
+            season = seasonUsed;
         }
 
-        if (response.data?.response && Array.isArray(response.data.response) && response.data.response.length > 0) {
+        console.log(`🔍 [LIGAS/EQUIPOS] Respuesta API - Cantidad: ${response?.data?.response?.length || 0}`);
+
+        if (response?.data?.response && Array.isArray(response.data.response) && response.data.response.length > 0) {
             const equipos = response.data.response
                 .map(item => ({
                     id: item.team?.id,
@@ -3182,6 +3160,22 @@ app.get('/api/equipos/:id/detalle', async (req, res) => {
             console.warn(`⚠️ No se pudieron obtener últimos partidos para equipo ${teamId}:`, fixturesError.message);
         }
 
+        // Resolver season temprano: query > API current > catálogo (respeta seasonMode)
+        let season = seasonQuery ? parseInt(seasonQuery, 10) : null;
+        if (!season && leagueId) {
+            try {
+                season = await getCurrentSeasonFromAPI(leagueId);
+                escribirLog(`📌 [EQUIPOS/DETALLE] Season obtenida de API: ${season} para liga ${leagueId}`);
+            } catch (seasonError) {
+                season = resolveCatalogSeasonFallback(leagueId, getCompetitionById);
+                escribirLog(`📌 [EQUIPOS/DETALLE] Season fallback catálogo: ${season}`);
+            }
+        } else if (!season) {
+            season = resolveCatalogSeasonFallback(leagueId, getCompetitionById);
+        }
+
+        escribirLog(`📌 [EQUIPOS/DETALLE] Season inicial: ${season}, LeagueId: ${leagueId}`);
+
         // Obtener estadísticas detalladas de los últimos partidos (shots, xG, xGA)
         let tirosAlArcoTotal = 0;
         let tirosAlArcoPromedio = null;
@@ -3293,92 +3287,71 @@ app.get('/api/equipos/:id/detalle', async (req, res) => {
             }
         }
 
-        // Fallback puntual: en selecciones a veces no hay métrica "Expected Goals" en fixtures/statistics.
-        // Si xGTotal quedó en 0 pero sí hubo goles reales, estimar un xG básico (sin tocar motor).
-        if (partidosConEstadisticas > 0 && xGTotal === 0) {
-            const golesRealesTotal = (ultimosPartidos || []).reduce(
-                (sum, p) => sum + (Number(p?.golesFavor) || 0),
-                0
-            );
-            if (golesRealesTotal > 0) {
-                const avgGoles = golesRealesTotal / Math.max((ultimosPartidos || []).length || partidosConEstadisticas, 1);
-                // Estimación simple: ligeramente por encima de goles reales (evita 0 y mantiene escala razonable).
-                xGTotal = Math.max(0.1, avgGoles * 1.05) * partidosConEstadisticas;
-                escribirLog(`🧩 [EQUIPOS/DETALLE] Fallback xG aplicado: avgGoles=${avgGoles.toFixed(2)} => xG estimado`);
-            }
-        }
-
-        // Determinar season: primero del query param, luego calcular con getCurrentSeasonFromAPI, luego manual
-        let season = seasonQuery ? parseInt(seasonQuery, 10) : null;
-        
-        if (!season && leagueId) {
-            try {
-                season = await getCurrentSeasonFromAPI(leagueId);
-                escribirLog(`📌 [EQUIPOS/DETALLE] Season obtenida de API: ${season} para liga ${leagueId}`);
-            } catch (seasonError) {
-                console.warn(`⚠️ No se pudo obtener season de API para liga ${leagueId}, usando cálculo manual:`, seasonError.message);
-                // Fallback: calcular temporada manualmente
-                const today = new Date();
-                const currentYear = today.getFullYear();
-                const currentMonth = today.getMonth() + 1;
-                season = currentMonth >= 8 ? currentYear : currentYear - 1;
-            }
-        } else if (!season) {
-            // Si no hay leagueId, calcular temporada manualmente
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth() + 1;
-            season = currentMonth >= 8 ? currentYear : currentYear - 1;
-        }
-        
-        escribirLog(`📌 [EQUIPOS/DETALLE] Season final: ${season}, LeagueId final: ${leagueId}`);
-
-        // Obtener estadísticas del equipo en su liga
+        // Obtener estadísticas del equipo en su liga (con fallback Mundial 2026→2022, etc.)
         let estadisticas = null;
+        let seasonUsed = season;
+        let statsFallbackApplied = false;
         if (leagueId) {
-            try {
-                escribirLog(`📡 [EQUIPOS/DETALLE] Solicitando estadísticas: team=${teamId}&league=${leagueId}&season=${season}`);
-                const statsResponse = await axios.get(
-                    `https://v3.football.api-sports.io/teams/statistics?team=${teamId}&league=${leagueId}&season=${season}`,
-                    { headers: apiHeaders }
-                );
-                // La API devuelve los datos directamente en response, no en response[0]
-                estadisticas = statsResponse.data?.response || null;
-                escribirLog(`✅ [EQUIPOS/DETALLE] Estadísticas obtenidas: ${estadisticas ? 'Sí' : 'No'}`);
-                if (estadisticas) {
-                    escribirLog(`📊 [EQUIPOS/DETALLE] Estructura: tiene goals=${!!estadisticas.goals}, tiene fixtures=${!!estadisticas.fixtures}`);
-                    escribirLog(`📊 [EQUIPOS/DETALLE] Keys de estadisticas: ${Object.keys(estadisticas).join(', ')}`);
-                }
-            } catch (statsError) {
-                escribirLog(`⚠️ No se pudieron obtener estadísticas para equipo ${teamId}: ${statsError.message}`);
-                if (statsError.response) {
-                    escribirLog(`⚠️ Status: ${statsError.response.status}, Data: ${JSON.stringify(statsError.response.data)}`);
-                }
-            }
+            const statsResult = await fetchTeamStatisticsWithSeasonFallback({
+                teamId,
+                leagueId,
+                season,
+                axios,
+                apiHeaders,
+            });
+            estadisticas = statsResult.estadisticas;
+            seasonUsed = statsResult.seasonUsed;
+            statsFallbackApplied = statsResult.fallbackApplied;
+            escribirLog(`✅ [EQUIPOS/DETALLE] Estadísticas: ${estadisticas ? 'Sí' : 'No'}, season usada: ${seasonUsed}, fallback: ${statsFallbackApplied}`);
         } else {
             escribirLog(`⚠️ [EQUIPOS/DETALLE] No se puede obtener estadísticas: falta leagueId`);
         }
 
-        // Procesar estadísticas
-        // La estructura de la API es: response.goals, response.fixtures (no response.statistics[0])
+        // Procesar estadísticas de liga
         const stats = estadisticas || {};
-        const fixtures = estadisticas?.fixtures || {};
-        
-        // Calcular promedios
-        const partidosJugados = fixtures.played?.total || 0;
+        const fixturesPlayed = estadisticas?.fixtures || {};
+        const partidosJugados = fixturesPlayed.played?.total || 0;
         const golesFavor = stats.goals?.for?.total?.total || 0;
         const golesContra = stats.goals?.against?.total?.total || 0;
-        const promedioGolesFavor = partidosJugados > 0 ? golesFavor / partidosJugados : 0;
-        const promedioGolesContra = partidosJugados > 0 ? golesContra / partidosJugados : 0;
+
+        let promedioGolesFavor = partidosJugados > 0 ? golesFavor / partidosJugados : 0;
+        let promedioGolesContra = partidosJugados > 0 ? golesContra / partidosJugados : 0;
+
+        // Fallback de promedios desde ultimosPartidos (misma lógica que /api/predictions)
+        const ultimosAvg = avgGoalsFromUltimosPartidos(ultimosPartidos);
+        let promediosFromUltimos = false;
+        if (!(promedioGolesFavor > 0) && ultimosAvg.forAvg != null) {
+            promedioGolesFavor = ultimosAvg.forAvg;
+            promediosFromUltimos = true;
+            escribirLog(`🧩 [EQUIPOS/DETALLE] promedioGolesFavor desde ultimosPartidos: ${promedioGolesFavor.toFixed(2)}`);
+        }
+        if (!(promedioGolesContra > 0) && ultimosAvg.againstAvg != null) {
+            promedioGolesContra = ultimosAvg.againstAvg;
+            promediosFromUltimos = true;
+            escribirLog(`🧩 [EQUIPOS/DETALLE] promedioGolesContra desde ultimosPartidos: ${promedioGolesContra.toFixed(2)}`);
+        }
+
+        const xGFromFixtures = partidosConEstadisticas > 0
+            ? xGTotal / partidosConEstadisticas
+            : null;
+        const xGAFromFixtures = xGAPromedio != null ? parseFloat(xGAPromedio) : null;
+
+        const { xG, xGA, xGSource, xGASource } = resolveXgMetrics({
+            xGFromFixtures,
+            xGAFromFixtures,
+            promedioGolesFavor,
+            promedioGolesContra,
+            ultimosPartidos,
+        });
 
         // Obtener posición en la tabla (si está disponible)
         let posicion = null;
         let puntos = null;
         if (leagueId) {
             try {
-                escribirLog(`📡 [EQUIPOS/DETALLE] Solicitando standings: league=${leagueId}&season=${season}`);
+                escribirLog(`📡 [EQUIPOS/DETALLE] Solicitando standings: league=${leagueId}&season=${seasonUsed}`);
                 const standingsResponse = await axios.get(
-                    `https://v3.football.api-sports.io/standings?league=${leagueId}&season=${season}`,
+                    `https://v3.football.api-sports.io/standings?league=${leagueId}&season=${seasonUsed}`,
                     { headers: apiHeaders }
                 );
                 
@@ -3419,16 +3392,16 @@ app.get('/api/equipos/:id/detalle', async (req, res) => {
             promedioGolesContra: promedioGolesContra,
             ultimosPartidos: ultimosPartidos,
             estadisticasOfensivas: {
-                // Datos obtenidos de los últimos 5 partidos (fixtures/statistics)
                 tirosAlArco: partidosConEstadisticas > 0 ? tirosAlArcoTotal : null,
                 tirosAlArcoPromedio: tirosAlArcoPromedio ? parseFloat(tirosAlArcoPromedio) : null,
-                xG: partidosConEstadisticas > 0 ? parseFloat((xGTotal / partidosConEstadisticas).toFixed(2)) : null
+                xG,
+                xGSource,
             },
             estadisticasDefensivas: {
-                // Datos obtenidos de los últimos 5 partidos (fixtures/statistics)
                 tirosEnContra: partidosConEstadisticas > 0 ? tirosEnContraTotal : null,
                 tirosEnContraPromedio: tirosEnContraPromedio ? parseFloat(tirosEnContraPromedio) : null,
-                xGA: xGAPromedio ? parseFloat(xGAPromedio) : null
+                xGA,
+                xGASource,
             }
         };
 
@@ -3437,7 +3410,9 @@ app.get('/api/equipos/:id/detalle', async (req, res) => {
             leagueIdRecibido: leagueIdQuery,
             leagueIdFinal: leagueId,
             seasonRecibida: seasonQuery,
-            seasonFinal: season,
+            seasonFinal: seasonUsed,
+            statsFallbackApplied,
+            promediosFromUltimos,
             tieneEstadisticas: estadisticas !== null,
             tienePosicion: posicion !== null,
             tienePuntos: puntos !== null,
