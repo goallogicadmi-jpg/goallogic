@@ -16,10 +16,6 @@ import {
   formatFixtureLiveMinute,
   shouldShowFixtureLiveMinute,
 } from "../../utils/matchEvents";
-import { didFixtureScoreChange } from "../../utils/matchCardHelpers";
-import useFixtureCardEvents from "../../hooks/useFixtureCardEvents";
-import PartidoCardMiniTimeline from "./PartidoCardMiniTimeline";
-import PartidoCardMiniMomentum from "./PartidoCardMiniMomentum";
 import BrandResponsiveText from '../BrandResponsiveText';
 import { BRAND_PREDIC_DESKTOP, BRAND_PREDIC_MOBILE } from '../../constants/brand';
 import "../../styles/partidos.css";
@@ -46,12 +42,7 @@ function PartidoCard({
   const [errorPredicciones, setErrorPredicciones] = useState(null);
   const [mostrarPredicciones, setMostrarPredicciones] = useState(false);
   const [perfilPrediccion, setPerfilPrediccion] = useState('balanceado');
-  const [goalFlash, setGoalFlash] = useState(false);
-  const [showGoalBadge, setShowGoalBadge] = useState(false);
-  const prevGoalsRef = useRef({ home: null, away: null });
   const fixtureId = useMemo(() => partido.fixture?.id, [partido.fixture?.id]);
-
-  const { timelineEvents } = useFixtureCardEvents(fixtureId, partido);
 
   useEffect(() => {
     // Cargar estado de favorito de forma asíncrona
@@ -76,38 +67,6 @@ function PartidoCard({
       setMostrarPredicciones(false);
     }
   }, [partido, fixtureId]);
-
-  useEffect(() => {
-    const home = partido.goals?.home;
-    const away = partido.goals?.away;
-    const prev = prevGoalsRef.current;
-
-    if (
-      prev.home != null
-      && prev.away != null
-      && didFixtureScoreChange(home, away, prev.home, prev.away)
-    ) {
-      setGoalFlash(true);
-      setShowGoalBadge(true);
-
-      if (typeof navigator !== "undefined" && navigator.vibrate) {
-        navigator.vibrate(35);
-      }
-
-      const flashTimer = window.setTimeout(() => setGoalFlash(false), 700);
-      const badgeTimer = window.setTimeout(() => setShowGoalBadge(false), 2000);
-
-      prevGoalsRef.current = { home, away };
-
-      return () => {
-        window.clearTimeout(flashTimer);
-        window.clearTimeout(badgeTimer);
-      };
-    }
-
-    prevGoalsRef.current = { home, away };
-    return undefined;
-  }, [partido.goals?.home, partido.goals?.away]);
 
   // Memoizar funciones de formateo
   const formatearFecha = useCallback((fechaISO) => {
@@ -288,13 +247,9 @@ function PartidoCard({
       className={[
         "partido-card",
         esFavorito ? "favorito" : "",
-        goalFlash ? "partido-card--goal-flash" : "",
       ].filter(Boolean).join(" ")}
       onClick={onClick}
     >
-      {showGoalBadge && (
-        <span className="partido-card-goal-badge" aria-live="polite">GOL</span>
-      )}
       <div className="partido-card-header">
         <div className="partido-card-info">
           <div>
@@ -369,20 +324,6 @@ function PartidoCard({
           </button>
         </div>
       </div>
-
-      {timelineEvents.length > 0 && (
-        <div className="partido-card-live-extras">
-          <PartidoCardMiniTimeline
-            timelineEvents={timelineEvents}
-            homeName={partido.teams.home?.name}
-            awayName={partido.teams.away?.name}
-          />
-          <PartidoCardMiniMomentum
-            timelineEvents={timelineEvents}
-            partido={partido}
-          />
-        </div>
-      )}
 
       {/* Spinner de carga */}
       {cargandoPredicciones && (

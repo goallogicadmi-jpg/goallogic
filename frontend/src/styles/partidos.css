@@ -704,11 +704,13 @@
   max-width: 90vw;
   width: 100%;
   max-height: 90vh;
+  max-height: 90dvh;
   overflow: hidden;
   overflow-x: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
+  min-height: 0;
   animation: slideUp 0.3s ease;
   box-sizing: border-box;
 }
@@ -740,6 +742,7 @@
   justify-content: space-between;
   align-items: center;
   background: rgba(79, 195, 247, 0.05);
+  flex-shrink: 0;
 }
 
 .match-center-header-info {
@@ -853,12 +856,15 @@
 /* Pestañas del Match Center */
 .match-center-tabs-wrap {
   position: relative;
+  z-index: 30;
+  flex-shrink: 0;
   min-width: 0;
   width: 100%;
   max-width: 100%;
   overflow: hidden;
   border-bottom: 1px solid rgba(79, 195, 247, 0.1);
-  background: rgba(79, 195, 247, 0.02);
+  background: #1a1a1a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
 }
 
 .match-center-tabs {
@@ -885,14 +891,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
   white-space: nowrap;
-}
-
-.match-center-tab-icon {
-  font-size: 0.92em;
-  line-height: 1;
-  flex-shrink: 0;
 }
 
 .match-center-tab-label {
@@ -935,21 +934,26 @@
 
 /* Contenido del Match Center */
 .match-center-content {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 24px;
   box-sizing: border-box;
   -webkit-overflow-scrolling: touch;
-  max-height: calc(90vh - 200px);
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
 }
 
 .match-center-panel {
   display: none;
+  min-width: 0;
 }
 
 .match-center-panel.is-active {
   display: block;
+  overflow: visible;
 }
 
 .match-center-loading,
@@ -1631,7 +1635,6 @@
 
   .match-center-content {
     padding: 16px;
-    max-height: calc(100dvh - 180px);
   }
 
   .eventos-lista-item {
@@ -1765,7 +1768,6 @@
 
   .match-center-content {
     padding: 12px;
-    max-height: calc(100dvh - 168px);
   }
 
   .eventos-lista-minute {
@@ -2078,17 +2080,8 @@
     font-size: 12px;
   }
 
-  .match-center-modal--ultra-compact .match-center-tab-icon {
-    font-size: 0.88em;
-  }
-
-  .match-center-modal--ultra-compact .match-center-tab-inner {
-    gap: 4px;
-  }
-
   .match-center-modal--ultra-compact .match-center-content {
     padding: 10px;
-    max-height: calc(100dvh - 156px);
   }
 
   .match-center-modal--ultra-compact .eventos-lista-item {

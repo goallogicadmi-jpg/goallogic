@@ -35,19 +35,12 @@ import "../../styles/partidos.css";
 
 
 const MATCH_CENTER_TABS = [
-
-  { id: "eventos", label: "Eventos", icon: "⚽" },
-
-  { id: "cronologia", label: "Cronología", icon: "📊" },
-
-  { id: "tactica", label: "Táctica", icon: "🎯" },
-
-  { id: "alineaciones", label: "Alineaciones", icon: "🧩" },
-
-  { id: "analisis", label: "Análisis", icon: "📈" },
-
-  { id: "clasificacion", label: "Clasificación", icon: "ℹ️" },
-
+  { id: "eventos", label: "Eventos" },
+  { id: "cronologia", label: "Cronología" },
+  { id: "tactica", label: "Táctica" },
+  { id: "alineaciones", label: "Alineaciones" },
+  { id: "analisis", label: "Análisis" },
+  { id: "clasificacion", label: "Clasificación" },
 ];
 
 
@@ -577,15 +570,7 @@ export default function MatchCenter({ partido, onClose, domain = "club" }) {
                 aria-selected={tabActiva === tab.id}
 
               >
-
-                <span className="match-center-tab-inner">
-
-                  <span className="match-center-tab-icon" aria-hidden="true">{tab.icon}</span>
-
-                  <span className="match-center-tab-label">{tab.label}</span>
-
-                </span>
-
+                {tab.label}
               </button>
 
             ))}

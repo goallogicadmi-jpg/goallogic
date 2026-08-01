@@ -84,6 +84,7 @@
 
 .match-momentum__chart {
   position: relative;
+  overflow: hidden;
   padding: 8px 4px 28px;
   border: 1px solid rgba(79, 195, 247, 0.14);
   border-radius: 12px;
