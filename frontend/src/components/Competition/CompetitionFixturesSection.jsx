@@ -5,6 +5,7 @@ import {
   SESSION_REQUIRED_TOAST_DURATION_MS,
 } from '../../constants/sessionMessages';
 import { usePrediccionesNavigation } from '../../hooks/usePrediccionesNavigation';
+import useSelectedPartidoLiveSync from '../../hooks/useSelectedPartidoLiveSync';
 import PartidoCard from '../Partidos/PartidoCard';
 import MatchCenter from '../Partidos/MatchCenter';
 import Toast from '../Toast';
@@ -71,6 +72,8 @@ export default function CompetitionFixturesSection({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [partidoSeleccionado, setPartidoSeleccionado] = useState(null);
+
+  useSelectedPartidoLiveSync(partidoSeleccionado, setPartidoSeleccionado);
 
   useEffect(() => {
     if (!leagueId || !season) {

@@ -14,7 +14,12 @@ import {
   extractPlayerPitchEvents,
   extractSubstitutionsFromEvents,
   formatEventMinute,
+  formatFixtureLiveMinute,
   getEventAnimationClass,
+  getLiveFixturePollDelayMs,
+  hasFixtureLiveSnapshotChanged,
+  mergeFixtureLiveUpdate,
+  applyLiveFixtureUpdates,
   getTimelineEventKind,
   getTimelineMaxMinute,
   getPlayerPitchEventKind,
@@ -26,6 +31,7 @@ import {
   normalizePlayerPitchEvent,
   normalizeSubstitutionEvent,
   pairSubstitutionsWithFixture,
+  shouldShowFixtureLiveMinute,
 } from '../frontend/src/utils/matchEvents.js';
 
 test('extractEventsResponse unwraps API envelopes', () => {
@@ -291,4 +297,85 @@ test('buildTimelineTooltip returns null without extra detail', () => {
   const compact = buildTimelineCompactLine(sub, 'subst', {});
   const tip = buildTimelineTooltip(sub, 'subst', compact, {});
   assert.equal(tip, null);
+});
+
+test('shouldShowFixtureLiveMinute respects API-Football live statuses', () => {
+  assert.equal(shouldShowFixtureLiveMinute({ short: '1H' }), true);
+  assert.equal(shouldShowFixtureLiveMinute({ short: '2H' }), true);
+  assert.equal(shouldShowFixtureLiveMinute({ short: 'HT' }), true);
+  assert.equal(shouldShowFixtureLiveMinute({ short: 'ET' }), true);
+  assert.equal(shouldShowFixtureLiveMinute({ short: 'P' }), true);
+  assert.equal(shouldShowFixtureLiveMinute({ short: 'LIVE' }), true);
+  assert.equal(shouldShowFixtureLiveMinute({ short: 'NS' }), false);
+  assert.equal(shouldShowFixtureLiveMinute({ short: 'FT' }), false);
+});
+
+test('formatFixtureLiveMinute formats elapsed and stoppage time', () => {
+  assert.equal(formatFixtureLiveMinute({ short: '1H', elapsed: 23 }), "23'");
+  assert.equal(formatFixtureLiveMinute({ short: '2H', elapsed: 67 }), "67'");
+  assert.equal(formatFixtureLiveMinute({ short: 'HT', elapsed: 45 }), 'HT');
+  assert.equal(formatFixtureLiveMinute({ short: 'P' }), 'PEN');
+  assert.equal(formatFixtureLiveMinute({ short: '1H', elapsed: 45, extra: 3 }), "45+3'");
+  assert.equal(formatFixtureLiveMinute({ short: '2H', elapsed: 90, extra: 2 }), "90+2'");
+  assert.equal(formatFixtureLiveMinute({ short: '1H', elapsed: 47 }), "45+2'");
+  assert.equal(formatFixtureLiveMinute({ short: '2H', elapsed: 93 }), "90+3'");
+  assert.equal(formatFixtureLiveMinute({ short: 'LIVE' }), 'LIVE');
+});
+
+test('getLiveFixturePollDelayMs stays within 25-35 seconds', () => {
+  for (let i = 0; i < 20; i += 1) {
+    const delay = getLiveFixturePollDelayMs();
+    assert.ok(delay >= 25000);
+    assert.ok(delay <= 35000);
+  }
+});
+
+test('mergeFixtureLiveUpdate preserves feed metadata', () => {
+  const existing = {
+    domain: 'club',
+    competitionMeta: { priority: 1 },
+    competitionPriority: 1,
+    fixture: { id: 10, date: '2026-06-01T20:00:00Z', status: { short: '1H', elapsed: 10 } },
+    goals: { home: 0, away: 0 },
+    teams: { home: { id: 1, name: 'Home' }, away: { id: 2, name: 'Away' } },
+    league: { id: 39, name: 'Premier League' },
+  };
+
+  const fresh = {
+    fixture: { id: 10, date: '2026-06-01T20:00:00Z', status: { short: '1H', elapsed: 24 } },
+    goals: { home: 1, away: 0 },
+    teams: { home: { id: 1, name: 'Home FC' }, away: { id: 2, name: 'Away FC' } },
+    league: { id: 39, name: 'Premier League', country: 'England' },
+  };
+
+  const merged = mergeFixtureLiveUpdate(existing, fresh);
+  assert.equal(merged.domain, 'club');
+  assert.equal(merged.competitionPriority, 1);
+  assert.equal(merged.fixture.status.elapsed, 24);
+  assert.equal(merged.goals.home, 1);
+  assert.equal(merged.teams.home.name, 'Home FC');
+});
+
+test('applyLiveFixtureUpdates updates only changed fixtures', () => {
+  const partidos = [
+    {
+      fixture: { id: 1, status: { short: '1H', elapsed: 10 } },
+      goals: { home: 0, away: 0 },
+      domain: 'club',
+    },
+    {
+      fixture: { id: 2, status: { short: 'NS' } },
+      goals: { home: null, away: null },
+      domain: 'club',
+    },
+  ];
+
+  const liveById = new Map([
+    [1, { fixture: { id: 1, status: { short: '1H', elapsed: 12 } }, goals: { home: 0, away: 0 } }],
+  ]);
+
+  const next = applyLiveFixtureUpdates(partidos, liveById);
+  assert.notEqual(next, partidos);
+  assert.equal(next[0].fixture.status.elapsed, 12);
+  assert.equal(next[1].fixture.status.short, 'NS');
 });

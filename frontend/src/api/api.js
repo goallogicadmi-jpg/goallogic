@@ -449,6 +449,30 @@ export async function getFixturesByDateForLocalDay(dateLocal, leagueId = null) {
 // MÓDULO MATCH CENTER - Funciones para detalles del partido
 // ======================================================
 
+export async function getLiveFixtures() {
+  const res = await authFetch('/api/fixtures/live');
+  if (!res.ok) {
+    throw new Error(`Error ${res.status}: ${res.statusText}`);
+  }
+
+  const payload = await res.json();
+  return Array.isArray(payload?.response) ? payload.response : [];
+}
+
+export async function getFixtureById(fixtureId) {
+  if (!fixtureId) {
+    return null;
+  }
+
+  const res = await authFetch(`/api/fixtures/${fixtureId}`);
+  if (!res.ok) {
+    throw new Error(`Error ${res.status}: ${res.statusText}`);
+  }
+
+  const payload = await res.json();
+  return payload?.fixture || null;
+}
+
 // Obtener eventos de un partido
 export async function getFixtureEvents(fixtureId) {
   try {

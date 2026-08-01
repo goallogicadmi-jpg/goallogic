@@ -12,7 +12,9 @@ import BusquedaPartidos from "../components/Partidos/BusquedaPartidos";
 import OrdenPartidos from "../components/Partidos/OrdenPartidos";
 import AgrupadorPartidos from "../components/Partidos/AgrupadorPartidos";
 import MatchCenter from "../components/Partidos/MatchCenter";
+import { useLiveFixturesPolling } from "../hooks/useLiveFixturesPolling";
 import { getDateRange, getTodayDateString } from "../utils/getDates";
+import { hasFixtureLiveSnapshotChanged } from "../utils/matchEvents";
 import "../styles/partidos.css";
 import { GoalLogicSectionHeader } from "../components/GoalLogicTitle";
 
@@ -67,6 +69,38 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
       setLoading(false);
     }
   }, [resolvedScope]);
+
+  const updatePartidos = useCallback((updater) => {
+    setPartidos((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+
+      if (selectedDate) {
+        const cacheKey = `${resolvedScope}:local:${selectedDate}`;
+        cacheRef.current[cacheKey] = next;
+      }
+
+      return next;
+    });
+  }, [resolvedScope, selectedDate]);
+
+  useLiveFixturesPolling(partidos, updatePartidos, {
+    enabled: !loading && partidos.length > 0,
+  });
+
+  useEffect(() => {
+    setPartidoSeleccionado((current) => {
+      if (!current?.fixture?.id) {
+        return current;
+      }
+
+      const fresh = partidos.find((partido) => partido.fixture?.id === current.fixture.id);
+      if (!fresh || !hasFixtureLiveSnapshotChanged(current, fresh)) {
+        return current;
+      }
+
+      return fresh;
+    });
+  }, [partidos]);
 
   useEffect(() => {
     if (selectedDate) {

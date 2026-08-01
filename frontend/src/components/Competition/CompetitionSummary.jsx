@@ -6,6 +6,7 @@ import {
   SESSION_REQUIRED_TOAST_DURATION_MS,
 } from '../../constants/sessionMessages';
 import { usePrediccionesNavigation } from '../../hooks/usePrediccionesNavigation';
+import useSelectedPartidoLiveSync from '../../hooks/useSelectedPartidoLiveSync';
 import PartidoCard from '../Partidos/PartidoCard';
 import MatchCenter from '../Partidos/MatchCenter';
 import Toast from '../Toast';
@@ -138,6 +139,8 @@ export default function CompetitionSummary({
   const [tabla, setTabla] = useState([]);
   const [hasMultipleGroups, setHasMultipleGroups] = useState(false);
   const [partidoSeleccionado, setPartidoSeleccionado] = useState(null);
+
+  useSelectedPartidoLiveSync(partidoSeleccionado, setPartidoSeleccionado);
   const {
     handlePrediccionesClick,
     showSessionToast,

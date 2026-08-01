@@ -1,0 +1,279 @@
+.match-momentum {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  contain: layout style;
+}
+
+.match-momentum--loading,
+.match-momentum--error {
+  padding: 24px;
+  text-align: center;
+  color: #b0b0b0;
+}
+
+.match-momentum--error {
+  color: #ef4444;
+}
+
+.match-momentum__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.match-momentum__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.match-momentum__subtitle {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #8b949e;
+  line-height: 1.4;
+}
+
+.match-momentum__live-badge {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  animation: momentumPulse 2s infinite;
+}
+
+@keyframes momentumPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.72; }
+}
+
+.match-momentum__teams {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.match-momentum__team {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--team-color, #58a6ff);
+}
+
+.match-momentum__team--away {
+  justify-content: flex-end;
+}
+
+.match-momentum__team-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.match-momentum__chart {
+  position: relative;
+  padding: 8px 4px 28px;
+  border: 1px solid rgba(79, 195, 247, 0.14);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(26, 26, 26, 0.9), rgba(15, 15, 15, 0.95));
+}
+
+.match-momentum__goals-row {
+  position: relative;
+  height: 28px;
+  margin-bottom: 8px;
+}
+
+.match-momentum__goal-icon {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 16px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+}
+
+.match-momentum__goal-icon--home {
+  top: 0;
+}
+
+.match-momentum__goal-icon--away {
+  top: 10px;
+}
+
+.match-momentum__bars-wrap {
+  position: relative;
+  height: 160px;
+}
+
+.match-momentum__bars {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  height: 100%;
+  align-items: center;
+}
+
+.match-momentum__bar-col {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.match-momentum__center-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(139, 148, 158, 0.35);
+  pointer-events: none;
+}
+
+.match-momentum__bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  min-height: 4px;
+  transition: height 0.35s ease;
+}
+
+.match-momentum__bar--home {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 50%;
+  background: linear-gradient(180deg, var(--momentum-home-color, #1565c0), rgba(21, 101, 192, 0.55));
+  border-radius: 3px 3px 0 0;
+}
+
+.match-momentum__bar--away {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  background: linear-gradient(180deg, rgba(198, 40, 40, 0.55), var(--momentum-away-color, #c62828));
+  border-radius: 0 0 3px 3px;
+}
+
+.match-momentum__axis {
+  position: relative;
+  height: 22px;
+  margin-top: 10px;
+}
+
+.match-momentum__axis-mark {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #8b949e;
+  white-space: nowrap;
+}
+
+.match-momentum__empty-note {
+  margin: 0;
+  font-size: 13px;
+  color: #8b949e;
+  text-align: center;
+}
+
+.match-momentum--compact .match-momentum__header {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.match-momentum--compact .match-momentum__subtitle {
+  font-size: 11px;
+}
+
+.match-momentum--compact .match-momentum__teams {
+  gap: 8px;
+}
+
+.match-momentum--compact .match-momentum__team {
+  font-size: 11px;
+  max-width: 48%;
+  line-height: 1.2;
+}
+
+.match-momentum--compact .match-momentum__team-logo {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.match-momentum--compact .match-momentum__chart {
+  padding: 6px 2px 24px;
+  overflow: hidden;
+}
+
+.match-momentum--compact .match-momentum__goals-row {
+  height: 24px;
+}
+
+.match-momentum--compact .match-momentum__goal-icon {
+  font-size: 13px;
+}
+
+.match-momentum--compact .match-momentum__goal-icon--away {
+  top: 11px;
+}
+
+.match-momentum--compact .match-momentum__bars-wrap {
+  height: 120px;
+}
+
+.match-momentum--compact .match-momentum__bars {
+  gap: 1px;
+}
+
+.match-momentum--compact .match-momentum__bar {
+  transition: none;
+}
+
+.match-momentum--compact .match-momentum__axis {
+  height: 18px;
+}
+
+.match-momentum--compact .match-momentum__axis-mark {
+  font-size: 9px;
+}
+
+.match-momentum--ultra-compact .match-momentum__bars-wrap {
+  height: 110px;
+}
+
+.match-momentum--ultra-compact .match-momentum__axis-mark {
+  font-size: 8px;
+}
+
+.match-momentum--ultra-compact .match-momentum__goal-icon {
+  font-size: 12px;
+}
+
+.match-momentum--ultra-compact .match-momentum__teams {
+  font-size: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .match-momentum__bar,
+  .eventos-lista-item--new,
+  .match-center-modal,
+  .match-center-overlay {
+    animation: none;
+    transition: none;
+  }
+}

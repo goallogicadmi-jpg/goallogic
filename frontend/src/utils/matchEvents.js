@@ -7,6 +7,9 @@ import { isSameTeamId } from './matchLineups.js';
 const LIVE_STATUSES = new Set(['1H', '2H', 'HT', 'ET', 'BT', 'P', 'SUSP', 'INT', 'LIVE']);
 const FINISHED_STATUSES = new Set(['FT', 'AET', 'PEN', 'AWD', 'WO', 'CANC', 'ABD', 'PST']);
 
+/** Estados en los que la tarjeta muestra minuto en vivo en lugar de la hora de inicio. */
+export const FIXTURE_LIVE_MINUTE_STATUSES = new Set(['1H', '2H', 'HT', 'ET', 'P', 'LIVE']);
+
 /**
  * @param {Object|null} partido
  */
@@ -24,6 +27,161 @@ export function getFixtureStatusShort(partido) {
 export function isFixtureLive(partido) {
   const status = getFixtureStatusShort(partido);
   return LIVE_STATUSES.has(status);
+}
+
+/**
+ * @param {Object|null|undefined} partidoOrStatus - Partido API-Football o objeto `fixture.status`.
+ */
+export function shouldShowFixtureLiveMinute(partidoOrStatus) {
+  const short = partidoOrStatus?.fixture
+    ? getFixtureStatusShort(partidoOrStatus)
+    : String(partidoOrStatus?.short || '').toUpperCase();
+  return FIXTURE_LIVE_MINUTE_STATUSES.has(short);
+}
+
+/**
+ * Formatea el minuto en vivo para tarjetas de partido (API-Football v3).
+ * @param {Object|null|undefined} status - `fixture.status`
+ * @returns {string|null}
+ */
+export function formatFixtureLiveMinute(status) {
+  if (!status) return null;
+
+  const short = String(status.short || '').toUpperCase();
+
+  if (short === 'HT') return 'HT';
+  if (short === 'P') return 'PEN';
+
+  const elapsedRaw = status.elapsed;
+  if (elapsedRaw == null || elapsedRaw === '') {
+    return short === 'LIVE' ? 'LIVE' : null;
+  }
+
+  const elapsed = Number(elapsedRaw);
+  if (!Number.isFinite(elapsed)) return null;
+
+  const extraRaw = status.extra;
+  const extra =
+    extraRaw != null && extraRaw !== '' && Number.isFinite(Number(extraRaw))
+      ? Number(extraRaw)
+      : null;
+
+  if (extra != null && extra > 0) {
+    return `${elapsed}+${extra}'`;
+  }
+
+  if (short === '1H' && elapsed > 45) {
+    return `45+${elapsed - 45}'`;
+  }
+
+  if (short === '2H' && elapsed > 90) {
+    return `90+${elapsed - 90}'`;
+  }
+
+  if (short === 'ET' && elapsed > 120) {
+    return `120+${elapsed - 120}'`;
+  }
+
+  return `${elapsed}'`;
+}
+
+export const LIVE_FIXTURE_POLL_MIN_MS = 25000;
+export const LIVE_FIXTURE_POLL_MAX_MS = 35000;
+
+/**
+ * Intervalo aleatorio entre 25 y 35 s para refresco de minutos en vivo.
+ */
+export function getLiveFixturePollDelayMs(
+  minMs = LIVE_FIXTURE_POLL_MIN_MS,
+  maxMs = LIVE_FIXTURE_POLL_MAX_MS
+) {
+  return minMs + Math.floor(Math.random() * (maxMs - minMs + 1));
+}
+
+/**
+ * @param {Object|null|undefined} left
+ * @param {Object|null|undefined} right
+ */
+export function hasFixtureLiveSnapshotChanged(left, right) {
+  if (!left || !right) return left !== right;
+
+  const leftStatus = left.fixture?.status || {};
+  const rightStatus = right.fixture?.status || {};
+
+  return (
+    leftStatus.short !== rightStatus.short
+    || leftStatus.elapsed !== rightStatus.elapsed
+    || leftStatus.extra !== rightStatus.extra
+    || left.goals?.home !== right.goals?.home
+    || left.goals?.away !== right.goals?.away
+  );
+}
+
+/**
+ * Fusiona datos frescos de API-Football preservando metadata del feed local.
+ * @param {Object} existingPartido
+ * @param {Object} freshPartido
+ */
+export function mergeFixtureLiveUpdate(existingPartido, freshPartido) {
+  if (!existingPartido) return freshPartido;
+  if (!freshPartido) return existingPartido;
+
+  return {
+    ...existingPartido,
+    ...freshPartido,
+    fixture: {
+      ...existingPartido.fixture,
+      ...freshPartido.fixture,
+      status: freshPartido.fixture?.status ?? existingPartido.fixture?.status,
+    },
+    goals: freshPartido.goals ?? existingPartido.goals,
+    teams: {
+      home: { ...existingPartido.teams?.home, ...freshPartido.teams?.home },
+      away: { ...existingPartido.teams?.away, ...freshPartido.teams?.away },
+    },
+    league: { ...existingPartido.league, ...freshPartido.league },
+    domain: existingPartido.domain,
+    competitionMeta: existingPartido.competitionMeta,
+    competitionPriority: existingPartido.competitionPriority,
+  };
+}
+
+/**
+ * @param {Array} partidos
+ * @param {Map<number, Object>} liveById
+ * @param {Map<number, Object>} [finishedById]
+ */
+export function applyLiveFixtureUpdates(partidos, liveById, finishedById = new Map()) {
+  if (!Array.isArray(partidos) || partidos.length === 0) {
+    return partidos;
+  }
+
+  let changed = false;
+
+  const next = partidos.map((partido) => {
+    const fixtureId = partido?.fixture?.id;
+    if (!fixtureId) return partido;
+
+    const fresh = liveById.get(fixtureId) || finishedById.get(fixtureId);
+    if (!fresh) return partido;
+
+    const merged = mergeFixtureLiveUpdate(partido, fresh);
+    if (merged !== partido && hasFixtureLiveSnapshotChanged(partido, merged)) {
+      changed = true;
+      return merged;
+    }
+
+    return partido;
+  });
+
+  return changed ? next : partidos;
+}
+
+/**
+ * @param {Object|null|undefined} partidoOrStatus
+ */
+export function shouldPollFixtureLiveMinute(partidoOrStatus) {
+  return shouldShowFixtureLiveMinute(partidoOrStatus);
 }
 
 /**
