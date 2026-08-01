@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
+import useMediaQuery from "../hooks/useMediaQuery";
 import EstadisticasAvanzadasEquipo from "../components/EstadisticasAvanzadasEquipo";
 import { cruzarDatosEquipos } from "../utils/cruzarDatosEquipos";
 import {
@@ -9,7 +10,9 @@ import {
   getTeamStats,
   getTeamPlayersStats,
   getTeamFixtures,
-  getUpcomingFixtureWithOdds
+  getUpcomingFixtureWithOdds,
+  getFixtureStatistics,
+  getFixturePlayers,
 } from "../api/api";
 import { 
   procesarCornersDeFixtures, 
@@ -37,11 +40,15 @@ import ComparacionConTabs from "../components/Predicciones/ComparacionConTabs";
 import FichaEquipoSimplificada from "../components/Predicciones/FichaEquipoSimplificada";
 import DatosAdicionales from "../components/Predicciones/DatosAdicionales";
 import LesionadosEquipo from "../components/Predicciones/LesionadosEquipo";
+import JugadoresImportantesPartido from "../components/Predicciones/JugadoresImportantesPartido";
+import AccordionBlock from "../components/Predicciones/AccordionBlock";
+import AccordionGroup from "../components/Predicciones/AccordionGroup";
 import { enrichTeamInjuries } from "../utils/evaluateInjuryImpact";
 import { buildH2HDisplayData } from "../utils/h2hFixturesUtils";
-import PrediccionesSectionTitle from "../components/Predicciones/PrediccionesSectionTitle";
+import PrediccionesMatchHeader from "../components/Predicciones/PrediccionesMatchHeader";
 import { IconPanoramaEquipo } from "../components/Predicciones/PrediccionesIcons";
 import { PREDICCIONES_TITLES } from "../constants/prediccionesSectionTitles";
+import { buildImportantPlayersViewModel } from "../utils/prediccionesImportantPlayers";
 import { buildConclusionesComparativaEquipos } from "../utils/conclusionesCopy";
 import {
   fetchPredictionsLeagues,
@@ -101,7 +108,7 @@ async function fetchPreferredSeasonYearForLeague(leagueId) {
 
 export default function Predicciones() {
   const location = useLocation();
-  const { homeTeam, awayTeam, leagueId, season: routeSeason, fixtureId: routeFixtureId, domain: routeDomainRaw } = location.state || {};
+  const { homeTeam, awayTeam, leagueId, season: routeSeason, fixtureId: routeFixtureId, domain: routeDomainRaw, leagueName: routeLeagueName, leagueLogo: routeLeagueLogo, fromMatchesRoute } = location.state || {};
   const routePredictionDomain = normalizeRoutePredictionDomain(routeDomainRaw);
 
   // Estados para ligas (global)
@@ -146,6 +153,54 @@ export default function Predicciones() {
     () => ligas.filter((l) => l.domain === predictionDomain),
     [ligas, predictionDomain]
   );
+
+  const matchHeaderHome = useMemo(() => ({
+    id: equipoLocal?.id ?? homeTeam?.id,
+    name: equipoLocal?.nombre ?? homeTeam?.name,
+    logo: equipoLocal?.logo ?? homeTeam?.logo,
+  }), [equipoLocal, homeTeam]);
+
+  const matchHeaderAway = useMemo(() => ({
+    id: equipoVisitante?.id ?? awayTeam?.id,
+    name: equipoVisitante?.nombre ?? awayTeam?.name,
+    logo: equipoVisitante?.logo ?? awayTeam?.logo,
+  }), [equipoVisitante, awayTeam]);
+
+  const matchHeaderLeagueLabel = useMemo(() => {
+    if (routeLeagueName) {
+      return routeLeagueName;
+    }
+
+    const activeLeagueId = ligaLocal ?? (typeof leagueId === 'string' ? parseInt(leagueId, 10) : leagueId);
+    if (!activeLeagueId) {
+      return null;
+    }
+
+    const liga = ligasInDomain.find((item) => item.id === activeLeagueId);
+    return liga ? `${liga.nombre}${liga.pais ? ` (${liga.pais})` : ''}` : null;
+  }, [routeLeagueName, ligaLocal, leagueId, ligasInDomain]);
+
+  const matchHeaderLeagueLogo = routeLeagueLogo ?? null;
+
+  const showMatchHeader = Boolean(matchHeaderHome.name && matchHeaderAway.name);
+
+  const isFromMatchNavigation = useMemo(
+    () => Boolean(
+      fromMatchesRoute
+      && homeTeam?.id
+      && awayTeam?.id
+      && leagueId
+    ),
+    [fromMatchesRoute, homeTeam?.id, awayTeam?.id, leagueId]
+  );
+
+  const isMobileCompactLayout = useMediaQuery("(max-width: 480px)");
+  const collapseMobileFilters = isFromMatchNavigation && isMobileCompactLayout;
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileFiltersOpen(false);
+  }, [homeTeam?.id, awayTeam?.id, leagueId, fromMatchesRoute]);
 
   // Cargar ligas desde /api/predicciones/ligas (catálogo + API).
   useEffect(() => {
@@ -502,6 +557,33 @@ export default function Predicciones() {
             { cardsFor: tarjetasDataB.cardsFor, cardsAgainst: tarjetasDataB.cardsAgainst }
           );
 
+          let fixturePlayerStats = null;
+          let fixtureTeamStatistics = null;
+
+          if (upcomingFixtureId) {
+            [fixtureTeamStatistics, fixturePlayerStats] = await Promise.all([
+              getFixtureStatistics(upcomingFixtureId).catch((err) => {
+                console.warn('⚠️ Error obteniendo estadísticas del fixture:', err);
+                return null;
+              }),
+              getFixturePlayers(upcomingFixtureId).catch((err) => {
+                console.warn('⚠️ Error obteniendo jugadores del fixture:', err);
+                return null;
+              }),
+            ]);
+          }
+
+          const jugadoresImportantes = buildImportantPlayersViewModel({
+            fixturePlayersResponse: fixturePlayerStats,
+            seasonPlayersResponseA: playersStatsA,
+            seasonPlayersResponseB: playersStatsB,
+            fixtureStatisticsResponse: fixtureTeamStatistics,
+            teamAId: equipoA.id,
+            teamBId: equipoB.id,
+            teamAName: equipoA.nombre,
+            teamBName: equipoB.nombre,
+          });
+
           // Procesar y estructurar los datos adicionales
           const datosAdicionalesEstructurados = {
             // 1. H2H (últimos 4 enfrentamientos más recientes)
@@ -614,7 +696,10 @@ export default function Predicciones() {
             },
 
             // 8. Fixture próximo y odds (probabilidades del mercado)
-            fixtureConOdds: fixtureConOdds
+            fixtureConOdds: fixtureConOdds,
+
+            // 9. Jugadores importantes del partido
+            jugadoresImportantes,
           };
 
           // Guardar los datos adicionales en el estado
@@ -641,7 +726,7 @@ export default function Predicciones() {
     <div className="predicciones-container">
       <div className="predicciones-header">
         <GoalLogicTitle as="h1" size="lg" className="predicciones-title" />
-        <p className="predicciones-subtitle">
+        <p className={`predicciones-subtitle${collapseMobileFilters ? " predicciones-subtitle--from-match-mobile" : ""}`}>
           Selecciona dos equipos para generar predicciones basadas en datos estadísticos.
         </p>
       </div>
@@ -672,7 +757,36 @@ export default function Predicciones() {
         </p>
       )}
 
-      <div className="predicciones-filtros">
+      {showMatchHeader && (
+        <PrediccionesMatchHeader
+          homeTeam={matchHeaderHome}
+          awayTeam={matchHeaderAway}
+          leagueLabel={matchHeaderLeagueLabel}
+          leagueLogo={matchHeaderLeagueLogo}
+        />
+      )}
+
+      {collapseMobileFilters && (
+        <button
+          type="button"
+          className="predicciones-toggle-filtros"
+          aria-expanded={mobileFiltersOpen}
+          aria-controls="predicciones-filtros-panel"
+          onClick={() => setMobileFiltersOpen((open) => !open)}
+        >
+          {mobileFiltersOpen ? "Ocultar ajustes de equipos" : "Ajustar equipos"}
+        </button>
+      )}
+
+      <div
+        id="predicciones-filtros-panel"
+        className={[
+          "predicciones-filtros-panel",
+          collapseMobileFilters ? "predicciones-filtros-panel--from-match" : "",
+          collapseMobileFilters && mobileFiltersOpen ? "is-open" : "",
+        ].filter(Boolean).join(" ")}
+      >
+      <div className={`predicciones-filtros${collapseMobileFilters ? " predicciones-filtros--compact" : ""}`}>
         {/* Equipo Local */}
         <div className="filtros-equipo">
           <h3 className="filtros-titulo">Equipo Local</h3>
@@ -769,7 +883,7 @@ export default function Predicciones() {
       </div>
 
       {/* Botón Analizar (mantener para compatibilidad con código anterior) */}
-      <div className="predicciones-acciones" style={{ marginTop: "30px" }}>
+      <div className={`predicciones-acciones${collapseMobileFilters ? " predicciones-acciones--compact" : ""}`}>
         <button
           type="button"
           className="btn-analizar"
@@ -778,11 +892,12 @@ export default function Predicciones() {
         >
           {loading ? "Analizando..." : "Analizar Comparación"}
         </button>
-        {(!equipoA || !equipoB) && !loading && (
+        {(!equipoA || !equipoB) && !loading && !collapseMobileFilters && (
           <p className="btn-analizar-hint">
             Selecciona ambos equipos para habilitar el análisis comparativo.
           </p>
         )}
+      </div>
       </div>
 
       {/* Mensajes de error */}
@@ -823,48 +938,57 @@ export default function Predicciones() {
             />
           )}
 
-          {datosAdicionales?.lesiones && (
-            <LesionadosEquipo
-              lesiones={datosAdicionales.lesiones}
-              nombreEquipoA={resultados.equipoA?.nombre}
-              nombreEquipoB={resultados.equipoB?.nombre}
-            />
-          )}
-
-          {/* Fichas de equipos simplificadas */}
-          <PrediccionesSectionTitle
-            as="h3"
-            size="lg"
-            icon={IconPanoramaEquipo}
-            className="predicciones-fichas-heading"
-            style={{ marginTop: tokens.spacing['2xl'] }}
-          >
-            {PREDICCIONES_TITLES.panoramaEquipo}
-          </PrediccionesSectionTitle>
-          <div className="fichas-equipos">
-            <div className="ficha-wrapper">
-              <FichaEquipoSimplificada 
-                equipo={resultados.equipoA} 
-                tipo="A" 
+          <AccordionGroup singleOpen={isMobileCompactLayout}>
+            {datosAdicionales?.lesiones && (
+              <LesionadosEquipo
+                lesiones={datosAdicionales.lesiones}
+                nombreEquipoA={resultados.equipoA?.nombre}
+                nombreEquipoB={resultados.equipoB?.nombre}
               />
-            </div>
-            
-            <div className="ficha-wrapper">
-              <FichaEquipoSimplificada 
-                equipo={resultados.equipoB} 
-                tipo="B" 
-              />
-            </div>
-          </div>
+            )}
 
-          {/* Datos Adicionales Colapsables */}
-          {datosAdicionales && (
-            <DatosAdicionales 
-              datosAdicionales={datosAdicionales}
-              nombreEquipoA={resultados.equipoA?.nombre}
-              nombreEquipoB={resultados.equipoB?.nombre}
-            />
-          )}
+            {datosAdicionales?.jugadoresImportantes && (
+              <JugadoresImportantesPartido
+                data={datosAdicionales.jugadoresImportantes}
+                nombreEquipoA={resultados.equipoA?.nombre}
+                nombreEquipoB={resultados.equipoB?.nombre}
+              />
+            )}
+
+            {/* Fichas de equipos simplificadas */}
+            <AccordionBlock
+              className="predicciones-accordion-block--spaced-lg predicciones-fichas-accordion"
+              title={PREDICCIONES_TITLES.panoramaEquipo}
+              icon={<IconPanoramaEquipo size={18} />}
+              defaultOpenDesktop
+              defaultOpenMobile={false}
+            >
+              <div className="fichas-equipos">
+                <div className="ficha-wrapper">
+                  <FichaEquipoSimplificada
+                    equipo={resultados.equipoA}
+                    tipo="A"
+                  />
+                </div>
+
+                <div className="ficha-wrapper">
+                  <FichaEquipoSimplificada
+                    equipo={resultados.equipoB}
+                    tipo="B"
+                  />
+                </div>
+              </div>
+            </AccordionBlock>
+
+            {/* Datos Adicionales Colapsables */}
+            {datosAdicionales && (
+              <DatosAdicionales
+                datosAdicionales={datosAdicionales}
+                nombreEquipoA={resultados.equipoA?.nombre}
+                nombreEquipoB={resultados.equipoB?.nombre}
+              />
+            )}
+          </AccordionGroup>
         </div>
       )}
 

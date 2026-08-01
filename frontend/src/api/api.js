@@ -567,6 +567,21 @@ export async function getFixtureStatistics(fixtureId) {
   }
 }
 
+// Obtener estadísticas de jugadores de un partido
+export async function getFixturePlayers(fixtureId) {
+  try {
+    const res = await authFetch(`/api/fixtures/${fixtureId}/players`);
+    if (!res.ok) {
+      throw new Error(`Error ${res.status}: ${res.statusText}`);
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('❌ Error obteniendo jugadores del partido:', error);
+    throw error;
+  }
+}
+
 // Obtener H2H (Head to Head) entre dos equipos
 export async function getH2H(team1Id, team2Id) {
   try {

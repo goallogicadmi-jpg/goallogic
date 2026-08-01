@@ -18,5 +18,6 @@ export const PREDICCIONES_TITLES = {
   estadoPlantel: 'Estado del Plantel',
   lesionadosEquipo: 'Lesionados del Equipo',
   referentesOfensivos: 'Goleadores Por Equipo',
+  jugadoresImportantesPartido: 'Jugadores importantes del partido',
   datosComplementarios: 'Datos Complementarios',
 };

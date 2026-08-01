@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { tokens } from '../../styles/tokens';
 import { PREDICCIONES_TITLES } from '../../constants/prediccionesSectionTitles';
-import PrediccionesSectionTitle from './PrediccionesSectionTitle';
+import AccordionBlock from './AccordionBlock';
 import { IconEstadoPlantel } from './PrediccionesIcons';
 import {
   IMPACTO_NIVEL,
@@ -243,14 +243,6 @@ function TeamInjuryColumn({ nombreEquipo, datos }) {
 export default function LesionadosEquipo({ lesiones, nombreEquipoA, nombreEquipoB }) {
   if (!lesiones) return null;
 
-  const containerStyle = {
-    backgroundColor: tokens.colors.bgCard,
-    border: `1px solid ${tokens.colors.borderDefault}`,
-    borderRadius: tokens.radius.xl,
-    padding: tokens.spacing.lg,
-    marginTop: tokens.spacing.xl,
-  };
-
   const gridStyle = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -258,32 +250,30 @@ export default function LesionadosEquipo({ lesiones, nombreEquipoA, nombreEquipo
     marginTop: tokens.spacing.md,
   };
 
+  const descriptionStyle = {
+    margin: `0 0 ${tokens.spacing.md}`,
+    fontSize: tokens.typography.fontSizeSm,
+    color: tokens.colors.textSecondary,
+    lineHeight: tokens.typography.lineHeightRelaxed,
+  };
+
   return (
-    <section style={containerStyle} aria-labelledby="predicciones-lesionados-heading">
-      <PrediccionesSectionTitle
-        as="h3"
-        size="lg"
-        icon={IconEstadoPlantel}
-        style={{ marginBottom: tokens.spacing.sm }}
-      >
-        {PREDICCIONES_TITLES.lesionadosEquipo}
-      </PrediccionesSectionTitle>
-      <p
-        style={{
-          margin: `0 0 ${tokens.spacing.md}`,
-          fontSize: tokens.typography.fontSizeSm,
-          color: tokens.colors.textSecondary,
-          lineHeight: tokens.typography.lineHeightRelaxed,
-        }}
-      >
+    <AccordionBlock
+      className="predicciones-accordion-block--spaced-lg"
+      title={PREDICCIONES_TITLES.lesionadosEquipo}
+      icon={<IconEstadoPlantel size={18} />}
+      defaultOpenDesktop
+      defaultOpenMobile={false}
+    >
+      <p style={descriptionStyle}>
         Máximo {MAX_LESIONES_VISIBLES} bajas por equipo, priorizadas por impacto del motor (alto, moderado, bajo).
         GoalLogic ajusta las probabilidades según el impacto agregado de toda la lista.
       </p>
-      <div style={gridStyle}>
+      <div style={gridStyle} className="predicciones-lesionados-grid">
         <TeamInjuryColumn nombreEquipo={nombreEquipoA || 'Equipo A'} datos={lesiones.equipoA} />
         <TeamInjuryColumn nombreEquipo={nombreEquipoB || 'Equipo B'} datos={lesiones.equipoB} />
       </div>
-    </section>
+    </AccordionBlock>
   );
 }
 

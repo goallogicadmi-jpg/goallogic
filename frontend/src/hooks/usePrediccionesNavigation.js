@@ -35,6 +35,8 @@ export function usePrediccionesNavigation(defaultDomain = 'club', defaultLeagueI
           season,
           fixtureId: partido.fixture?.id ?? null,
           fromMatchesRoute: window.location.pathname,
+          leagueName: partido.league?.name ?? null,
+          leagueLogo: partido.league?.logo ?? null,
           homeTeam: {
             id: homeTeam.id,
             name: homeTeam.name,

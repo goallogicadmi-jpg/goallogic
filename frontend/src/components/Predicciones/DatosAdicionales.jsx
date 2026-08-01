@@ -1,5 +1,5 @@
 import React from 'react';
-import SeccionColapsable from './SeccionColapsable';
+import AccordionBlock from './AccordionBlock';
 import { tokens } from '../../styles/tokens';
 import { PREDICCIONES_TITLES } from '../../constants/prediccionesSectionTitles';
 import PrediccionesSectionTitle from './PrediccionesSectionTitle';
@@ -56,19 +56,19 @@ export default function DatosAdicionales({ datosAdicionales, nombreEquipoA, nomb
       </PrediccionesSectionTitle>
 
       {datosAdicionales.h2h && datosAdicionales.h2h.totalPartidos > 0 && (
-        <SeccionColapsable
-          titulo={PREDICCIONES_TITLES.historialDirecto}
-          icono={<IconHistorialDirecto size={18} />}
+        <AccordionBlock
+          title={PREDICCIONES_TITLES.historialDirecto}
+          icon={<IconHistorialDirecto size={18} />}
         >
           <HistorialH2H h2h={datosAdicionales.h2h} />
-        </SeccionColapsable>
+        </AccordionBlock>
       )}
 
       {datosAdicionales.goleadores &&
         (datosAdicionales.goleadores.equipoA.total > 0 || datosAdicionales.goleadores.equipoB.total > 0) && (
-          <SeccionColapsable
-            titulo={PREDICCIONES_TITLES.referentesOfensivos}
-            icono={<IconReferentesOfensivos size={18} />}
+          <AccordionBlock
+            title={PREDICCIONES_TITLES.referentesOfensivos}
+            icon={<IconReferentesOfensivos size={18} />}
           >
             <div style={gridStyle}>
               <div style={cardStyle}>
@@ -116,7 +116,7 @@ export default function DatosAdicionales({ datosAdicionales, nombreEquipoA, nomb
                 </ul>
               </div>
             </div>
-          </SeccionColapsable>
+          </AccordionBlock>
         )}
     </div>
   );

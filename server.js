@@ -928,6 +928,39 @@ app.get('/api/fixtures/:fixtureId/statistics', async (req, res) => {
 });
 
 // ======================================================
+// 📌 Estadísticas de jugadores de un partido (fixture)
+// ======================================================
+app.get('/api/fixtures/:fixtureId/players', async (req, res) => {
+    try {
+        const { fixtureId } = req.params;
+
+        if (!fixtureId) {
+            return res.status(400).json({ error: 'Falta parámetro: fixtureId' });
+        }
+
+        if (!process.env.API_KEY) {
+            return res.status(500).json({
+                error: 'servicio_datos_no_configurado',
+                message: 'Servicio de datos no disponible en este momento.',
+            });
+        }
+
+        const response = await axios.get(
+            `https://v3.football.api-sports.io/fixtures/players?fixture=${fixtureId}`,
+            { headers: apiHeaders }
+        );
+
+        res.json(response.data);
+    } catch (error) {
+        logUpstream('fixtures_players', error);
+        const status = error.response?.status;
+        res.status(status && status >= 400 && status < 600 ? status : 500).json({
+            error: GENERIC_API_ERROR,
+        });
+    }
+});
+
+// ======================================================
 // 📌 Obtener fixture próximo y odds entre dos equipos
 // ======================================================
 app.get('/api/fixtures/upcoming', async (req, res) => {
