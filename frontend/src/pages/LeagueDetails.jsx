@@ -37,7 +37,6 @@ import axios from "axios";
 export default function LeagueDetails({ domain }) {
 
   const navigate = useNavigate();
-
   const { leagueId } = useParams();
 
   const [seasons, setSeasons] = useState([]);

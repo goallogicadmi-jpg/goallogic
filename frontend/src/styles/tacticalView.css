@@ -161,6 +161,11 @@
 
 .tactical-pitch__node-photo {
   clip-path: circle(50%);
+  pointer-events: none;
+}
+
+.tactical-pitch__node-photo[visibility="hidden"] {
+  display: none;
 }
 
 .tactical-pitch__node-initial {

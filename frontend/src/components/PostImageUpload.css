@@ -1,0 +1,63 @@
+.post-image-upload {
+  display: grid;
+  gap: 10px;
+}
+
+.post-image-upload__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.post-image-upload__preview-wrap {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 102, 255, 0.15);
+  background: #f5f7fb;
+}
+
+.post-image-upload__preview {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+}
+
+.post-image-upload__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.post-image-upload__input {
+  display: none;
+}
+
+.post-image-upload__hint {
+  flex: 1 1 100%;
+  color: #666;
+  font-size: 0.78rem;
+}
+
+.post-image-upload__error {
+  margin: 0;
+  color: #b00020;
+  font-size: 0.85rem;
+}
+
+.analyst-premium-post__image-wrap,
+.post-detail-image-wrap {
+  margin: 12px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 102, 255, 0.12);
+}
+
+.analyst-premium-post__image,
+.post-detail-image {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+}

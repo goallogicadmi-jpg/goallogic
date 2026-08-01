@@ -1,5 +1,6 @@
 import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { PlanAccessProvider } from "../context/PlanAccessContext";
 import Layout from "../layout/Layout";
 import Leagues from "../pages/Leagues";
 import CompetitionDomainPage from "../pages/CompetitionDomainPage";
@@ -25,6 +26,7 @@ const Predicciones = lazy(() => import("../pages/Predicciones"));
 const Partidos = lazy(() => import("../pages/Partidos"));
 const AdminPanel = lazy(() => import("../components/AdminPanel/AdminPanel"));
 const CommunityLayout = lazy(() => import("../pages/community/CommunityLayout"));
+const AnalystProfilePage = lazy(() => import("../pages/AnalystProfilePage"));
 
 const routeFallback = (
   <div
@@ -57,6 +59,7 @@ const routeFallback = (
 export default function AppRouter() {
   return (
     <BrowserRouter>
+      <PlanAccessProvider>
       <Suspense fallback={routeFallback}>
         <Routes>
           <Route element={<Layout />}>
@@ -107,9 +110,18 @@ export default function AppRouter() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/analista/:analystId"
+              element={
+                <ProtectedRoute>
+                  <AnalystProfilePage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
         </Routes>
       </Suspense>
+      </PlanAccessProvider>
     </BrowserRouter>
   );
 }

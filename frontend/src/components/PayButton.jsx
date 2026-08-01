@@ -2,13 +2,18 @@ import { useState } from "react";
 import { getAuthHeaders, authFetch } from "../setupApiAuth.js";
 
 /** Debe coincidir con el precio activo en Stripe (Dashboard → producto → Precios). Sin valor, el checkout no arranca. */
-const checkoutPriceId = import.meta.env.VITE_STRIPE_PRICE_ID?.trim() || "";
+const defaultCheckoutPriceId = import.meta.env.VITE_STRIPE_PRICE_ID?.trim() || "";
 
 /**
  * Checkout Stripe por URL (sesión creada en el servidor).
  * Requiere JWT: el servidor usa req.user.id, no acepta userId en el body.
  */
-export default function PayButton({ buttonText = "Comprar Premium", showCouponField = true }) {
+export default function PayButton({
+  buttonText = "Comprar Premium",
+  showCouponField = true,
+  priceId,
+}) {
+  const checkoutPriceId = priceId?.trim() || defaultCheckoutPriceId;
   const [busy, setBusy] = useState(false);
   const [localError, setLocalError] = useState("");
   const [couponCode, setCouponCode] = useState("");

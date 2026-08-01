@@ -8,6 +8,35 @@
   letter-spacing: 0.06em;
   line-height: 1.15;
   width: 100%;
+  translate: no;
+}
+
+.goal-logic-title__goal,
+.goal-logic-title__logic {
+  translate: no;
+}
+
+.brand-responsive__desktop {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .goal-logic-title {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    gap: 0;
+  }
+
+  .brand-responsive__mobile {
+    display: none;
+  }
+
+  .brand-responsive__desktop {
+    display: inline;
+  }
 }
 
 .goal-logic-title__goal {

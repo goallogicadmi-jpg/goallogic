@@ -1,0 +1,92 @@
+.premium-upgrade-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(8, 12, 20, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.premium-upgrade-modal__dialog {
+  width: min(100%, 420px);
+  padding: 24px 22px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, #1a2233 0%, #141824 100%);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+}
+
+.premium-upgrade-modal__title {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.premium-upgrade-modal__text {
+  margin: 0 0 20px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
+.premium-upgrade-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.premium-upgrade-modal__btn {
+  flex: 1 1 140px;
+  min-height: 42px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.premium-upgrade-modal__btn--primary {
+  background: #f97316;
+  color: #fff;
+}
+
+.premium-upgrade-modal__btn--primary:hover {
+  background: #ea580c;
+}
+
+.premium-upgrade-modal__btn--secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.premium-upgrade-modal__btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.premium-upgrade-modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .premium-upgrade-modal__dialog {
+    padding: 20px 16px;
+  }
+
+  .premium-upgrade-modal__title {
+    font-size: 1.1rem;
+  }
+
+  .premium-upgrade-modal__actions {
+    flex-direction: column;
+  }
+
+  .premium-upgrade-modal__btn {
+    width: 100%;
+  }
+}

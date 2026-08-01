@@ -17,6 +17,10 @@ const {
   getSettingBoolean,
   getSettingNumber,
 } = require('../utils/systemSettingsService');
+const { getAnalystBetStats, isSportsAnalyst } = require('../utils/analystStats');
+const AnalystSubscription = require('../models/AnalystSubscription');
+const { isRequesterAnalyst, forbidAnalystPrivateData } = require('../utils/analystPrivacy');
+const { isCloudinaryAssetUrl } = require('../utils/cloudinaryAvatar');
 
 const { communityPostLimiter } = require('../middleware/routeRateLimits');
 
@@ -24,6 +28,19 @@ async function loadParticipationUser(userId) {
   return User.findById(userId).select(
     'communityBlocked communityMutedUntil role isMainAdmin nombre email'
   );
+}
+
+function stripPrivateUserFieldsFromPosts(posts, req) {
+  if (!isRequesterAnalyst(req)) return posts;
+  return posts.map((post) => {
+    const plain = post.toObject ? post.toObject() : { ...post };
+    if (plain.user && typeof plain.user === 'object') {
+      delete plain.user.email;
+      delete plain.user.telefono;
+      delete plain.user.direccion;
+    }
+    return plain;
+  });
 }
 
 // Crear post
@@ -35,12 +52,24 @@ router.post('/posts', communityPostLimiter, auth, async (req, res) => {
       return res.status(403).json({ message: restriction.reason });
     }
 
+    if (author?.role === 'analista') {
+      const analystProfile = await User.findById(req.user.id)
+        .select('analystPostsBlocked analystStatus')
+        .lean();
+      if (analystProfile?.analystPostsBlocked || analystProfile?.analystStatus === 'suspended') {
+        return res.status(403).json({
+          message: 'Tus publicaciones están bloqueadas. Contacta con administración.',
+        });
+      }
+    }
+
     const {
       publicationType,
       matchInfo,
       statsUsed,
       probability,
       text,
+      imagen_url: rawImagenUrl,
     } = req.body;
 
     if (!publicationType) {
@@ -67,6 +96,17 @@ router.post('/posts', communityPostLimiter, auth, async (req, res) => {
       }
     }
 
+    let imagen_url = '';
+    if (rawImagenUrl && String(rawImagenUrl).trim()) {
+      if (author?.role !== 'analista') {
+        return res.status(403).json({ message: 'Solo los analistas pueden adjuntar imágenes a publicaciones' });
+      }
+      imagen_url = String(rawImagenUrl).trim();
+      if (!isCloudinaryAssetUrl(imagen_url)) {
+        return res.status(400).json({ message: 'La URL de imagen no es válida' });
+      }
+    }
+
     const post = await CommunityPost.create({
       user: req.user.id,
       publicationType,
@@ -80,6 +120,7 @@ router.post('/posts', communityPostLimiter, auth, async (req, res) => {
       statsUsed: isComment ? [] : (statsUsed || []),
       probability: isComment ? '' : (probability?.trim() || ''),
       text: text.trim(),
+      imagen_url: imagen_url || undefined,
     });
 
     res.status(201).json(post);
@@ -88,6 +129,61 @@ router.post('/posts', communityPostLimiter, auth, async (req, res) => {
     res.status(500).json({ message: 'Error al crear el análisis' });
   }
 });
+
+async function enrichPostsWithAnalystData(posts, viewerUserId) {
+  const analystIds = [
+    ...new Set(
+      posts
+        .filter((p) => p.user && isSportsAnalyst(p.user))
+        .map((p) => String(p.user._id || p.user))
+    ),
+  ];
+
+  if (!analystIds.length) return posts;
+
+  const statsMap = new Map();
+  await Promise.all(
+    analystIds.map(async (id) => {
+      const stats = await getAnalystBetStats(id);
+      statsMap.set(id, stats);
+    })
+  );
+
+  let subscribedSet = new Set();
+  if (viewerUserId) {
+    const subs = await AnalystSubscription.find({
+      subscriberId: viewerUserId,
+      analystId: { $in: analystIds },
+      status: { $in: ['active', 'trialing', 'past_due'] },
+    })
+      .select('analystId')
+      .lean();
+    subscribedSet = new Set(subs.map((s) => String(s.analystId)));
+  }
+
+  return posts.map((post) => {
+    const author = post.user;
+    if (!author || !isSportsAnalyst(author)) return post;
+    const authorId = String(author._id || author);
+    const stats = statsMap.get(authorId);
+    const plain = post.toObject ? post.toObject() : { ...post };
+    if (plain.user && typeof plain.user === 'object') {
+      plain.user.hasStripePrice = Boolean(plain.user.analystStripePriceId);
+    }
+    plain.isAnalystPremiumPost = true;
+    plain.analystStats = stats
+      ? {
+          currentStreak: stats.currentStreak,
+          winRate: stats.winRate,
+          roi: stats.roi,
+          historySummary: stats.historySummary,
+        }
+      : null;
+    plain.viewerSubscribedToAnalyst =
+      subscribedSet.has(authorId) || (viewerUserId && String(viewerUserId) === authorId);
+    return plain;
+  });
+}
 
 // Listar posts (JWT sin exigir premium: usuarios en proceso de pago pueden ver el feed)
 router.get('/posts', authJwt, async (req, res) => {
@@ -101,17 +197,18 @@ router.get('/posts', authJwt, async (req, res) => {
     if (analyst) filter.user = analyst;
 
     let query = CommunityPost.find(filter)
-      .populate('user', 'nombre email')
+      .populate('user', 'nombre publicId role pais foto_perfil_url analystVerifiedAt analystStripePriceId analystSubscriptionPriceCents')
       .sort({ createdAt: -1 });
 
     if (sort === 'top') {
       query = query.sort({ 'reactionsCount.useful': -1, 'reactionsCount.like': -1 });
     }
 
-    // Permitir limit personalizado (por defecto 50)
     const limitValue = limit ? parseInt(limit, 10) : 50;
     const posts = await query.limit(limitValue);
-    res.json(posts);
+    let enriched = await enrichPostsWithAnalystData(posts, req.user?.id);
+    enriched = stripPrivateUserFieldsFromPosts(enriched, req);
+    res.json(enriched);
   } catch (err) {
     console.error('Error obteniendo posts:', err);
     res.status(500).json({ message: 'Error al obtener el feed' });
@@ -124,14 +221,23 @@ router.get('/posts/:id', authJwt, async (req, res) => {
     const post = await CommunityPost.findOne({
       _id: req.params.id,
       ...notDeletedFilter(),
-    }).populate('user', 'nombre email');
+    }).populate('user', 'nombre publicId role pais foto_perfil_url');
     if (!post) return res.status(404).json({ message: 'No encontrado' });
 
     const comments = await PostComment.find({ post: post._id, ...notDeletedFilter() })
-      .populate('user', 'nombre')
+      .populate('user', 'nombre publicId foto_perfil_url')
       .sort({ createdAt: 1 });
 
-    res.json({ post, comments });
+    let payload = { post, comments };
+    if (isRequesterAnalyst(req)) {
+      if (post.user && typeof post.user === 'object') delete post.user.email;
+      payload = {
+        post: stripPrivateUserFieldsFromPosts([post], req)[0],
+        comments,
+      };
+    }
+
+    res.json(payload);
   } catch (err) {
     console.error('Error obteniendo post:', err);
     res.status(500).json({ message: 'Error al obtener el post' });
@@ -171,7 +277,7 @@ router.post('/posts/:id/comments', auth, async (req, res) => {
     await post.save();
 
     const populatedComment = await PostComment.findById(comment._id)
-      .populate('user', 'nombre');
+      .populate('user', 'nombre foto_perfil_url');
 
     res.status(201).json(populatedComment);
   } catch (err) {
@@ -443,6 +549,14 @@ router.get('/user-stats', authJwt, async (req, res) => {
   try {
     const { userId } = req.query;
     const targetUserId = userId || req.user.id;
+
+    if (
+      isRequesterAnalyst(req) &&
+      userId &&
+      String(userId) !== String(req.user.id)
+    ) {
+      return forbidAnalystPrivateData(req, res);
+    }
 
     // Verificar cache
     const cacheKey = `user_stats_${targetUserId}`;

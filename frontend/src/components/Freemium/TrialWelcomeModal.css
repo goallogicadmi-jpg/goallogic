@@ -1,0 +1,323 @@
+/* GOAL_LOGIC welcome popup — brand colors:
+   #0066FF, #003B99, #111111, #444444, #F5F7FA, #FFFFFF */
+
+.trial-welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10040;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(0, 59, 153, 0.28);
+  animation: trial-welcome-overlay-in 0.28s ease-out;
+}
+
+.trial-welcome-modal {
+  width: 520px;
+  max-width: 100%;
+  padding: 32px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow:
+    0 24px 64px rgba(0, 59, 153, 0.14),
+    0 8px 24px rgba(0, 0, 0, 0.08);
+  text-align: left;
+  color: #111111;
+  animation: trial-welcome-modal-in-desktop 0.32s ease-out;
+}
+
+.trial-welcome-modal__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f5f7fa;
+}
+
+.trial-welcome-modal__brand-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #0066ff;
+}
+
+.trial-welcome-modal__brand-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.trial-welcome-modal__brand-logo {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #0066ff;
+}
+
+.trial-welcome-modal__title {
+  margin: 0 0 10px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111111;
+  line-height: 1.25;
+}
+
+.trial-welcome-modal__subtitle {
+  margin: 0 0 22px;
+  line-height: 1.5;
+  color: #444444;
+  font-size: 16px;
+}
+
+.trial-welcome-modal__list {
+  margin: 0 0 28px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trial-welcome-modal__list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+  color: #444444;
+  font-size: 16px;
+}
+
+.trial-welcome-modal__list-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #0066ff;
+}
+
+.trial-welcome-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trial-welcome-modal__btn {
+  width: 100%;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: opacity 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+.trial-welcome-modal__btn--primary {
+  height: 48px;
+  border: none;
+  background: #0066ff;
+  color: #ffffff;
+}
+
+.trial-welcome-modal__btn--primary:hover:not(:disabled) {
+  background: #003b99;
+}
+
+.trial-welcome-modal__btn--secondary {
+  height: auto;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  color: #0066ff;
+  font-weight: 500;
+}
+
+.trial-welcome-modal__btn--secondary:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.trial-welcome-modal__btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@keyframes trial-welcome-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes trial-welcome-modal-in-desktop {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .trial-welcome-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .trial-welcome-modal {
+    width: 92%;
+    margin: 0 auto 4vh;
+    padding: 24px;
+    border-radius: 14px;
+    animation: trial-welcome-modal-in-mobile 0.34s ease-out;
+  }
+
+  .trial-welcome-modal__brand {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .trial-welcome-modal__brand-logo {
+    font-size: 17px;
+  }
+
+  .trial-welcome-modal__title {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .trial-welcome-modal__subtitle {
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .trial-welcome-modal__list {
+    margin-bottom: 24px;
+    gap: 10px;
+  }
+
+  .trial-welcome-modal__list li {
+    font-size: 14px;
+  }
+
+  .trial-welcome-modal__list-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .trial-welcome-modal__btn--primary {
+    height: 44px;
+  }
+
+  .trial-welcome-modal__btn--secondary {
+    font-size: 14px;
+  }
+}
+
+@keyframes trial-welcome-modal-in-mobile {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* —— Trial expired modal (unchanged dark theme) —— */
+
+.trial-expired-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10040;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(8, 15, 30, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.trial-expired-modal {
+  width: min(100%, 440px);
+  padding: 2rem 1.75rem;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #0f2744 0%, #132f52 100%);
+  border: 1px solid rgba(79, 195, 247, 0.35);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  color: #e3f2fd;
+}
+
+.trial-expired-modal__icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.trial-expired-modal__title {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.trial-expired-modal__text {
+  margin: 0 0 1.5rem;
+  line-height: 1.55;
+  color: #b0bec5;
+  font-size: 0.98rem;
+}
+
+.trial-expired-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.trial-expired-modal__btn-primary {
+  padding: 0.85rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ffb300, #f57c00);
+  color: #111;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.trial-expired-modal__btn-secondary {
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(176, 190, 197, 0.45);
+  border-radius: 10px;
+  background: transparent;
+  color: #e3f2fd;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.trial-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(41, 182, 246, 0.18);
+  border: 1px solid rgba(41, 182, 246, 0.45);
+  color: #81d4fa;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .trial-badge {
+    display: none;
+  }
+}

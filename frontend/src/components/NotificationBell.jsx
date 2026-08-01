@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getUnreadCount, getInbox } from '../services/messageService';
 import { useUser } from '../context/UserContext';
+import { usePlanAccess } from '../context/PlanAccessContext';
+import { FEATURES } from '../utils/planAccess';
 import './NotificationBell.css';
 
 /**
@@ -9,6 +11,7 @@ import './NotificationBell.css';
  */
 const NotificationBell = () => {
   const { isAuthenticated } = useUser();
+  const { canAccessFeature, openUpgradeModal } = usePlanAccess();
   const [unreadCount, setUnreadCount] = useState(0);
   const [recentMessages, setRecentMessages] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -26,6 +29,18 @@ const NotificationBell = () => {
       setUnreadCount(0);
       setRecentMessages([]);
     }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    const openInbox = () => {
+      if (!isAuthenticated) return;
+      loadUnreadCount();
+      loadRecentMessages();
+      setShowDropdown(true);
+    };
+
+    window.addEventListener('goal-logic:open-inbox', openInbox);
+    return () => window.removeEventListener('goal-logic:open-inbox', openInbox);
   }, [isAuthenticated]);
 
   // Cerrar dropdown al hacer clic fuera
@@ -78,6 +93,10 @@ const NotificationBell = () => {
 
   // Función para abrir/cerrar dropdown
   const toggleDropdown = () => {
+    if (!canAccessFeature(FEATURES.ALERTS_NOTIFICATIONS)) {
+      openUpgradeModal();
+      return;
+    }
     if (!showDropdown && isAuthenticated) {
       loadRecentMessages();
     }

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { getLeagueTopAssists, getLeagueTopScorers } from '../../api/api';
 import { tokens } from '../../styles/tokens';
+import { FEATURES } from '../../utils/planAccess';
+import { usePlanAccess } from '../../context/PlanAccessContext';
 import {
   clearTopAssistsApiCache,
   clearTopScorersApiCache,
@@ -127,12 +129,14 @@ export default function CompetitionTopScorersSection({
   competitionInfo,
   onTeamNavigate,
 }) {
+  const { requestFeature } = usePlanAccess();
   const [view, setView] = useState('goles');
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
   const [selectedPlayerName, setSelectedPlayerName] = useState(null);
 
   const openPlayerPanel = (player) => {
     if (!player?.playerId) return;
+    if (!requestFeature(FEATURES.ADVANCED_STATS)) return;
     setSelectedPlayerId(player.playerId);
     setSelectedPlayerName(player.playerName ?? null);
   };

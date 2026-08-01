@@ -35,7 +35,14 @@ export function ProtectedRoute({ children }) {
   const adminBypass = isAdmin || isMainAdmin;
   const isFamilyAccount =
     user.billingLocked === true || user.tipo === 'familia' || user.plan === 'free-family';
-  const needsPremium = user.premium !== true && !adminBypass && !isFamilyAccount;
+  const hasProAccess =
+    user.hasProAccess === true ||
+    user.premium === true ||
+    user.trialActive === true ||
+    adminBypass ||
+    isFamilyAccount;
+  const isFreePlan = user.plan === 'free';
+  const needsPremium = !hasProAccess && !isFreePlan && !adminBypass;
 
   if (needsPremium) {
     return (

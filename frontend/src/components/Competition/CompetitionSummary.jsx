@@ -22,6 +22,7 @@ import {
 import { getLatestChampion } from '../../utils/competitionHistory';
 import { COMPETITION_TAB_IDS } from './competitionTabIds';
 import CompetitionLinkButton from './CompetitionLinkButton';
+import useCompetitionPremiumNav from '../../hooks/useCompetitionPremiumNav';
 import '../../styles/partidos.css';
 import '../../styles/standings.css';
 
@@ -133,6 +134,7 @@ export default function CompetitionSummary({
   onGoToAllMatches,
   onNavigateToTab,
 }) {
+  const { openTab } = useCompetitionPremiumNav(onNavigateToTab);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [proximoPartido, setProximoPartido] = useState(null);
@@ -244,7 +246,7 @@ export default function CompetitionSummary({
               />
               <CompetitionLinkButton
                 icon="chart"
-                onClick={() => onNavigateToTab?.(COMPETITION_TAB_IDS.ESTADISTICAS)}
+                onClick={() => openTab(COMPETITION_TAB_IDS.ESTADISTICAS)}
               >
                 Ver análisis
               </CompetitionLinkButton>
@@ -314,7 +316,7 @@ export default function CompetitionSummary({
           {leader && (
             <CompetitionLinkButton
               icon="table"
-              onClick={() => onNavigateToTab?.(COMPETITION_TAB_IDS.TABLA)}
+              onClick={() => openTab(COMPETITION_TAB_IDS.TABLA)}
             >
               Ver tabla completa
             </CompetitionLinkButton>
@@ -349,7 +351,7 @@ export default function CompetitionSummary({
             </div>
             <CompetitionLinkButton
               icon="history"
-              onClick={() => onNavigateToTab?.(COMPETITION_TAB_IDS.HISTORIAL)}
+              onClick={() => openTab(COMPETITION_TAB_IDS.HISTORIAL)}
             >
               Ver historial
             </CompetitionLinkButton>

@@ -4,24 +4,26 @@ const {
   analizarLimiter,
   predictionsExportLimiter,
 } = require('./routeRateLimits');
+const { createUsageLimiter } = require('./planUsageLimit');
 
 /**
- * Rutas premium: requieren JWT + suscripción activa (middleware auth).
- * Catálogo público (ligas, search-teams, listado equipos) queda fuera.
+ * Rutas premium: JWT + plan (trial/pro/familia/free con límites).
  */
 function isPremiumProtectedPath(pathname) {
   const p = pathname || '';
-
-  // IMPORTANTE:
-  // - Clubes / Selecciones / Partidos y todo su contenido (fixtures, perfiles, equipos, ligas, etc.) es PÚBLICO.
-  // - Solo las funciones premium (GoalLogic Predict / análisis) requieren sesión premium.
 
   if (p.startsWith('/api/predictions')) return true;
   if (p.startsWith('/api/predicciones')) return true;
   if (p.startsWith('/api/analizar')) return true;
 
-  // Todo lo demás queda público.
   return false;
+}
+
+function runWithPlanAuth(req, res, next, usageType = null) {
+  auth(req, res, () => {
+    if (!usageType) return next();
+    return createUsageLimiter(usageType)(req, res, next);
+  });
 }
 
 function premiumApiGuard(req, res, next) {
@@ -32,16 +34,18 @@ function premiumApiGuard(req, res, next) {
   }
 
   if (pathname.startsWith('/api/predictions/export')) {
-    return predictionsExportLimiter(req, res, () => auth(req, res, next));
+    return predictionsExportLimiter(req, res, () =>
+      runWithPlanAuth(req, res, next, 'predictions')
+    );
   }
   if (pathname.startsWith('/api/analizar')) {
-    return analizarLimiter(req, res, () => auth(req, res, next));
+    return analizarLimiter(req, res, () => runWithPlanAuth(req, res, next, 'predictions'));
   }
   if (pathname.startsWith('/api/predictions')) {
-    return predictionsLimiter(req, res, () => auth(req, res, next));
+    return predictionsLimiter(req, res, () => runWithPlanAuth(req, res, next, 'predictions'));
   }
 
-  return auth(req, res, next);
+  return runWithPlanAuth(req, res, next);
 }
 
 module.exports = premiumApiGuard;

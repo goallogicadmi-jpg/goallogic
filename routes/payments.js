@@ -3,6 +3,7 @@ const Stripe = require("stripe");
 const rateLimit = require("express-rate-limit");
 const { authJwt } = require("../middleware/auth");
 const logger = require("../utils/logger");
+const { resolvePlanFromStripePriceId } = require("../utils/planAccess");
 const {
   validatePromotionCode,
   resolveCheckoutDiscount,
@@ -243,6 +244,7 @@ router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, re
     checkoutMode = recurring ? "subscription" : "payment";
 
     const uid = String(userId).trim();
+    const resolvedPlan = resolvePlanFromStripePriceId(resolvedPriceId);
     const sessionParams = {
       mode: checkoutMode,
       payment_method_types: ["card"],
@@ -255,12 +257,12 @@ router.post("/create-checkout-session", checkoutLimiter, authJwt, async (req, re
       success_url: withCheckoutSessionPlaceholder(successUrl),
       cancel_url: withCheckoutSessionPlaceholder(cancelUrl),
       client_reference_id: uid,
-      metadata: { userId: uid },
+      metadata: { userId: uid, plan: resolvedPlan },
     };
 
     if (checkoutMode === "subscription") {
       sessionParams.subscription_data = {
-        metadata: { userId: uid },
+        metadata: { userId: uid, plan: resolvedPlan },
       };
     }
 

@@ -3,6 +3,7 @@ import { tokens } from '../../styles/tokens';
 import { PREDICCIONES_TITLES } from '../../constants/prediccionesSectionTitles';
 import AccordionBlock from './AccordionBlock';
 import { IconEstadoPlantel } from './PrediccionesIcons';
+import BrandResponsiveText from '../BrandResponsiveText';
 import {
   IMPACTO_NIVEL,
   MAX_LESIONES_VISIBLES,
@@ -267,7 +268,7 @@ export default function LesionadosEquipo({ lesiones, nombreEquipoA, nombreEquipo
     >
       <p style={descriptionStyle}>
         Máximo {MAX_LESIONES_VISIBLES} bajas por equipo, priorizadas por impacto del motor (alto, moderado, bajo).
-        GoalLogic ajusta las probabilidades según el impacto agregado de toda la lista.
+        <BrandResponsiveText /> ajusta las probabilidades según el impacto agregado de toda la lista.
       </p>
       <div style={gridStyle} className="predicciones-lesionados-grid">
         <TeamInjuryColumn nombreEquipo={nombreEquipoA || 'Equipo A'} datos={lesiones.equipoA} />

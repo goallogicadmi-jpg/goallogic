@@ -27,6 +27,11 @@ function mapSessionUser(sessionUser) {
     sessionUser.tipo === 'familia' ||
     sessionUser.plan === 'free-family' ||
     sessionUser.billingLocked === true;
+  const hasProAccess =
+    sessionUser.hasProAccess === true ||
+    sessionUser.premium === true ||
+    sessionUser.trialActive === true ||
+    isFamily;
 
   return {
     ...sessionUser,
@@ -34,13 +39,21 @@ function mapSessionUser(sessionUser) {
     user_id: id,
     role: sessionUser.role || 'usuario',
     isMainAdmin: sessionUser.isMainAdmin || false,
-    premium: sessionUser.premium === true || isFamily,
+    premium: sessionUser.premium === true || hasProAccess,
     legalAccepted: sessionUser.legalAccepted === true,
     tipo: sessionUser.tipo || 'usuario',
     plan: sessionUser.plan || null,
     billingLocked: sessionUser.billingLocked === true || isFamily,
     welcomeShown: sessionUser.welcomeShown === true,
+    trialActive: sessionUser.trialActive === true,
+    trialEndsAt: sessionUser.trialEndsAt || null,
+    trialDaysRemaining: sessionUser.trialDaysRemaining ?? 0,
+    hasProAccess,
     isFamilyAccount: isFamily,
+    trialExpiredAcknowledged: sessionUser.trialExpiredAcknowledged === true,
+    showTrialExpiredModal: sessionUser.showTrialExpiredModal === true,
+    limits: sessionUser.limits || null,
+    features: sessionUser.features || null,
   };
 }
 

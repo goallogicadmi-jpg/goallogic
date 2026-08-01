@@ -15,6 +15,8 @@ import MessagesSendModule from './modules/MessagesSendModule';
 import MessagesSentModule from './modules/MessagesSentModule';
 import MainAdminRoute from './MainAdminRoute';
 import FamiliaModule from './modules/FamiliaModule';
+import AnalistasModule from './modules/AnalistasModule';
+import AnalystRankingModule from './modules/AnalystRankingModule';
 
 /**
  * Admin Panel PRO — rutas anidadas bajo /admin/*
@@ -36,7 +38,16 @@ export default function AdminPanel() {
               </MainAdminRoute>
             }
           />
-          <Route path="stripe" element={<StripeAnalyticsModule />} />
+          <Route path="analistas" element={<AnalistasModule />} />
+          <Route path="ranking-analistas" element={<AnalystRankingModule />} />
+          <Route
+            path="stripe"
+            element={
+              <MainAdminRoute>
+                <StripeAnalyticsModule />
+              </MainAdminRoute>
+            }
+          />
           <Route path="cms" element={<CmsModule />} />
           <Route path="leagues" element={<LeaguesDataModule />} />
           <Route path="moderation" element={<ModerationModule />} />

@@ -1,8 +1,10 @@
 const express = require('express');
 const { authJwt } = require('../middleware/auth');
+const { createUsageLimiter } = require('../middleware/planUsageLimit');
 const SimulatorState = require('../models/SimulatorState');
 
 const router = express.Router();
+const simulationLimit = createUsageLimiter('simulations');
 
 /**
  * GET /api/simulator
@@ -100,7 +102,7 @@ router.get('/', authJwt, async (req, res) => {
  * Body: { capital_inicial, capital_actual, apuestas }
  * Retorna: { success, simulator_state }
  */
-router.post('/', authJwt, async (req, res) => {
+router.post('/', authJwt, simulationLimit, async (req, res) => {
   try {
     // Validar que user_id esté presente
     if (!req.user || !req.user.id) {
@@ -213,7 +215,7 @@ router.post('/', authJwt, async (req, res) => {
  * Body: { partido, cuota, stake, resultado?, ganancia? }
  * Retorna: { success, simulator_state }
  */
-router.put('/apuesta', authJwt, async (req, res) => {
+router.put('/apuesta', authJwt, simulationLimit, async (req, res) => {
   try {
     // Validar que user_id esté presente
     if (!req.user || !req.user.id) {

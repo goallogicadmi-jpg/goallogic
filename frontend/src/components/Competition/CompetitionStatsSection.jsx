@@ -15,6 +15,9 @@ import {
 } from '../../utils/competitionStats';
 import { COMPETITION_TAB_IDS } from './competitionTabIds';
 import CompetitionLinkButton from './CompetitionLinkButton';
+import PremiumFeatureGate, { FEATURES } from '../Freemium/PremiumFeatureGate';
+import { COMPETITION_PREMIUM_COPY } from '../../utils/competitionPremiumSections';
+import { usePlanAccess } from '../../context/PlanAccessContext';
 import '../../styles/standings.css';
 import '../../styles/competitionStats.css';
 
@@ -180,6 +183,9 @@ export default function CompetitionStatsSection({
   onNavigateToTab,
   standingsTabId = COMPETITION_TAB_IDS.TABLA,
 }) {
+  const { canAccessFeature } = usePlanAccess();
+  const canAdvancedStats = canAccessFeature(FEATURES.ADVANCED_STATS);
+  const canAdvancedModels = canAccessFeature(FEATURES.ADVANCED_MODELS);
   const [torneoData, setTorneoData] = useState(null);
   const [avanzadasData, setAvanzadasData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -200,13 +206,15 @@ export default function CompetitionStatsSection({
       setLoading(true);
       setError(null);
       try {
-        const [torneoRes, avanzadasRes] = await Promise.all([
-          axios.get(`/estadisticas/torneo?leagueId=${leagueId}&season=${season}`),
-          axios.get(`/estadisticas/avanzadas?leagueId=${leagueId}&season=${season}`),
-        ]);
+        const requests = [axios.get(`/estadisticas/torneo?leagueId=${leagueId}&season=${season}`)];
+        if (canAdvancedStats || canAdvancedModels) {
+          requests.push(axios.get(`/estadisticas/avanzadas?leagueId=${leagueId}&season=${season}`));
+        }
+
+        const [torneoRes, avanzadasRes] = await Promise.all(requests);
         if (cancelled) return;
         setTorneoData(torneoRes.data);
-        setAvanzadasData(avanzadasRes.data);
+        setAvanzadasData(avanzadasRes?.data ?? null);
         setHasMultipleGroups(Boolean(torneoRes.data?.hasMultipleGroups));
       } catch (err) {
         console.error('Error cargando estadísticas de competición:', err);
@@ -226,7 +234,7 @@ export default function CompetitionStatsSection({
     return () => {
       cancelled = true;
     };
-  }, [leagueId, season]);
+  }, [leagueId, season, canAdvancedStats, canAdvancedModels]);
 
   const tabla = useMemo(() => getTablaFromTorneoResponse(torneoData), [torneoData]);
   const equiposAvanzadas = useMemo(
@@ -269,63 +277,6 @@ export default function CompetitionStatsSection({
           Estadísticas del primer grupo de la competición.
         </p>
       )}
-
-      <section style={cardStyle}>
-        <h3 style={sectionTitleStyle}>KPIs del torneo</h3>
-        <div style={kpiGridStyle}>
-          <KpiCard label="Goles / partido" value={kpis?.golesPorPartido} />
-          <KpiCard label="Prom. GF / equipo" value={kpis?.promedioGF} />
-          <KpiCard label="Prom. GC / equipo" value={kpis?.promedioGC} />
-          <KpiCard
-            label="Más goleador"
-            value={kpis?.topScorer?.golesFavor}
-            sub={kpis?.topScorer?.equipo}
-          />
-          <KpiCard
-            label="Más sólido"
-            value={kpis?.bestDefense?.golesContra}
-            sub={kpis?.bestDefense?.equipo}
-          />
-          <KpiCard label="Total goles" value={kpis?.totalGF} />
-        </div>
-      </section>
-
-      <section style={cardStyle}>
-        <h3 style={sectionTitleStyle}>Destacados</h3>
-        <div style={chipRowStyle}>
-          <HighlightChip
-            label="Mejor ataque"
-            team={highlights.mejorAtaque}
-            action={
-              highlights.mejorAtaque ? (
-                <CompetitionLinkButton
-                  icon="table"
-                  style={{ marginTop: 0 }}
-                  onClick={() => onNavigateToTab?.(standingsTabId)}
-                >
-                  Ver tabla
-                </CompetitionLinkButton>
-              ) : null
-            }
-          />
-          <HighlightChip
-            label="Mejor defensa"
-            team={highlights.mejorDefensa}
-            action={
-              highlights.mejorDefensa ? (
-                <CompetitionLinkButton
-                  icon="matches"
-                  style={{ marginTop: 0 }}
-                  onClick={() => onNavigateToTab?.(COMPETITION_TAB_IDS.PARTIDOS)}
-                >
-                  Ver partidos
-                </CompetitionLinkButton>
-              ) : null
-            }
-          />
-          <HighlightChip label="Mejor forma" team={highlights.mejorForma} />
-        </div>
-      </section>
 
       <section style={cardStyle}>
         <h3 style={sectionTitleStyle}>Estadísticas básicas</h3>
@@ -383,6 +334,68 @@ export default function CompetitionStatsSection({
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <PremiumFeatureGate
+        feature={FEATURES.ADVANCED_STATS}
+        title={COMPETITION_PREMIUM_COPY[FEATURES.ADVANCED_STATS].title}
+        description={COMPETITION_PREMIUM_COPY[FEATURES.ADVANCED_STATS].description}
+      >
+      <section style={cardStyle}>
+        <h3 style={sectionTitleStyle}>KPIs del torneo</h3>
+        <div style={kpiGridStyle}>
+          <KpiCard label="Goles / partido" value={kpis?.golesPorPartido} />
+          <KpiCard label="Prom. GF / equipo" value={kpis?.promedioGF} />
+          <KpiCard label="Prom. GC / equipo" value={kpis?.promedioGC} />
+          <KpiCard
+            label="Más goleador"
+            value={kpis?.topScorer?.golesFavor}
+            sub={kpis?.topScorer?.equipo}
+          />
+          <KpiCard
+            label="Más sólido"
+            value={kpis?.bestDefense?.golesContra}
+            sub={kpis?.bestDefense?.equipo}
+          />
+          <KpiCard label="Total goles" value={kpis?.totalGF} />
+        </div>
+      </section>
+
+      <section style={cardStyle}>
+        <h3 style={sectionTitleStyle}>Destacados</h3>
+        <div style={chipRowStyle}>
+          <HighlightChip
+            label="Mejor ataque"
+            team={highlights.mejorAtaque}
+            action={
+              highlights.mejorAtaque ? (
+                <CompetitionLinkButton
+                  icon="table"
+                  style={{ marginTop: 0 }}
+                  onClick={() => onNavigateToTab?.(standingsTabId)}
+                >
+                  Ver tabla
+                </CompetitionLinkButton>
+              ) : null
+            }
+          />
+          <HighlightChip
+            label="Mejor defensa"
+            team={highlights.mejorDefensa}
+            action={
+              highlights.mejorDefensa ? (
+                <CompetitionLinkButton
+                  icon="matches"
+                  style={{ marginTop: 0 }}
+                  onClick={() => onNavigateToTab?.(COMPETITION_TAB_IDS.PARTIDOS)}
+                >
+                  Ver partidos
+                </CompetitionLinkButton>
+              ) : null
+            }
+          />
+          <HighlightChip label="Mejor forma" team={highlights.mejorForma} />
         </div>
       </section>
 
@@ -454,13 +467,20 @@ export default function CompetitionStatsSection({
           xGA estimado a partir de goles encajados y el ratio xG/goles del equipo (misma fuente que estadísticas avanzadas).
         </p>
       </section>
+      </PremiumFeatureGate>
 
+      <PremiumFeatureGate
+        feature={FEATURES.ADVANCED_MODELS}
+        title={COMPETITION_PREMIUM_COPY[FEATURES.ADVANCED_MODELS].title}
+        description={COMPETITION_PREMIUM_COPY[FEATURES.ADVANCED_MODELS].description}
+      >
       <section style={cardStyle}>
         <h3 style={sectionTitleStyle}>Estadísticas avanzadas del torneo</h3>
         <div className="competition-stats-advanced-wrap">
           <EstadisticasAvanzadas leagueId={leagueId} season={season} />
         </div>
       </section>
+      </PremiumFeatureGate>
     </div>
   );
 }

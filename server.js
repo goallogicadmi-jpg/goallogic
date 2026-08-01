@@ -219,6 +219,9 @@ app.get('/api/health', (req, res) => {
       couponConfigured: Boolean((process.env.STRIPE_COUPON_ID || '').trim()),
       webhookSecretConfigured: Boolean((process.env.STRIPE_WEBHOOK_SECRET || '').trim()),
     },
+    cloudinary: {
+      configured: require('./config/cloudinary').isCloudinaryConfigured,
+    },
   });
 });
 
@@ -2798,7 +2801,9 @@ app.use("/estadisticas", estadisticasAvanzadasRoutes);
 // 📌 Rutas de Autenticación
 // ======================================================
 const authRoutes = require('./routes/auth.js');
+const uploadRoutes = require('./routes/upload.js');
 app.use('/api/auth', authRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // ======================================================
 // 📌 Rutas de Apuestas
@@ -2847,6 +2852,10 @@ const adminMessagesRoutes = require('./routes/adminMessages.js');
 app.use('/api/admin/messages', adminMessagesRoutes);
 const familyAdminRoutes = require('./routes/familyAdmin.js');
 app.use('/api/admin/family', familyAdminRoutes);
+const analystAdminRoutes = require('./routes/analystAdmin.js');
+app.use('/api/admin', analystAdminRoutes);
+const analystsRoutes = require('./routes/analysts.js');
+app.use('/api/analysts', analystsRoutes);
 const userPlanRoutes = require('./routes/userPlan.js');
 app.use('/api/user', userPlanRoutes);
 const trialCronRoutes = require('./routes/trialCron.js');

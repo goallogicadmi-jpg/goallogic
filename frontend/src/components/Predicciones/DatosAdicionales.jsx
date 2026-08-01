@@ -9,8 +9,15 @@ import {
   IconReferentesOfensivos,
 } from './PrediccionesIcons';
 import HistorialH2H from './HistorialH2H';
+import UltimosPartidosPredicciones from './UltimosPartidosPredicciones';
 
-export default function DatosAdicionales({ datosAdicionales, nombreEquipoA, nombreEquipoB }) {
+export default function DatosAdicionales({
+  datosAdicionales,
+  nombreEquipoA,
+  nombreEquipoB,
+  equipoAId,
+  equipoBId,
+}) {
   if (!datosAdicionales) return null;
 
   const nombreA = nombreEquipoA || 'Equipo A';
@@ -63,6 +70,13 @@ export default function DatosAdicionales({ datosAdicionales, nombreEquipoA, nomb
           <HistorialH2H h2h={datosAdicionales.h2h} />
         </AccordionBlock>
       )}
+
+      <UltimosPartidosPredicciones
+        equipoAId={equipoAId}
+        equipoBId={equipoBId}
+        nombreEquipoA={nombreA}
+        nombreEquipoB={nombreB}
+      />
 
       {datosAdicionales.goleadores &&
         (datosAdicionales.goleadores.equipoA.total > 0 || datosAdicionales.goleadores.equipoB.total > 0) && (

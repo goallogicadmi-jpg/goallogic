@@ -1,6 +1,8 @@
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import { filterNavForUser, findNavItemByPath } from './adminNavConfig';
+import { GoalLogicTitle } from '../GoalLogicTitle';
+import { BRAND_NAME } from '../../constants/brand';
 import './AdminPanel.css';
 
 export default function AdminPanelLayout() {
@@ -26,7 +28,7 @@ export default function AdminPanelLayout() {
     <div className="admin-pro-layout">
       <aside className="admin-pro-sidebar" aria-label="Navegación del panel">
         <div className="admin-pro-sidebar-brand">
-          <span className="admin-pro-brand-title">GoalLogic</span>
+          <GoalLogicTitle as="div" size="sm" className="admin-pro-brand-title" />
           <span className="admin-pro-brand-sub">Admin PRO</span>
         </div>
         <nav className="admin-pro-nav">
@@ -60,7 +62,7 @@ export default function AdminPanelLayout() {
         <header className="admin-pro-topbar">
           <div>
             <h1>{currentItem?.label || 'Panel de administración'}</h1>
-            <p>{currentItem?.description || 'Gestión centralizada de GoalLogic'}</p>
+            <p>{currentItem?.description || `Gestión centralizada de ${BRAND_NAME}`}</p>
           </div>
           <div className="admin-pro-topbar-actions">
             <span className="admin-pro-user-chip">

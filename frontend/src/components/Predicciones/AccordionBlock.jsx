@@ -32,6 +32,7 @@ export default function AccordionBlock({
   defaultOpenMobile = false,
   className = '',
   headingLevel = 3,
+  onOpenChange,
 }) {
   const blockId = useId();
   const panelId = useId();
@@ -97,6 +98,10 @@ export default function AccordionBlock({
 
     return () => window.clearTimeout(timeoutId);
   }, [isOpen, isMobile, prefersReducedMotion]);
+
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
 
   const toggle = () => {
     if (useGroupMode) {

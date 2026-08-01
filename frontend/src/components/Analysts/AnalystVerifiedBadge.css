@@ -1,0 +1,31 @@
+.analyst-verified-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.analyst-verified-badge__line {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #0066ff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.analyst-verified-badge__check {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.analyst-verified-badge__subtitle {
+  color: #003b99;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.analyst-verified-badge--compact .analyst-verified-badge__subtitle {
+  display: none;
+}

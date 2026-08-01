@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import useTacticalView from '../../../hooks/useTacticalView';
 import '../../../styles/tacticalView.css';
 
@@ -6,6 +6,52 @@ const PHOTO_CDN = (id) => `https://media.api-sports.io/football/players/${id}.pn
 
 function linkKey(link) {
   return `${link.fromId}-${link.toId}`;
+}
+
+function TacticalPitchNode({ player, isHovered, onMouseEnter, onMouseLeave }) {
+  const [photoFailed, setPhotoFailed] = useState(false);
+  const playerId = player.playerId;
+
+  useEffect(() => {
+    setPhotoFailed(false);
+  }, [playerId]);
+
+  const showPhoto = Boolean(playerId) && !photoFailed;
+  const initial = (player.name || '?').trim().charAt(0).toUpperCase();
+
+  return (
+    <g
+      className={`tactical-pitch__node${isHovered ? ' tactical-pitch__node--hover' : ''}`}
+      transform={`translate(${player.x}, ${player.y})`}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      <circle r="5.5" className="tactical-pitch__node-bg" />
+      {Boolean(playerId) && (
+        <image
+          href={PHOTO_CDN(playerId)}
+          x="-4.5"
+          y="-4.5"
+          width="9"
+          height="9"
+          className="tactical-pitch__node-photo"
+          visibility={showPhoto ? 'visible' : 'hidden'}
+          onError={() => setPhotoFailed(true)}
+        />
+      )}
+      {!showPhoto && (
+        <text className="tactical-pitch__node-initial" y="1.5">
+          {initial}
+        </text>
+      )}
+      <text className="tactical-pitch__node-number" y="9.5">
+        {player.number}
+      </text>
+      <title>
+        {player.name} — posición promedio ({player.x}%, {player.y}%)
+      </title>
+    </g>
+  );
 }
 
 /**
@@ -110,41 +156,15 @@ function TacticalPitch({ teamData, teamLabel }) {
         </g>
 
         <g className="tactical-pitch__nodes">
-          {players.map((player) => {
-            const isHovered = hoveredPlayer === String(player.playerId);
-            const initial = (player.name || '?').trim().charAt(0).toUpperCase();
-            return (
-              <g
-                key={player.playerId}
-                className={`tactical-pitch__node${isHovered ? ' tactical-pitch__node--hover' : ''}`}
-                transform={`translate(${player.x}, ${player.y})`}
-                onMouseEnter={() => setHoveredPlayer(String(player.playerId))}
-                onMouseLeave={() => setHoveredPlayer(null)}
-              >
-                <circle r="5.5" className="tactical-pitch__node-bg" />
-                <image
-                  href={PHOTO_CDN(player.playerId)}
-                  x="-4.5"
-                  y="-4.5"
-                  width="9"
-                  height="9"
-                  className="tactical-pitch__node-photo"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-                <text className="tactical-pitch__node-initial" y="1.5">
-                  {initial}
-                </text>
-                <text className="tactical-pitch__node-number" y="9.5">
-                  {player.number}
-                </text>
-                <title>
-                  {player.name} — posición promedio ({player.x}%, {player.y}%)
-                </title>
-              </g>
-            );
-          })}
+          {players.map((player) => (
+            <TacticalPitchNode
+              key={player.playerId}
+              player={player}
+              isHovered={hoveredPlayer === String(player.playerId)}
+              onMouseEnter={() => setHoveredPlayer(String(player.playerId))}
+              onMouseLeave={() => setHoveredPlayer(null)}
+            />
+          ))}
         </g>
       </svg>
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { getUserInitial } from '../utils/userInitial';
+import { UserAvatar } from './UserAvatar';
 import './UserMenuAvatar.css';
 
 function PersonIcon() {
@@ -72,7 +72,6 @@ export default function UserMenuAvatar() {
   };
 
   const displayName = user?.nombre || user?.email || '';
-  const initial = isAuthenticated ? getUserInitial(displayName) : null;
 
   return (
     <div className="user-menu-avatar" ref={containerRef}>
@@ -85,8 +84,15 @@ export default function UserMenuAvatar() {
         aria-haspopup="menu"
       >
         <span className="user-menu-avatar__circle" aria-hidden="true">
-          {initial ? (
-            <span className="user-menu-avatar__initial">{initial}</span>
+          {isAuthenticated && user?.foto_perfil_url ? (
+            <UserAvatar
+              nombre={displayName}
+              foto_perfil_url={user.foto_perfil_url}
+              size={36}
+              className="user-menu-avatar__photo"
+            />
+          ) : isAuthenticated ? (
+            <UserAvatar nombre={displayName} size={36} className="user-menu-avatar__photo" />
           ) : (
             <PersonIcon />
           )}

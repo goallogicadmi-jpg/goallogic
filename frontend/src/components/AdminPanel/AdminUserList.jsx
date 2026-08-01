@@ -14,7 +14,7 @@ const EMPTY_FILTERS = {
 };
 
 export default function AdminUserList({ onUserSelect, selectedUserId }) {
-  const { isMainAdmin } = useUser();
+  const { isMainAdmin, isAdminSecundario } = useUser();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -55,8 +55,12 @@ export default function AdminUserList({ onUserSelect, selectedUserId }) {
   };
 
   const handleRoleChange = async (userId, newRole) => {
-    if (!isMainAdmin) {
-      alert('Solo el administrador principal puede cambiar roles');
+    if (!isMainAdmin && !isAdminSecundario) {
+      alert('No tienes permiso para cambiar roles');
+      return;
+    }
+    if (isAdminSecundario && !isMainAdmin && !['usuario', 'analista'].includes(newRole)) {
+      alert('Como admin secundario solo puedes asignar rol Usuario o Analista Deportivo');
       return;
     }
     if (!window.confirm(`¿Cambiar el rol de este usuario a "${newRole}"?`)) return;
@@ -216,7 +220,9 @@ export default function AdminUserList({ onUserSelect, selectedUserId }) {
                 const roleBadge = getRoleBadge(user);
                 const premiumBadge = getPremiumBadge(user);
                 const isSelected = selectedUserId === user._id;
-                const canManage = isMainAdmin && user.role !== 'admin';
+                const canManageRole =
+                  (isMainAdmin || isAdminSecundario) && user.role !== 'admin';
+                const canDelete = isMainAdmin && user.role !== 'admin';
 
                 return (
                   <tr key={user._id} className={isSelected ? 'admin-row-selected' : ''}>
@@ -253,7 +259,7 @@ export default function AdminUserList({ onUserSelect, selectedUserId }) {
                         >
                           Ver
                         </button>
-                        {canManage && (
+                        {canManageRole && (
                           <>
                             <select
                               className="admin-select-small"
@@ -263,17 +269,22 @@ export default function AdminUserList({ onUserSelect, selectedUserId }) {
                               aria-label="Cambiar rol"
                             >
                               <option value="usuario">Usuario</option>
-                              <option value="admin_secundario">Admin sec.</option>
+                              <option value="analista">Analista Deportivo</option>
+                              {isMainAdmin ? (
+                                <option value="admin_secundario">Admin sec.</option>
+                              ) : null}
                             </select>
-                            <button
-                              type="button"
-                              className="admin-btn-danger"
-                              onClick={() => handleDeleteUser(user._id, user.nombre)}
-                              disabled={actionLoading === user._id}
-                              title="Eliminar"
-                            >
-                              {actionLoading === user._id ? '…' : 'Eliminar'}
-                            </button>
+                            {canDelete ? (
+                              <button
+                                type="button"
+                                className="admin-btn-danger"
+                                onClick={() => handleDeleteUser(user._id, user.nombre)}
+                                disabled={actionLoading === user._id}
+                                title="Eliminar"
+                              >
+                                {actionLoading === user._id ? '…' : 'Eliminar'}
+                              </button>
+                            ) : null}
                           </>
                         )}
                       </div>

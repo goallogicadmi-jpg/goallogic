@@ -3,6 +3,7 @@ import { getPublicCmsContent } from '../../services/cmsPublicService';
 import { SimpleMarkdown } from '../../utils/simpleMarkdown';
 import { formatCmsDate } from '../AdminPanel/adminCmsUtils';
 import './cms.css';
+import BrandResponsiveText from '../BrandResponsiveText';
 
 export default function CmsDashboardSection() {
   const [announcements, setAnnouncements] = useState([]);
@@ -46,7 +47,9 @@ export default function CmsDashboardSection() {
 
       {news.length > 0 && (
         <div className="cms-news-block">
-          <h3 className="cms-news-block__heading">Noticias GoalLogic</h3>
+          <h3 className="cms-news-block__heading">
+            Noticias <BrandResponsiveText />
+          </h3>
           <div className="cms-news-grid">
             {news.map((item) => (
               <article key={item.id} className="cms-news-card">

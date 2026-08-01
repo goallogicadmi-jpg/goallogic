@@ -1,0 +1,172 @@
+.analyst-premium-post {
+  background: linear-gradient(180deg, #ffffff 0%, #f5f7fa 100%);
+  border: 1px solid rgba(0, 102, 255, 0.22);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(0, 59, 153, 0.08);
+}
+
+.analyst-premium-post__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.analyst-premium-post__author {
+  flex: 1;
+  min-width: 0;
+}
+
+.analyst-premium-post__name {
+  display: block;
+  color: #111111;
+  font-size: 1rem;
+}
+
+.analyst-premium-post__badge {
+  background: #0066ff;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.analyst-premium-post__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid rgba(0, 102, 255, 0.12);
+}
+
+.analyst-premium-post__stat-label {
+  display: block;
+  font-size: 0.72rem;
+  color: #444444;
+  margin-bottom: 2px;
+}
+
+.analyst-premium-post__history h4 {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: #003b99;
+}
+
+.analyst-premium-post__history ul {
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.analyst-premium-post__history li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.85rem;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.analyst-result--ganada {
+  color: #0d9488;
+  font-weight: 600;
+}
+
+.analyst-result--perdida {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.analyst-result--pendiente {
+  color: #444444;
+}
+
+.analyst-premium-post__body {
+  color: #111111;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.analyst-premium-post__match,
+.analyst-premium-post__prob {
+  font-size: 0.88rem;
+  color: #444444;
+}
+
+.analyst-premium-post__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.analyst-subscribe-btn {
+  border: none;
+  border-radius: 8px;
+  background: #0066ff;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.analyst-subscribe-btn--active {
+  display: inline-block;
+  background: #f5f7fa;
+  color: #003b99;
+  border: 1px solid rgba(0, 102, 255, 0.3);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.analyst-subscribe-hint,
+.analyst-subscribe-error {
+  font-size: 0.8rem;
+  margin: 6px 0 0;
+}
+
+.analyst-subscribe-error {
+  color: #dc2626;
+}
+
+.analyst-subscribe-hint {
+  color: #444444;
+}
+
+.analyst-premium-post__link-btn {
+  border: 1px solid #0066ff;
+  background: transparent;
+  color: #0066ff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.analyst-premium-post__footer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 10px;
+}
+
+.analyst-premium-post__footer button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #444444;
+}
+
+.analyst-premium-post__delete {
+  margin-left: auto;
+  color: #dc2626 !important;
+}

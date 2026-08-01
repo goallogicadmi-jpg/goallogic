@@ -36,11 +36,26 @@ export const ADMIN_NAV_GROUPS = [
         mainAdminOnly: true,
       },
       {
+        id: 'analistas',
+        path: '/admin/analistas',
+        label: 'Analistas',
+        icon: '📈',
+        description: 'Dashboard, gestión, verificación, suscriptores y auditoría',
+      },
+      {
+        id: 'ranking-analistas',
+        path: '/admin/ranking-analistas',
+        label: 'Ranking Analistas',
+        icon: '🏆',
+        description: 'Ranking global y publicación oficial en comunidad',
+      },
+      {
         id: 'stripe',
         path: '/admin/stripe',
         label: 'Ingresos Stripe',
         icon: '💳',
         description: 'Métricas, suscripciones y pagos',
+        mainAdminOnly: true,
       },
       {
         id: 'coupons',

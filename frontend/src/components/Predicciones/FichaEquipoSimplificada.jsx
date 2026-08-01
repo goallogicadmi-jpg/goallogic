@@ -164,11 +164,11 @@ export default function FichaEquipoSimplificada({ equipo, tipo }) {
 
   return (
     <div style={containerStyle}>
-      <div style={headerStyle}>
+      <div style={headerStyle} className="predicciones-ficha-header">
         {equipo.logo && (
-          <img src={equipo.logo} alt={equipo.nombre} style={logoStyle} />
+          <img src={equipo.logo} alt={equipo.nombre} style={logoStyle} className="predicciones-ficha-logo" />
         )}
-        <div>
+        <div className="predicciones-ficha-info">
           <h3 style={nombreStyle}>{equipo.nombre}</h3>
           <p style={ligaStyle}>{equipo.liga} • {equipo.pais}</p>
         </div>

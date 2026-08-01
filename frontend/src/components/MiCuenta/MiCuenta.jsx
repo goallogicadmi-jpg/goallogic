@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getUserIdFromToken } from '../../services/authService';
 import { useUser } from '../../context/UserContext';
 import Login from './Login';
 import Register from './Register';
 import ProtectedView from './ProtectedView';
 import ProfilePhoto from './ProfilePhoto';
+import ProfilePhotoSettings from './ProfilePhotoSettings';
 import DashboardUsuario from './DashboardUsuario';
 import EstadisticasApuestas from './EstadisticasApuestas';
 import GraficoProfit from './GraficoProfit';
@@ -14,6 +15,7 @@ import SimuladorApuestas from '../../pages/SimuladorApuestas';
 import HistorialApuestas from './HistorialApuestas';
 import MensajesUsuario from './MensajesUsuario';
 import PremiumRequired from '../PremiumRequired';
+import PlansPanel from '../Freemium/PlansPanel';
 import { GoalLogicTitle } from '../GoalLogicTitle';
 import './MiCuenta.css';
 
@@ -35,7 +37,8 @@ const MiCuenta = () => {
     showPremiumBanner
   } = useUser();
   const navigate = useNavigate();
-  const [showLogin, setShowLogin] = useState(true); // true = login, false = register
+  const location = useLocation();
+  const [showLogin, setShowLogin] = useState(true);
   const [refreshHistorial, setRefreshHistorial] = useState(0);
 
   const paymentUserId =
@@ -47,6 +50,9 @@ const MiCuenta = () => {
     !user.billingLocked &&
     user.tipo !== 'familia' &&
     user.plan !== 'free-family' &&
+    user.plan !== 'free' &&
+    !user.trialActive &&
+    !user.hasProAccess &&
     (showPremiumBanner || user.premium !== true);
 
   // Redirigir administradores al panel de administración
@@ -55,6 +61,14 @@ const MiCuenta = () => {
       navigate('/admin');
     }
   }, [isAuthenticated, isAdmin, isMainAdmin, navigate]);
+
+  useEffect(() => {
+    if (location.state?.showPlans) {
+      window.setTimeout(() => {
+        document.getElementById('planes-usuario')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    }
+  }, [location.state?.showPlans]);
 
   const handleLoginSuccess = () => {
     // El UserContext ya maneja la carga del perfil
@@ -120,7 +134,7 @@ const MiCuenta = () => {
         <div className="micuenta-header-authenticated">
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             {user && (
-              <ProfilePhoto nombre={user.nombre} />
+              <ProfilePhoto nombre={user.nombre} foto_perfil_url={user.foto_perfil_url} />
             )}
             <div>
               {user && (
@@ -146,6 +160,13 @@ const MiCuenta = () => {
             <PremiumRequired userId={paymentUserId} />
           ) : (
             <div className="micuenta-protected-content">
+              <ProfilePhotoSettings
+                user={user}
+                onUpdated={() => loadUserProfile()}
+              />
+              <div id="planes-usuario">
+                <PlansPanel />
+              </div>
               <DashboardUsuario />
 
               <EstadisticasApuestas refreshTrigger={refreshHistorial} />

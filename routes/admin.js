@@ -10,6 +10,7 @@ const PostComment = require('../models/PostComment');
 const auth = require('../middleware/auth');
 const checkAdmin = require('../middleware/checkAdmin');
 const logger = require('../utils/logger');
+const { logAnalystAudit } = require('../utils/analystAudit');
 
 /**
  * Middleware para verificar que el usuario es admin principal (no admin_secundario)
@@ -256,17 +257,32 @@ router.get('/user/:id', auth, checkAdmin, async (req, res) => {
  * Cambiar el rol de un usuario
  * Solo admin principal
  */
-router.put('/user/:id/role', auth, checkMainAdmin, async (req, res) => {
+router.put('/user/:id/role', auth, checkAdmin, async (req, res) => {
   try {
     const userId = req.params.id;
     const { role } = req.body;
 
     // Validar rol
-    if (!role || (role !== 'usuario' && role !== 'admin_secundario')) {
+    if (!role || !['usuario', 'admin_secundario', 'analista'].includes(role)) {
       return res.status(400).json({
         success: false,
-        message: 'Rol inválido. Solo se permiten: usuario, admin_secundario'
+        message: 'Rol inválido. Solo se permiten: usuario, admin_secundario, analista'
       });
+    }
+
+    const actor = await User.findById(req.user.id).select('role isMainAdmin');
+    if (!actor) {
+      return res.status(401).json({ success: false, message: 'No autorizado' });
+    }
+
+    const actorIsMainAdmin = actor.role === 'admin' && actor.isMainAdmin === true;
+    if (!actorIsMainAdmin && actor.role === 'admin_secundario') {
+      if (!['usuario', 'analista'].includes(role)) {
+        return res.status(403).json({
+          success: false,
+          message: 'Como admin secundario solo puedes asignar rol usuario o analista deportivo.',
+        });
+      }
     }
 
     // No permitir cambiar el rol del admin principal
@@ -295,9 +311,27 @@ router.put('/user/:id/role', auth, checkMainAdmin, async (req, res) => {
 
     const previousRole = user.role;
 
-    // Actualizar rol
     user.role = role;
+    if (role === 'analista') {
+      if (!user.analystVerifiedAt) user.analystVerifiedAt = new Date();
+      if (!user.analystStatus || user.analystStatus === 'none' || user.analystStatus === 'pending') {
+        user.analystStatus = 'active';
+      }
+    }
+    if (role !== 'analista') {
+      user.analystVerifiedAt = null;
+      user.analystStatus = 'none';
+    }
     await user.save();
+
+    await logAnalystAudit({
+      action: 'role_changed',
+      analystId: role === 'analista' ? user._id : null,
+      actorId: req.user.id,
+      targetUserId: user._id,
+      details: { previousRole, newRole: role },
+      ip: req.ip,
+    }).catch(() => {});
 
     logger.info('admin_role_changed', {
       targetUserId: String(userId),

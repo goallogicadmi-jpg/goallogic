@@ -21,6 +21,9 @@ import {
   getCompetitionsByDomainFromCatalog,
 } from "../config/competitionCatalog";
 import brandLogoUrl from "../assets/images/goal-logic-logo.png";
+import { BRAND_NAME } from "../constants/brand";
+import { canAccessPremiumModule } from "../utils/premiumModuleAccess";
+import { usePlanAccess } from "../context/PlanAccessContext";
 
 const clubCompetitionFallback = getCompetitionsByDomainFromCatalog("club").map((competition) =>
   applyCatalogDisplay({
@@ -105,10 +108,16 @@ export default function Leagues() {
     isAdmin,
     isMainAdmin,
   } = useUser();
+  const { openUpgradeModal } = usePlanAccess();
   const [prediccionesEmbedAuthToast, setPrediccionesEmbedAuthToast] = useState(false);
   const canAccessPredicciones =
     isAuthenticated &&
-    (user?.premium === true || isAdmin || isMainAdmin);
+    (user?.hasProAccess === true ||
+      user?.premium === true ||
+      user?.trialActive === true ||
+      user?.plan === 'free' ||
+      isAdmin ||
+      isMainAdmin);
   const prediccionesPaymentUserId = user?.user_id || user?.id;
   const initialState = location.state?.activeSection || (location.pathname === '/torneos' ? "torneos" : "ligas");
   const [activeSection, setActiveSection] = useState(initialState); // Usar estado de navegación si está disponible
@@ -120,6 +129,12 @@ export default function Leagues() {
   const [selectedSeason, setSelectedSeason] = useState("2024");
   const [loadingSeason, setLoadingSeason] = useState(false);
   const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
+
+  const canViewSelectedPremiumModule =
+    !selectedLeagueId ||
+    canAccessPremiumModule(user, selectedLeagueId) ||
+    isAdmin ||
+    isMainAdmin;
 
   // Leer el estado de navegación al montar o cuando cambia la ubicación
   useEffect(() => {
@@ -566,7 +581,7 @@ export default function Leagues() {
                   <div className="hero-logo-section">
                     <img
                       src={brandLogoUrl}
-                      alt="GoalLogic Logo"
+                      alt={`${BRAND_NAME} Logo`}
                       className="hero-logo-full"
                       width={400}
                       height={400}
@@ -621,7 +636,18 @@ export default function Leagues() {
                   </div>
                 )}
                 {/* Tabla de posiciones centrada */}
-                {selectedLeagueId && selectedSeason && !loadingSeason && (
+                {selectedLeagueId && selectedSeason && !loadingSeason && !canViewSelectedPremiumModule && (
+                  <div className="section-content premium-module-locked" style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
+                    <h3>Módulo premium</h3>
+                    <p style={{ color: '#b0bec5' }}>
+                      Champions, Mundial y Eliminatorias están disponibles en planes Basic o PRO.
+                    </p>
+                    <button type="button" className="premium-module-locked__btn" onClick={openUpgradeModal}>
+                      Desbloquear acceso
+                    </button>
+                  </div>
+                )}
+                {selectedLeagueId && selectedSeason && !loadingSeason && canViewSelectedPremiumModule && (
                   <div className="standings-table-container">
                     {esCopaConGrupos ? (
                       <CupCompetitionView 

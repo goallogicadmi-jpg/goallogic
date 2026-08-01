@@ -17,6 +17,7 @@ import PlayerCard from "./PlayerCard";
 import PlayerMatchesTable from "./PlayerMatchesTable";
 import PlayerModal from "./Partidos/PlayerModal";
 import SeasonStandingsStats from "./SeasonStandingsStats";
+import PremiumFeatureGate, { FEATURES } from "./Freemium/PremiumFeatureGate";
 import { formatStatDisplay, hasSeasonStandingContent, hasStatValue } from "../utils/statDisplay";
 import {
   ADVANCED_METRIC_LABELS as ML,
@@ -837,6 +838,11 @@ export default function EquipoDetalle({
 
       {/* Estadísticas Avanzadas */}
       {advancedStats && (
+        <PremiumFeatureGate
+          feature={FEATURES.ADVANCED_STATS}
+          title="Estadísticas avanzadas"
+          description="Promedios, portería a cero, over/under y más métricas están en GOAL_LOGIC PRO."
+        >
         <div style={cardStyle}>
           <h2 style={titleStyle}>Estadísticas Avanzadas</h2>
           
@@ -951,6 +957,7 @@ export default function EquipoDetalle({
             </div>
           </div>
         </div>
+        </PremiumFeatureGate>
       )}
 
       {/* Estadísticas de jugadores (sin datos personales) */}

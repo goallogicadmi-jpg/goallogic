@@ -5,8 +5,9 @@ const MessageTemplate = require('../models/MessageTemplate');
 const CommunityPost = require('../models/CommunityPost');
 const Bet = require('../models/Bet');
 const logger = require('./logger');
+const { TRIAL_DAYS, FREE_DAILY_PREDICTIONS, FREE_DAILY_SIMULATIONS } = require('./planAccess');
 
-const TEMPLATE_VARIABLES = ['name', 'email', 'premium_since'];
+const TEMPLATE_VARIABLES = ['name', 'email', 'premium_since', 'trialEndsAt', 'plan', 'trialDays'];
 const DEFAULT_BATCH_SIZE = 50;
 const BATCH_DELAY_MS = 80;
 
@@ -24,6 +25,43 @@ const DEFAULT_TEMPLATES = [
     contenido:
       'Hola {{name}},\n\nTu membresía premium está activa desde {{premium_since}}.\n\nGracias por apoyar GoalLogic.',
     description: 'Usuarios premium — variable premium_since',
+  },
+  {
+    name: 'Bienvenida extendida',
+    titulo: 'Bienvenida extendida a GOAL_LOGIC, {{name}}',
+    contenido:
+      'Hola {{name}},\n\n¡Bienvenido/a a GOAL_LOGIC! Tu cuenta ({{email}}) ya está activa.\n\n' +
+      '—— TU PRUEBA GRATUITA ——\n' +
+      'Tienes acceso PRO completo durante {{trialDays}} días.\n' +
+      'Tu trial finaliza el {{trialEndsAt}} (plan actual: {{plan}}).\n\n' +
+      'Durante el trial puedes explorar sin límites:\n' +
+      '• Predicciones ilimitadas\n' +
+      '• Simulaciones ilimitadas\n' +
+      '• Estadísticas avanzadas\n' +
+      '• Torneos premium\n' +
+      '• Modelos avanzados GOAL_LOGIC\n' +
+      '• Alertas y notificaciones\n\n' +
+      '—— PLAN FREE (después del trial) ——\n' +
+      'Podrás seguir usando GOAL_LOGIC con acceso a la app completa, pero con estas condiciones:\n\n' +
+      'Incluye:\n' +
+      `• Navegación completa de la app\n` +
+      `• ${FREE_DAILY_PREDICTIONS} predicciones por día\n` +
+      `• ${FREE_DAILY_SIMULATIONS} simulación por día\n` +
+      '• Estadísticas y panorama básico\n' +
+      '• Tabla, partidos, goleadores y equipos\n\n' +
+      'Funciones premium bloqueadas (verás el modal de upgrade):\n' +
+      '• Estadísticas avanzadas\n' +
+      '• Torneos premium (Champions, Mundial, etc.)\n' +
+      '• Modelos avanzados GOAL_LOGIC\n' +
+      '• Alertas y notificaciones\n\n' +
+      '—— PLAN PRO ——\n' +
+      'Acceso total sin límites:\n' +
+      '• Predicciones y simulaciones ilimitadas\n' +
+      '• Todas las funciones premium desbloqueadas\n' +
+      '• Soporte al proyecto GOAL_LOGIC\n\n' +
+      'Explora la app y aprovecha tu trial. Cuando expire, podrás continuar gratis o mejorar a PRO desde Mi Proyecto.\n\n' +
+      '— Equipo GOAL_LOGIC',
+    description: 'Guía detallada enviada automáticamente en el primer login',
   },
 ];
 
@@ -51,15 +89,35 @@ function normalizeSegment(raw = {}) {
   return { premium, activity, inactiveDays, pais, userIds };
 }
 
+function formatPlanLabel(plan) {
+  switch (plan) {
+    case 'pro':
+      return 'PRO';
+    case 'trial':
+      return 'Prueba gratuita';
+    case 'free-family':
+      return 'Familia';
+    default:
+      return 'Free';
+  }
+}
+
 function applyTemplateVariables(text, user) {
   if (!text) return '';
   const premiumSince = user?.premium_since
     ? new Date(user.premium_since).toLocaleDateString('es-ES')
     : '—';
+  const trialEndsAt = user?.trialEndsAt
+    ? new Date(user.trialEndsAt).toLocaleDateString('es-ES')
+    : '—';
+  const plan = formatPlanLabel(user?.plan);
   return String(text)
     .replace(/\{\{name\}\}/gi, user?.nombre || '')
     .replace(/\{\{email\}\}/gi, user?.email || '')
-    .replace(/\{\{premium_since\}\}/gi, premiumSince);
+    .replace(/\{\{premium_since\}\}/gi, premiumSince)
+    .replace(/\{\{trialEndsAt\}\}/gi, trialEndsAt)
+    .replace(/\{\{plan\}\}/gi, plan)
+    .replace(/\{\{trialDays\}\}/gi, String(TRIAL_DAYS));
 }
 
 async function seedDefaultTemplatesIfEmpty() {
@@ -72,6 +130,32 @@ async function seedDefaultTemplatesIfEmpty() {
     }))
   );
   return DEFAULT_TEMPLATES.length;
+}
+
+async function ensureDefaultTemplates() {
+  await seedDefaultTemplatesIfEmpty();
+
+  const legacyGuide = await MessageTemplate.findOne({ name: 'Guía GOAL_LOGIC' }).lean();
+  const extendedGuide = await MessageTemplate.findOne({ name: 'Bienvenida extendida' }).lean();
+  if (legacyGuide && !extendedGuide) {
+    await MessageTemplate.updateOne(
+      { _id: legacyGuide._id },
+      { $set: { name: 'Bienvenida extendida' } }
+    );
+  }
+
+  let inserted = 0;
+  for (const tpl of DEFAULT_TEMPLATES) {
+    const exists = await MessageTemplate.findOne({ name: tpl.name }).lean();
+    if (!exists) {
+      await MessageTemplate.create({
+        ...tpl,
+        variables: TEMPLATE_VARIABLES,
+      });
+      inserted += 1;
+    }
+  }
+  return inserted;
 }
 
 async function buildBaseUserQuery(segment) {
@@ -153,15 +237,21 @@ async function countSegmentUsers(segment) {
 async function previewMessageContent({ titulo, contenido, userId }) {
   let user = null;
   if (userId) {
-    user = await User.findById(userId).select('nombre email premium_since').lean();
+    user = await User.findById(userId).select('nombre email premium_since trialEndsAt plan').lean();
   }
   if (!user) {
     user = await User.findOne({ role: 'usuario' })
-      .select('nombre email premium_since')
+      .select('nombre email premium_since trialEndsAt plan')
       .lean();
   }
   if (!user) {
-    user = { nombre: 'Usuario', email: 'usuario@ejemplo.com', premium_since: null };
+    user = {
+      nombre: 'Usuario',
+      email: 'usuario@ejemplo.com',
+      premium_since: null,
+      trialEndsAt: null,
+      plan: 'free',
+    };
   }
   return {
     titulo: applyTemplateVariables(titulo, user),
@@ -213,7 +303,7 @@ async function executeCampaign(campaignId) {
   }
 
   const users = await User.find({ _id: { $in: userIds } })
-    .select('nombre email premium_since')
+    .select('nombre email premium_since trialEndsAt plan')
     .lean();
   const userMap = new Map(users.map((u) => [String(u._id), u]));
 
@@ -364,6 +454,7 @@ module.exports = {
   normalizeSegment,
   applyTemplateVariables,
   seedDefaultTemplatesIfEmpty,
+  ensureDefaultTemplates,
   resolveSegmentUserIds,
   countSegmentUsers,
   previewMessageContent,

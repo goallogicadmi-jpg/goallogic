@@ -1,0 +1,69 @@
+.avatar-upload {
+  display: grid;
+  gap: 8px;
+}
+
+.avatar-upload__label {
+  font-size: 0.88rem;
+  color: #444;
+}
+
+.avatar-upload__row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.avatar-upload__preview.user-avatar-img,
+.avatar-upload__preview.user-initial-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(0, 102, 255, 0.2);
+}
+
+.avatar-upload__input {
+  display: none;
+}
+
+.avatar-upload__actions {
+  display: grid;
+  gap: 8px;
+}
+
+.avatar-upload__btn {
+  justify-self: start;
+}
+
+.avatar-upload__hint {
+  color: #666;
+  font-size: 0.78rem;
+}
+
+.avatar-upload__error {
+  color: #b00020;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.user-avatar-img {
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-photo-wrapper .user-avatar-img {
+  width: 100%;
+  height: 100%;
+}
+
+.profile-photo-wrapper--small .user-avatar-img {
+  width: 40px;
+  height: 40px;
+}
+
+.micuenta-avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}

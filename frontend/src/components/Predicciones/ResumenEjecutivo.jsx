@@ -14,6 +14,8 @@ import {
   IconCuotasMercado,
   IconVisionEstrategica,
 } from './PrediccionesIcons';
+import BrandResponsiveText from '../BrandResponsiveText';
+import { BRAND_NAME } from '../../constants/brand';
 
 /**
  * ResumenEjecutivo - Componente visual para mostrar información clave destacada
@@ -158,13 +160,13 @@ export default function ResumenEjecutivo({ predicciones, equipoA, equipoB, fixtu
           >
             {PREDICCIONES_TITLES.cuotasMercado}
           </PrediccionesSectionTitle>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: tokens.spacing.md, marginTop: tokens.spacing.sm }}>
+          <div className="predicciones-resumen-probs" style={{ marginTop: tokens.spacing.sm }}>
             {probabilidadesAPI.probHome && (
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: tokens.typography.fontSizeXs, color: tokens.colors.textMuted, marginBottom: tokens.spacing.xs }}>{equipoA?.nombre || 'Local'}</div>
                 <div style={{ fontSize: tokens.typography.fontSizeXl, fontWeight: tokens.typography.fontWeightBold, color: tokens.colors.accentOrange }}>{probabilidadesAPI.probHome}%</div>
-                <div style={{ fontSize: tokens.typography.fontSizeSm, color: tokens.colors.accentGold, marginTop: tokens.spacing.xs, cursor: 'help' }} title="Probabilidad calculada por nuestro modelo interno GoalLogic.">
-                  GoalLogic: {(probabilidadesGoalLogic.local * 100).toFixed(1)}%
+                <div style={{ fontSize: tokens.typography.fontSizeSm, color: tokens.colors.accentGold, marginTop: tokens.spacing.xs, cursor: 'help' }} title={`Probabilidad calculada por nuestro modelo interno ${BRAND_NAME}.`}>
+                  <BrandResponsiveText suffix=":" /> {(probabilidadesGoalLogic.local * 100).toFixed(1)}%
                 </div>
               </div>
             )}
@@ -172,8 +174,8 @@ export default function ResumenEjecutivo({ predicciones, equipoA, equipoB, fixtu
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: tokens.typography.fontSizeXs, color: tokens.colors.textMuted, marginBottom: tokens.spacing.xs }}>Empate</div>
                 <div style={{ fontSize: tokens.typography.fontSizeXl, fontWeight: tokens.typography.fontWeightBold, color: tokens.colors.accentOrange }}>{probabilidadesAPI.probDraw}%</div>
-                <div style={{ fontSize: tokens.typography.fontSizeSm, color: tokens.colors.accentGold, marginTop: tokens.spacing.xs, cursor: 'help' }} title="Probabilidad calculada por nuestro modelo interno GoalLogic.">
-                  GoalLogic: {(probabilidadesGoalLogic.empate * 100).toFixed(1)}%
+                <div style={{ fontSize: tokens.typography.fontSizeSm, color: tokens.colors.accentGold, marginTop: tokens.spacing.xs, cursor: 'help' }} title={`Probabilidad calculada por nuestro modelo interno ${BRAND_NAME}.`}>
+                  <BrandResponsiveText suffix=":" /> {(probabilidadesGoalLogic.empate * 100).toFixed(1)}%
                 </div>
               </div>
             )}
@@ -181,8 +183,8 @@ export default function ResumenEjecutivo({ predicciones, equipoA, equipoB, fixtu
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: tokens.typography.fontSizeXs, color: tokens.colors.textMuted, marginBottom: tokens.spacing.xs }}>{equipoB?.nombre || 'Visitante'}</div>
                 <div style={{ fontSize: tokens.typography.fontSizeXl, fontWeight: tokens.typography.fontWeightBold, color: tokens.colors.accentOrange }}>{probabilidadesAPI.probAway}%</div>
-                <div style={{ fontSize: tokens.typography.fontSizeSm, color: tokens.colors.accentGold, marginTop: tokens.spacing.xs, cursor: 'help' }} title="Probabilidad calculada por nuestro modelo interno GoalLogic.">
-                  GoalLogic: {(probabilidadesGoalLogic.visitante * 100).toFixed(1)}%
+                <div style={{ fontSize: tokens.typography.fontSizeSm, color: tokens.colors.accentGold, marginTop: tokens.spacing.xs, cursor: 'help' }} title={`Probabilidad calculada por nuestro modelo interno ${BRAND_NAME}.`}>
+                  <BrandResponsiveText suffix=":" /> {(probabilidadesGoalLogic.visitante * 100).toFixed(1)}%
                 </div>
               </div>
             )}
@@ -200,22 +202,22 @@ export default function ResumenEjecutivo({ predicciones, equipoA, equipoB, fixtu
             >
               {PREDICCIONES_TITLES.visionEstrategica}
             </PrediccionesSectionTitle>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: tokens.spacing.md, marginTop: tokens.spacing.sm }}>
+            <div className="predicciones-resumen-probs" style={{ marginTop: tokens.spacing.sm }}>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: tokens.typography.fontSizeXs, color: tokens.colors.textMuted, marginBottom: tokens.spacing.xs }}>{equipoA?.nombre || 'Local'}</div>
-                <div style={{ fontSize: tokens.typography.fontSizeXl, fontWeight: tokens.typography.fontWeightBold, color: tokens.colors.accentGold, cursor: 'help' }} title="Probabilidad calculada por nuestro modelo interno GoalLogic.">
+                <div style={{ fontSize: tokens.typography.fontSizeXl, fontWeight: tokens.typography.fontWeightBold, color: tokens.colors.accentGold, cursor: 'help' }} title={`Probabilidad calculada por nuestro modelo interno ${BRAND_NAME}.`}>
                   {(probabilidadesGoalLogic.local * 100).toFixed(1)}%
                 </div>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: tokens.typography.fontSizeXs, color: tokens.colors.textMuted, marginBottom: tokens.spacing.xs }}>Empate</div>
-                <div style={{ fontSize: tokens.typography.fontSizeXl, fontWeight: tokens.typography.fontWeightBold, color: tokens.colors.accentGold, cursor: 'help' }} title="Probabilidad calculada por nuestro modelo interno GoalLogic.">
+                <div style={{ fontSize: tokens.typography.fontSizeXl, fontWeight: tokens.typography.fontWeightBold, color: tokens.colors.accentGold, cursor: 'help' }} title={`Probabilidad calculada por nuestro modelo interno ${BRAND_NAME}.`}>
                   {(probabilidadesGoalLogic.empate * 100).toFixed(1)}%
                 </div>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: tokens.typography.fontSizeXs, color: tokens.colors.textMuted, marginBottom: tokens.spacing.xs }}>{equipoB?.nombre || 'Visitante'}</div>
-                <div style={{ fontSize: tokens.typography.fontSizeXl, fontWeight: tokens.typography.fontWeightBold, color: tokens.colors.accentGold, cursor: 'help' }} title="Probabilidad calculada por nuestro modelo interno GoalLogic.">
+                <div style={{ fontSize: tokens.typography.fontSizeXl, fontWeight: tokens.typography.fontWeightBold, color: tokens.colors.accentGold, cursor: 'help' }} title={`Probabilidad calculada por nuestro modelo interno ${BRAND_NAME}.`}>
                   {(probabilidadesGoalLogic.visitante * 100).toFixed(1)}%
                 </div>
               </div>

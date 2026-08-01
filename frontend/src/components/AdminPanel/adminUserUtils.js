@@ -7,6 +7,9 @@ export function getRoleBadge(user) {
   if (user?.role === 'admin') {
     return { text: 'Admin', className: 'role-admin' };
   }
+  if (user?.role === 'analista') {
+    return { text: 'Analista Deportivo', className: 'role-analista' };
+  }
   if (user?.role === 'admin_secundario') {
     return { text: 'Admin secundario', className: 'role-admin-sec' };
   }

@@ -1,0 +1,81 @@
+.image-crop-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.image-crop-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.image-crop-modal__panel {
+  position: relative;
+  width: min(560px, 100%);
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.image-crop-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.image-crop-modal__header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.image-crop-modal__close {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+}
+
+.image-crop-modal__crop-area {
+  position: relative;
+  height: 360px;
+  background: #111;
+}
+
+.image-crop-modal__controls {
+  padding: 12px 16px 0;
+}
+
+.image-crop-modal__zoom-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.88rem;
+  color: #444;
+}
+
+.image-crop-modal__zoom-label input {
+  flex: 1;
+}
+
+.image-crop-modal__error {
+  margin: 8px 16px 0;
+  color: #b00020;
+  font-size: 0.85rem;
+}
+
+.image-crop-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px;
+}

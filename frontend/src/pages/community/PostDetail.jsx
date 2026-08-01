@@ -4,7 +4,8 @@ import { useUser } from '../../context/UserContext';
 import axios from 'axios';
 import { getToken } from '../../services/authService';
 import { deletePost, deleteComment } from '../../services/communityService';
-import { UserInitialAvatar } from '../../components/UserInitialAvatar';
+import { UserAvatar } from '../../components/UserAvatar';
+import '../../components/PostImageUpload.css';
 
 export function PostDetail() {
   const { id } = useParams();
@@ -128,8 +129,9 @@ export function PostDetail() {
       <div className="post-card post-card-detail">
         <div className="post-header">
           <div className="post-author">
-            <UserInitialAvatar
+            <UserAvatar
               nombre={post.user?.nombre}
+              foto_perfil_url={post.user?.foto_perfil_url}
               className="author-avatar"
               size={40}
             />
@@ -169,6 +171,17 @@ export function PostDetail() {
             )}
           </div>
         )}
+
+        {post.imagen_url ? (
+          <div className="post-detail-image-wrap">
+            <img
+              src={post.imagen_url}
+              alt="Imagen de la publicación"
+              className="post-detail-image"
+              loading="lazy"
+            />
+          </div>
+        ) : null}
 
         <div className="post-text">{post.text}</div>
 
@@ -223,8 +236,9 @@ export function PostDetail() {
               <div key={comment._id} className="comment-card">
                 <div className="comment-card-header">
                   <div className="comment-author">
-                    <UserInitialAvatar
+                    <UserAvatar
                       nombre={comment.user?.nombre}
+                      foto_perfil_url={comment.user?.foto_perfil_url}
                       className="comment-avatar"
                       size={36}
                     />

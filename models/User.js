@@ -73,6 +73,28 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  /** Guía detallada de onboarding enviada en el primer login. */
+  onboardingGuideSent: {
+    type: Boolean,
+    default: false,
+  },
+  /** Prueba gratuita de 15 días activa. */
+  trialActive: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
+  /** Fin de la prueba gratuita. */
+  trialEndsAt: {
+    type: Date,
+    default: null,
+    index: true,
+  },
+  /** Usuario vio el modal de trial expirado. */
+  trialExpiredAcknowledged: {
+    type: Boolean,
+    default: false,
+  },
   premium: {
     type: Boolean,
     default: false,
@@ -111,9 +133,70 @@ const userSchema = new mongoose.Schema({
   // Rol del usuario: admin, admin_secundario, usuario
   role: {
     type: String,
-    enum: ['admin', 'admin_secundario', 'usuario'],
+    enum: ['admin', 'admin_secundario', 'usuario', 'analista'],
     default: 'usuario',
     index: true // Índice para búsquedas de administradores
+  },
+  /** Fecha en que el usuario fue certificado como analista deportivo. */
+  analystVerifiedAt: {
+    type: Date,
+    default: null,
+  },
+  /** Precio mensual de suscripción al analista (centavos, display). */
+  analystSubscriptionPriceCents: {
+    type: Number,
+    default: null,
+    min: 0,
+  },
+  /** Stripe Price ID para suscripción al analista (configurado por admin). */
+  analystStripePriceId: {
+    type: String,
+    trim: true,
+    default: null,
+  },
+  /** Identificador público visible (ej. BRAYAN-CORTES-582). */
+  publicId: {
+    type: String,
+    trim: true,
+    unique: true,
+    sparse: true,
+    index: true,
+  },
+  /** Estado operativo del analista deportivo. */
+  analystStatus: {
+    type: String,
+    enum: ['none', 'pending', 'active', 'suspended', 'rejected'],
+    default: 'none',
+    index: true,
+  },
+  analystSuspendedAt: {
+    type: Date,
+    default: null,
+  },
+  analystSuspendedReason: {
+    type: String,
+    trim: true,
+    default: null,
+  },
+  analystPostsBlocked: {
+    type: Boolean,
+    default: false,
+  },
+  analystMessagesBlocked: {
+    type: Boolean,
+    default: false,
+  },
+  analystWarnings: [{
+    message: { type: String, trim: true, required: true },
+    actorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    createdAt: { type: Date, default: Date.now },
+  }],
+  /** Bio pública del analista deportivo. */
+  analystDescription: {
+    type: String,
+    trim: true,
+    default: '',
+    maxlength: 2000,
   },
   // Indica si es el administrador principal del sistema
   isMainAdmin: {

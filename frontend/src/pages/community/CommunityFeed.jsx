@@ -4,7 +4,8 @@ import { useUser } from '../../context/UserContext';
 import axios from 'axios';
 import { getToken } from '../../services/authService';
 import { deletePost } from '../../services/communityService';
-import { UserInitialAvatar } from '../../components/UserInitialAvatar';
+import { UserAvatar } from '../../components/UserAvatar';
+import AnalystPremiumPostCard from '../../components/Analysts/AnalystPremiumPostCard';
 
 export function CommunityFeed() {
   const [posts, setPosts] = useState([]);
@@ -106,12 +107,23 @@ export function CommunityFeed() {
             </button>
           </div>
         ) : (
-          posts.map(post => (
+          posts.map(post =>
+            post.isAnalystPremiumPost ? (
+              <AnalystPremiumPostCard
+                key={post._id}
+                post={post}
+                onReaction={handleReaction}
+                onDelete={handleDeletePost}
+                deletingPostId={deletingPostId}
+                isAdmin={isAdmin}
+              />
+            ) : (
             <div key={post._id} className="post-card">
               <div className="post-header">
                 <div className="post-author">
-                  <UserInitialAvatar
+                  <UserAvatar
                     nombre={post.user?.nombre}
+                    foto_perfil_url={post.user?.foto_perfil_url}
                     className="author-avatar"
                     size={40}
                   />
@@ -186,7 +198,8 @@ export function CommunityFeed() {
                 )}
               </div>
             </div>
-          ))
+            )
+          )
         )}
       </div>
     </div>

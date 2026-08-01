@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { register, login, saveToken, saveAuthUserSnapshot } from '../../services/authService';
-import { getAuthHeaders, authFetch } from '../../setupApiAuth.js';
 import { useUser } from '../../context/UserContext';
 import './MiCuenta.css';
 
-const checkoutPriceId =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_STRIPE_PRICE_ID?.trim()) || '';
-
 /**
- * Componente de Registro
- * Registro y pago en un solo flujo: cuenta → checkout Stripe.
+ * Registro gratuito: crea cuenta con trial de 15 días sin pago obligatorio.
  */
 const Register = () => {
+  const navigate = useNavigate();
   const { loadUserProfile } = useUser();
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
@@ -100,51 +97,23 @@ const Register = () => {
         return;
       }
 
-      if (!checkoutPriceId) {
-        setError(
-          'Falta VITE_STRIPE_PRICE_ID en frontend/.env (precio activo del producto en Stripe). Guarda el archivo y reinicia Vite (npm run dev).'
-        );
+      const loginRes = await login(email.trim(), password);
+      if (!loginRes?.success || !loginRes.token) {
+        setSuccess('Cuenta creada. Inicia sesión para continuar.');
         setLoading(false);
         return;
       }
 
-      // Iniciar sesión para que, si el checkout falla, el usuario ya tenga token
-      // y pueda usar “Completar pago” en Mi Cuenta (GET /me devuelve 403 sin premium).
-      try {
-        const loginRes = await login(email.trim(), password);
-        if (loginRes?.success && loginRes.token) {
-          saveToken(loginRes.token);
-          if (loginRes.user) {
-            saveAuthUserSnapshot(loginRes.user);
-          }
-          await loadUserProfile();
-        } else {
-          setError('Cuenta creada pero no se pudo iniciar sesión. Inicia sesión y completa el pago.');
-          setLoading(false);
-          return;
-        }
-      } catch (loginErr) {
-        setError('Cuenta creada pero no se pudo iniciar sesión. Inicia sesión y completa el pago.');
-        setLoading(false);
-        return;
+      saveToken(loginRes.token);
+      if (loginRes.user) {
+        saveAuthUserSnapshot(loginRes.user);
       }
+      await loadUserProfile();
 
-      const payRes = await authFetch('/api/payments/create-checkout-session', {
-        method: 'POST',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ priceId: checkoutPriceId }),
-      });
-
-      const payData = await payRes.json();
-
-      if (!payRes.ok || !payData.url) {
-        throw new Error(payData.error || payData.message || 'Error al iniciar el pago');
-      }
-
-      setSuccess('Redirigiendo al pago seguro…');
-      window.location.href = payData.url;
+      setSuccess('¡Cuenta creada! Disfruta GOAL_LOGIC con acceso gratuito.');
+      navigate('/clubes');
     } catch (err) {
-      setError(err.message || 'Error al registrar o iniciar el pago.');
+      setError(err.message || 'Error al registrar la cuenta.');
     } finally {
       setLoading(false);
     }
@@ -154,6 +123,7 @@ const Register = () => {
     <div className="auth-form-container">
       <div className="auth-form">
         <h2 className="auth-form-title">Crear Cuenta</h2>
+        <p className="auth-form-subtitle">Registro 100% gratuito. Sin tarjeta requerida.</p>
 
         {error && (
           <div className="auth-message auth-error">
@@ -305,7 +275,7 @@ const Register = () => {
             className="auth-button auth-button-primary"
             disabled={loading}
           >
-            {loading ? 'Procesando…' : 'Continuar y pagar'}
+            {loading ? 'Creando cuenta…' : 'Crear cuenta gratis'}
           </button>
         </form>
       </div>

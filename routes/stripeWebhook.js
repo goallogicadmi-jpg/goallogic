@@ -5,6 +5,15 @@ const logger = require('../utils/logger');
 const metrics = require('../utils/metrics');
 const stripeWebhookMetrics = require('../utils/stripeWebhookMetrics');
 const { mongoUriHint, stripeApiModeFromEnv } = require('../utils/mongoUriHint');
+const { resolvePlanFromStripePriceId } = require('../utils/planAccess');
+const { sendPremiumActiveAutomatedMessage } = require('../utils/automatedMessageTriggers');
+const {
+  activateAnalystSubscription,
+  deactivateAnalystSubscriptionByStripeId,
+  syncAnalystSubscriptionFromStripe,
+} = require('../utils/analystSubscriptionService');
+const { recordAnalystPayment } = require('../utils/analystAdminService');
+const AnalystSubscription = require('../models/AnalystSubscription');
 
 const PAYMENT_FAILED_TYPES = new Set([
   'payment_intent.payment_failed',
@@ -92,7 +101,7 @@ async function resolveUserId(obj) {
   return null;
 }
 
-async function setPremiumActive(userId, stripePatch = {}) {
+async function setPremiumActive(userId, stripePatch = {}, plan = 'pro') {
   const user = await User.findById(userId);
   if (!user) {
     console.error(
@@ -102,8 +111,12 @@ async function setPremiumActive(userId, stripePatch = {}) {
     return false;
   }
 
+  const wasPremium = user.premium === true;
+
   const set = {
     premium: true,
+    plan: plan === 'basic' ? 'basic' : 'pro',
+    trialActive: false,
     updated_at: new Date(),
     ...stripePatch,
   };
@@ -126,6 +139,16 @@ async function setPremiumActive(userId, stripePatch = {}) {
     stripeMode: mode,
     mongoUriHint: mongoUriHint(),
   });
+
+  if (!wasPremium) {
+    sendPremiumActiveAutomatedMessage(userId).catch((msgErr) => {
+      logger.error('premium_automated_message_error', {
+        message: msgErr.message,
+        userId: String(userId),
+      });
+    });
+  }
+
   return true;
 }
 
@@ -144,7 +167,7 @@ async function setPremiumInactive(userId) {
   await User.updateOne(
     { _id: userId },
     {
-      $set: { premium: false, updated_at: new Date() },
+      $set: { premium: false, plan: 'free', updated_at: new Date() },
       $unset: { stripe_subscription_id: '' },
     }
   );
@@ -322,6 +345,25 @@ async function stripeWebhook(req, res) {
           break;
         }
 
+        if (session.metadata?.checkoutType === 'analyst_subscription') {
+          const analystId = session.metadata.analystId;
+          await activateAnalystSubscription({
+            subscriberId: userId,
+            analystId,
+            stripeSubscriptionId:
+              typeof session.subscription === 'string' ? session.subscription : null,
+            stripeCustomerId:
+              typeof session.customer === 'string' ? session.customer : null,
+            status: 'active',
+          });
+          logger.log('webhook', 'analyst_subscription_checkout_completed', {
+            subscriberId: userId,
+            analystId,
+            sessionId: session.id,
+          });
+          break;
+        }
+
         console.log(
           `[webhook] checkout.session.completed → userId resuelto=${userId}, client_reference_id=${session.client_reference_id ?? '(n/a)'}, stripeMode=${stripeApiModeFromEnv()}, mongoUriHint=${mongoUriHint()}`
         );
@@ -336,7 +378,10 @@ async function stripeWebhook(req, res) {
           stripePatch.stripe_subscription_id = session.subscription;
         }
 
-        await setPremiumActive(userId, stripePatch);
+        const checkoutPlan =
+          session.metadata?.plan === 'basic' ? 'basic' : session.metadata?.plan === 'pro' ? 'pro' : 'pro';
+
+        await setPremiumActive(userId, stripePatch, checkoutPlan);
         logger.log('webhook', 'stripe_premium_activated_checkout', {
           userId,
           sessionId: session.id,
@@ -347,6 +392,15 @@ async function stripeWebhook(req, res) {
 
       case 'customer.subscription.created': {
         const sub = event.data.object;
+        if (sub.metadata?.checkoutType === 'analyst_subscription') {
+          await syncAnalystSubscriptionFromStripe(sub);
+          logger.log('webhook', 'analyst_subscription_created', {
+            subscriptionId: sub.id,
+            analystId: sub.metadata?.analystId,
+            userId: sub.metadata?.userId,
+          });
+          break;
+        }
         const userId = await resolveUserId(sub);
         if (!userId) {
           logger.warn('stripe_subscription_created_no_user', {
@@ -361,7 +415,13 @@ async function stripeWebhook(req, res) {
           stripePatch.stripe_customer_id = sub.customer;
         }
         if (subscriptionShouldBePremium(sub)) {
-          await setPremiumActive(userId, stripePatch);
+          const subPlan =
+            sub.metadata?.plan === 'basic'
+              ? 'basic'
+              : sub.metadata?.plan === 'pro'
+                ? 'pro'
+                : resolvePlanFromStripePriceId(sub.items?.data?.[0]?.price?.id);
+          await setPremiumActive(userId, stripePatch, subPlan);
         }
         logger.log('webhook', 'stripe_subscription_created', {
           userId,
@@ -373,6 +433,14 @@ async function stripeWebhook(req, res) {
 
       case 'customer.subscription.updated': {
         const sub = event.data.object;
+        if (sub.metadata?.checkoutType === 'analyst_subscription') {
+          await syncAnalystSubscriptionFromStripe(sub);
+          logger.log('webhook', 'analyst_subscription_updated', {
+            subscriptionId: sub.id,
+            status: sub.status,
+          });
+          break;
+        }
         const userId = await resolveUserId(sub);
         if (!userId) {
           logger.warn('stripe_subscription_updated_no_user', {
@@ -387,7 +455,13 @@ async function stripeWebhook(req, res) {
           stripePatch.stripe_customer_id = sub.customer;
         }
         if (subscriptionShouldBePremium(sub)) {
-          await setPremiumActive(userId, stripePatch);
+          const subPlan =
+            sub.metadata?.plan === 'basic'
+              ? 'basic'
+              : sub.metadata?.plan === 'pro'
+                ? 'pro'
+                : resolvePlanFromStripePriceId(sub.items?.data?.[0]?.price?.id);
+          await setPremiumActive(userId, stripePatch, subPlan);
         } else if (subscriptionShouldDeactivatePremium(sub)) {
           await setPremiumInactive(userId);
         }
@@ -401,6 +475,14 @@ async function stripeWebhook(req, res) {
 
       case 'customer.subscription.deleted': {
         const sub = event.data.object;
+        if (sub.metadata?.checkoutType === 'analyst_subscription') {
+          await deactivateAnalystSubscriptionByStripeId(sub.id);
+          logger.log('webhook', 'analyst_subscription_deleted', {
+            subscriptionId: sub.id,
+            analystId: sub.metadata?.analystId,
+          });
+          break;
+        }
         const userId = await resolveUserId(sub);
         if (!userId) {
           logger.warn('stripe_subscription_deleted_no_user', {
@@ -421,6 +503,36 @@ async function stripeWebhook(req, res) {
         if (invoice.billing_reason === 'subscription_create' && invoice.amount_paid === 0) {
           // evitar doble log ruidoso; checkout.session.completed ya activó
         }
+
+        const subscriptionId =
+          typeof invoice.subscription === 'string' ? invoice.subscription : null;
+
+        if (subscriptionId) {
+          const analystSub = await AnalystSubscription.findOne({
+            stripeSubscriptionId: subscriptionId,
+          }).lean();
+
+          if (analystSub && invoice.amount_paid > 0) {
+            await recordAnalystPayment({
+              analystId: analystSub.analystId,
+              subscriberId: analystSub.subscriberId,
+              stripeInvoiceId: invoice.id,
+              stripeSubscriptionId: subscriptionId,
+              amountCents: invoice.amount_paid,
+              currency: invoice.currency || 'eur',
+              paidAt: invoice.status_transitions?.paid_at
+                ? new Date(invoice.status_transitions.paid_at * 1000)
+                : new Date(),
+            });
+            logger.log('webhook', 'analyst_payment_recorded', {
+              invoiceId: invoice.id,
+              analystId: String(analystSub.analystId),
+              amountCents: invoice.amount_paid,
+            });
+            break;
+          }
+        }
+
         const userId = await resolveUserId(invoice);
         if (!userId) {
           logger.warn('stripe_invoice_succeeded_no_user', { invoiceId: invoice.id });
@@ -436,7 +548,7 @@ async function stripeWebhook(req, res) {
         ) {
           stripePatch.stripe_subscription_id = invoice.subscription;
         }
-        await setPremiumActive(userId, stripePatch);
+        await setPremiumActive(userId, stripePatch, 'pro');
         logger.log('webhook', 'stripe_invoice_payment_succeeded', {
           userId,
           invoiceId: invoice.id,

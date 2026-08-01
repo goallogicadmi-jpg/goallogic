@@ -6,6 +6,7 @@ const PUBLICATION_TYPES = [
   'Tarjetas',
   'Equipos',
   'Comentario',
+  'Ranking Analistas',
 ];
 
 const CommunityPostSchema = new mongoose.Schema({
@@ -34,6 +35,7 @@ const CommunityPostSchema = new mongoose.Schema({
     away: { type: Number, min: 0, max: 100 },
   },
   text: { type: String, required: true },
+  imagen_url: { type: String, default: '' },
   reactionsCount: {
     like: { type: Number, default: 0 },
     useful: { type: Number, default: 0 },

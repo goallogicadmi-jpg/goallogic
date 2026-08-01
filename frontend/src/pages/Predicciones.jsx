@@ -50,6 +50,11 @@ import { IconPanoramaEquipo } from "../components/Predicciones/PrediccionesIcons
 import { PREDICCIONES_TITLES } from "../constants/prediccionesSectionTitles";
 import { buildImportantPlayersViewModel } from "../utils/prediccionesImportantPlayers";
 import { buildConclusionesComparativaEquipos } from "../utils/conclusionesCopy";
+import { useUser } from "../context/UserContext";
+import { usePlanAccess } from "../context/PlanAccessContext";
+import { consumePlanUsage } from "../services/planService";
+import { hasFullProAccess } from "../utils/planAccess";
+import PremiumFeatureGate, { FEATURES } from "../components/Freemium/PremiumFeatureGate";
 import {
   fetchPredictionsLeagues,
   getLeagueSeasonMode,
@@ -107,6 +112,8 @@ async function fetchPreferredSeasonYearForLeague(leagueId) {
 }
 
 export default function Predicciones() {
+  const { user, isAuthenticated } = useUser();
+  const { openUpgradeModal } = usePlanAccess();
   const location = useLocation();
   const { homeTeam, awayTeam, leagueId, season: routeSeason, fixtureId: routeFixtureId, domain: routeDomainRaw, leagueName: routeLeagueName, leagueLogo: routeLeagueLogo, fromMatchesRoute } = location.state || {};
   const routePredictionDomain = normalizeRoutePredictionDomain(routeDomainRaw);
@@ -415,6 +422,20 @@ export default function Predicciones() {
     if (domainA !== predictionDomain || domainB !== predictionDomain) {
       setError("Las competiciones elegidas no corresponden al modo Clubes o Selecciones activo.");
       return;
+    }
+
+    if (isAuthenticated && !hasFullProAccess(user)) {
+      try {
+        await consumePlanUsage('predictions');
+      } catch (usageErr) {
+        if (usageErr.code === 'daily_limit_reached' || usageErr.status === 429) {
+          openUpgradeModal();
+          setError(
+            usageErr.message || 'Has alcanzado el límite diario de predicciones del plan gratuito.'
+          );
+          return;
+        }
+      }
     }
 
     // Activar estado de carga
@@ -919,23 +940,34 @@ export default function Predicciones() {
         <div className="predicciones-resultados">
           {/* Resumen Ejecutivo - Destacado */}
           {resultados.predicciones && (
-            <ResumenEjecutivo 
-              predicciones={resultados.predicciones}
-              equipoA={resultados.equipoA}
-              equipoB={resultados.equipoB}
-              fixtureConOdds={datosAdicionales?.fixtureConOdds}
-              datosAdicionales={datosAdicionales}
-            />
+            <PremiumFeatureGate
+              feature={FEATURES.ADVANCED_MODELS}
+              title="Modelos avanzados GOAL_LOGIC"
+              description="El informe ejecutivo y la comparación avanzada están disponibles en GOAL_LOGIC PRO."
+            >
+              <ResumenEjecutivo 
+                predicciones={resultados.predicciones}
+                equipoA={resultados.equipoA}
+                equipoB={resultados.equipoB}
+                fixtureConOdds={datosAdicionales?.fixtureConOdds}
+                datosAdicionales={datosAdicionales}
+              />
+            </PremiumFeatureGate>
           )}
 
-          {/* Comparación con Tabs */}
           {resultados.predicciones && (
-            <ComparacionConTabs 
-              predicciones={resultados.predicciones}
-              equipoA={resultados.equipoA}
-              equipoB={resultados.equipoB}
-              datosAdicionales={datosAdicionales}
-            />
+            <PremiumFeatureGate
+              feature={FEATURES.ADVANCED_MODELS}
+              title="Análisis comparativo avanzado"
+              description="Desbloquea métricas avanzadas, proyecciones y conclusiones estratégicas con PRO."
+            >
+              <ComparacionConTabs 
+                predicciones={resultados.predicciones}
+                equipoA={resultados.equipoA}
+                equipoB={resultados.equipoB}
+                datosAdicionales={datosAdicionales}
+              />
+            </PremiumFeatureGate>
           )}
 
           <AccordionGroup singleOpen={isMobileCompactLayout}>
@@ -986,6 +1018,8 @@ export default function Predicciones() {
                 datosAdicionales={datosAdicionales}
                 nombreEquipoA={resultados.equipoA?.nombre}
                 nombreEquipoB={resultados.equipoB?.nombre}
+                equipoAId={resultados.equipoA?.id}
+                equipoBId={resultados.equipoB?.id}
               />
             )}
           </AccordionGroup>

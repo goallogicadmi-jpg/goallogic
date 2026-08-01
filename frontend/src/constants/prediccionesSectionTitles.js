@@ -15,6 +15,7 @@ export const PREDICCIONES_TITLES = {
   conclusionesEstrategicas: 'Conclusiones Estratégicas',
   panoramaEquipo: 'Panorama del Equipo',
   historialDirecto: 'H2H',
+  ultimosPartidos: 'Últimos partidos',
   estadoPlantel: 'Estado del Plantel',
   lesionadosEquipo: 'Lesionados del Equipo',
   referentesOfensivos: 'Goleadores Por Equipo',

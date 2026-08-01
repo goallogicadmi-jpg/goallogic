@@ -20,6 +20,8 @@ import { didFixtureScoreChange } from "../../utils/matchCardHelpers";
 import useFixtureCardEvents from "../../hooks/useFixtureCardEvents";
 import PartidoCardMiniTimeline from "./PartidoCardMiniTimeline";
 import PartidoCardMiniMomentum from "./PartidoCardMiniMomentum";
+import BrandResponsiveText from '../BrandResponsiveText';
+import { BRAND_PREDIC_DESKTOP, BRAND_PREDIC_MOBILE } from '../../constants/brand';
 import "../../styles/partidos.css";
 
 /**
@@ -360,7 +362,10 @@ function PartidoCard({
             onClick={handlePrediccionesClick}
             disabled={cargandoPredicciones}
           >
-            GoalLogic Predic
+            <BrandResponsiveText
+              mobileLabel={BRAND_PREDIC_MOBILE}
+              desktopLabel={BRAND_PREDIC_DESKTOP}
+            />
           </button>
         </div>
       </div>

@@ -319,6 +319,12 @@
   border: 1px solid rgba(255, 152, 0, 0.3);
 }
 
+.role-badge.role-analista {
+  background: rgba(0, 102, 255, 0.12);
+  color: #0066ff;
+  border: 1px solid rgba(0, 102, 255, 0.35);
+}
+
 .role-badge.role-usuario {
   background: rgba(76, 175, 80, 0.2);
   color: #4CAF50;
@@ -659,11 +665,12 @@
   margin-bottom: 16px;
 }
 
-.admin-pro-brand-title {
+.admin-pro-brand-title.goal-logic-title {
   display: block;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--accent-color, #f28a00);
+  text-align: left;
+  margin: 0;
+  width: auto;
+  font-size: 1.1rem;
 }
 
 .admin-pro-brand-sub {
@@ -2612,4 +2619,336 @@
   background: rgba(76, 175, 80, 0.12);
   color: #a5d6a7;
   border: 1px solid rgba(76, 175, 80, 0.25);
+}
+
+/* Analistas Deportivos — Admin PRO */
+.analyst-admin-tabs {
+  margin-bottom: 20px;
+}
+
+.analyst-admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.analyst-admin-stat-card {
+  background: var(--bg-tertiary, #252525);
+  border: 1px solid var(--border-color, #1F2630);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.analyst-admin-stat-card span {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary, #B3B8C2);
+  margin-bottom: 6px;
+}
+
+.analyst-admin-stat-card strong {
+  font-size: 1.4rem;
+}
+
+.analyst-admin-tops-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.analyst-admin-top-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.analyst-admin-top-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-color, #1F2630);
+}
+
+.analyst-admin-link-btn {
+  background: none;
+  border: none;
+  color: var(--accent-color, #F28A00);
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.analyst-admin-table tr.is-suspended {
+  opacity: 0.65;
+}
+
+.analyst-admin-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.analyst-admin-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.analyst-admin-avatar--placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(242, 138, 0, 0.2);
+  color: var(--accent-color, #F28A00);
+  font-weight: 700;
+}
+
+.analyst-admin-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.analyst-admin-status--active,
+.analyst-admin-status--none {
+  background: rgba(76, 175, 80, 0.15);
+  color: #81c784;
+}
+
+.analyst-admin-status--pending {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffd54f;
+}
+
+.analyst-admin-status--suspended,
+.analyst-admin-status--rejected {
+  background: rgba(244, 67, 54, 0.15);
+  color: #ef9a9a;
+}
+
+.analyst-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.analyst-admin-detail__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.analyst-admin-summary-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.analyst-admin-mini-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 120px;
+  margin: 12px 0;
+}
+
+.analyst-admin-mini-chart__bar {
+  flex: 1;
+  min-width: 6px;
+  border-radius: 4px 4px 0 0;
+  background: #ef5350;
+}
+
+.analyst-admin-mini-chart__bar.is-pos {
+  background: #66bb6a;
+}
+
+.analyst-admin-post-list,
+.analyst-admin-message-list,
+.analyst-admin-warning-list,
+.analyst-admin-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.analyst-admin-message-list li,
+.analyst-admin-post-list li {
+  padding: 12px;
+  border: 1px solid var(--border-color, #1F2630);
+  border-radius: 8px;
+}
+
+.analyst-admin-message-list li.is-suspended {
+  opacity: 0.6;
+}
+
+.analyst-admin-sanctions .analyst-admin-sanction-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.analyst-admin-warning-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.analyst-admin-verifications-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 16px;
+}
+
+.analyst-admin-audit-payload {
+  margin: 0;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.analyst-admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.analyst-admin-modal {
+  width: min(480px, 92vw);
+  display: grid;
+  gap: 12px;
+}
+
+.analyst-admin-create-form {
+  display: grid;
+  gap: 20px;
+}
+
+.analyst-admin-create-section {
+  display: grid;
+  gap: 12px;
+}
+
+.analyst-admin-create-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.analyst-admin-bets-editor {
+  display: grid;
+  gap: 8px;
+}
+
+.analyst-admin-bet-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 0.7fr 0.7fr 0.9fr auto;
+  gap: 6px;
+}
+
+.analyst-admin-avatar--lg {
+  width: 64px;
+  height: 64px;
+  font-size: 1.4rem;
+}
+
+.analyst-admin-detail__profile {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+@media (max-width: 960px) {
+  .analyst-admin-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analyst-admin-tops-grid,
+  .analyst-admin-verifications-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analyst-admin-bet-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Ranking de Analistas */
+.analyst-ranking-layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(280px, 340px);
+  gap: 16px;
+  align-items: start;
+}
+
+.analyst-ranking-table tbody tr {
+  cursor: pointer;
+}
+
+.analyst-ranking-table tbody tr.is-selected {
+  background: rgba(242, 138, 0, 0.08);
+}
+
+.analyst-ranking-quick-card {
+  position: sticky;
+  top: 16px;
+}
+
+.analyst-ranking-quick-card__close {
+  float: right;
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.analyst-ranking-quick-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.analyst-ranking-quick-stats span {
+  font-size: 0.88rem;
+  color: var(--text-secondary, #B3B8C2);
+}
+
+.analyst-ranking-preview {
+  background: var(--bg-tertiary, #252525);
+  border: 1px solid var(--border-color, #1F2630);
+  border-radius: 8px;
+  padding: 14px;
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.9rem;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.analyst-ranking-publish-modal {
+  width: min(640px, 94vw);
+  max-height: 90vh;
+  overflow: auto;
+}
+
+@media (max-width: 960px) {
+  .analyst-ranking-layout {
+    grid-template-columns: 1fr;
+  }
 }

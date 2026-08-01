@@ -9,6 +9,8 @@ import Toast from "../components/Toast";
 import SiteFooter from "../components/legal/SiteFooter";
 import LegalAcceptanceGate from "../components/legal/LegalAcceptanceGate";
 import FamilyWelcomeGate from "../components/Familia/FamilyWelcomeGate";
+import { TrialWelcomeGate, TrialExpiredGate } from "../components/Freemium/TrialModals";
+import TrialBadge from "../components/Freemium/TrialBadge";
 import CmsGlobalBanner from "../components/Cms/CmsGlobalBanner";
 import OperationalSettingsBanner from "../components/OperationalSettingsBanner";
 import {
@@ -16,6 +18,7 @@ import {
   SESSION_REQUIRED_TOAST_DURATION_MS,
 } from "../constants/sessionMessages";
 import logoSrc from "../assets/images/goal-logic-logo.png";
+import { BRAND_NAME } from "../constants/brand";
 
 export default function Layout() {
   const [logoError, setLogoError] = useState(false);
@@ -554,7 +557,7 @@ export default function Layout() {
             {!logoError ? (
               <img
                 src={logoSrc}
-                alt="GoalLogic Logo"
+                alt={`${BRAND_NAME} Logo`}
                 className="main-header-logo-img"
                 width={140}
                 height={48}
@@ -563,7 +566,9 @@ export default function Layout() {
                 onError={() => setLogoError(true)}
               />
             ) : null}
-            <span className={`main-header-logo-text ${logoError ? 'show' : ''}`}>GoalLogic</span>
+            <span className={`main-header-logo-text notranslate ${logoError ? 'show' : ''}`} translate="no" lang="en">
+              {BRAND_NAME}
+            </span>
           </div>
           <nav
             className={`sidebar main-header-nav${isSidebarOpen ? ' open' : ''}`}
@@ -576,6 +581,7 @@ export default function Layout() {
             <ComunidadButton />
           </nav>
           <div className="main-header-actions">
+            <TrialBadge />
             <AdminLink />
             <NotificationBell />
             <UserMenuAvatar />
@@ -595,9 +601,13 @@ export default function Layout() {
       <main className="layout-page-shell">
         <div className="app-container">
           <LegalAcceptanceGate>
-            <FamilyWelcomeGate>
-              <Outlet />
-            </FamilyWelcomeGate>
+            <TrialExpiredGate>
+              <FamilyWelcomeGate>
+                <TrialWelcomeGate>
+                  <Outlet />
+                </TrialWelcomeGate>
+              </FamilyWelcomeGate>
+            </TrialExpiredGate>
           </LegalAcceptanceGate>
         </div>
       </main>

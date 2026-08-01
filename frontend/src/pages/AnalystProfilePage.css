@@ -1,0 +1,168 @@
+.analyst-profile-page {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  color: #111111;
+}
+
+.analyst-profile-page--loading,
+.analyst-profile-page--error {
+  text-align: center;
+  padding: 48px 16px;
+  color: #444444;
+}
+
+.analyst-profile__hero {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 20px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 102, 255, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 59, 153, 0.08);
+}
+
+.analyst-profile__identity h1 {
+  margin: 0 0 8px;
+  font-size: 1.6rem;
+}
+
+.analyst-profile__country {
+  margin: 8px 0 0;
+  color: #444444;
+}
+
+.analyst-profile__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.analyst-profile__stats-grid article {
+  background: #f5f7fa;
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid rgba(0, 102, 255, 0.1);
+}
+
+.analyst-profile__stats-grid span {
+  display: block;
+  font-size: 0.78rem;
+  color: #444444;
+  margin-bottom: 4px;
+}
+
+.analyst-profile__stats-grid strong {
+  font-size: 1.2rem;
+  color: #0066ff;
+}
+
+.analyst-profile__subscribe {
+  margin-bottom: 24px;
+}
+
+.analyst-profile__price-note {
+  margin: 8px 0 0;
+  color: #444444;
+  font-size: 0.88rem;
+}
+
+.analyst-profile__section {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.analyst-profile__section h2 {
+  margin: 0 0 14px;
+  font-size: 1.1rem;
+  color: #003b99;
+}
+
+.analyst-profile__locked {
+  padding: 16px;
+  border-radius: 10px;
+  background: #f5f7fa;
+  border: 1px dashed rgba(0, 102, 255, 0.35);
+  color: #444444;
+}
+
+.analyst-profile__summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 14px;
+  font-size: 0.92rem;
+  color: #444444;
+}
+
+.analyst-performance-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 120px;
+  margin-bottom: 16px;
+  padding: 10px;
+  background: #f5f7fa;
+  border-radius: 10px;
+}
+
+.analyst-performance-chart__bar {
+  flex: 1;
+  min-width: 6px;
+  border-radius: 4px 4px 0 0;
+  background: #0066ff;
+}
+
+.analyst-performance-chart__bar.is-neg {
+  background: #dc2626;
+}
+
+.analyst-profile__bets-table-wrap {
+  overflow-x: auto;
+}
+
+.analyst-profile__bets-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.analyst-profile__bets-table th,
+.analyst-profile__bets-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  text-align: left;
+}
+
+.analyst-profile__posts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.analyst-profile__posts li {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.analyst-profile__empty {
+  color: #444444;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .analyst-profile__stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analyst-profile__hero {
+    flex-direction: column;
+    text-align: center;
+  }
+}

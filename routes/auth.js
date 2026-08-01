@@ -14,6 +14,11 @@ const { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } = require('../utils/passwordP
 const metrics = require('../utils/metrics');
 const { mongoUriHint, stripeApiModeFromEnv } = require('../utils/mongoUriHint');
 const { isFamilyUser } = require('../utils/familyUser');
+const { buildTrialFieldsForNewUser, serializePlanStatus } = require('../utils/planAccess');
+const { deleteCloudinaryImageByUrl, isCloudinaryAssetUrl } = require('../utils/cloudinaryAvatar');
+const { buildUniquePublicId, ensureUserPublicId } = require('../utils/publicId');
+const { expireTrialIfNeeded } = require('../utils/trialService');
+const { trySendFirstLoginGuideMessage } = require('../utils/automatedMessageTriggers');
 
 const router = express.Router();
 
@@ -36,11 +41,20 @@ const loginLimiter = rateLimit({
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '2h';
 
 function serializeAuthUserFields(user) {
+  const planStatus = serializePlanStatus(user);
   return {
     tipo: user.tipo || 'usuario',
-    plan: user.plan || null,
+    plan: planStatus.plan,
     billingLocked: user.billingLocked === true || isFamilyUser(user),
     welcomeShown: user.welcomeShown === true,
+    trialActive: planStatus.trialActive,
+    trialEndsAt: planStatus.trialEndsAt,
+    trialDaysRemaining: planStatus.trialDaysRemaining,
+    hasProAccess: planStatus.hasProAccess,
+    trialExpiredAcknowledged: planStatus.trialExpiredAcknowledged,
+    showTrialExpiredModal: planStatus.showTrialExpiredModal,
+    limits: planStatus.limits,
+    features: planStatus.features,
   };
 }
 
@@ -95,7 +109,9 @@ router.post('/register', registerLimiter, async (req, res) => {
     const saltRounds = 10;
     const password_hash = await bcrypt.hash(password, saltRounds);
 
-    // Crear nuevo usuario (premium se activa vía webhook de Stripe tras el pago)
+    // Crear nuevo usuario con trial gratuito de 15 días (sin tarjeta)
+    const trialFields = buildTrialFieldsForNewUser();
+    const publicId = await buildUniquePublicId(nombre.trim(), apellido.trim());
     const newUser = new User({
       nombre: nombre.trim(),
       apellido: apellido.trim(),
@@ -106,8 +122,9 @@ router.post('/register', registerLimiter, async (req, res) => {
       ciudad: ciudad.trim(),
       direccion: direccion.trim(),
       codigo_postal: codigo_postal.trim(),
-      premium: false,
       tokenVersion: 0,
+      publicId,
+      ...trialFields,
     });
 
     await newUser.save();
@@ -238,6 +255,17 @@ router.post('/login', loginLimiter, async (req, res) => {
       ip: req.ip,
     });
 
+    ensureUserPublicId(user).catch((err) => {
+      logger.error('ensure_public_id_login_error', { userId: String(user._id), message: err.message });
+    });
+
+    trySendFirstLoginGuideMessage(user._id).catch((msgErr) => {
+      logger.error('first_login_guide_message_error', {
+        message: msgErr.message,
+        userId: String(user._id),
+      });
+    });
+
     res.json({
       success: true,
       token: token,
@@ -330,7 +358,9 @@ router.post('/change-password', auth, async (req, res) => {
 router.get('/session', authJwt, async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
-      .select('nombre apellido email role isMainAdmin premium legalAccepted legalAcceptedAt tipo plan billingLocked welcomeShown')
+      .select(
+        'nombre apellido email foto_perfil_url role isMainAdmin premium legalAccepted legalAcceptedAt tipo plan billingLocked welcomeShown trialActive trialEndsAt trialExpiredAcknowledged'
+      )
       .lean();
 
     if (!user) {
@@ -345,6 +375,7 @@ router.get('/session', authJwt, async (req, res) => {
         nombre: user.nombre || null,
         apellido: user.apellido || null,
         email: user.email,
+        foto_perfil_url: user.foto_perfil_url || null,
         role: user.role || 'usuario',
         isMainAdmin: user.isMainAdmin || false,
         premium: user.premium === true,
@@ -399,20 +430,13 @@ router.post('/accept-legal', authJwt, async (req, res) => {
 
 /**
  * POST /api/auth/welcome-shown
- * Marca el modal de bienvenida familiar como visto.
+ * Marca el modal de bienvenida (trial o familia) como visto.
  */
 router.post('/welcome-shown', authJwt, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
-    }
-
-    if (!isFamilyUser(user)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Este usuario no pertenece al plan familiar',
-      });
     }
 
     if (user.welcomeShown === true) {
@@ -426,7 +450,11 @@ router.post('/welcome-shown', authJwt, async (req, res) => {
     user.welcomeShown = true;
     await user.save();
 
-    logger.info('auth_family_welcome_shown', { userId: String(user._id), ip: req.ip });
+    logger.info('auth_welcome_shown', {
+      userId: String(user._id),
+      tipo: user.tipo,
+      ip: req.ip,
+    });
 
     res.json({
       success: true,
@@ -459,33 +487,35 @@ router.get('/me', authJwt, async (req, res) => {
 
     const userId = req.user.id;
 
-    // Ejecutar consultas en paralelo para mejor rendimiento
+    let userRecord = await User.findById(userId)
+      .select(
+        'nombre apellido email telefono pais ciudad direccion codigo_postal idioma timezone equipo_favorito ligas_favoritas foto_perfil_url role isMainAdmin premium legalAccepted legalAcceptedAt tipo plan billingLocked welcomeShown trialActive trialEndsAt trialExpiredAcknowledged created_at updated_at'
+      )
+      .lean();
+
+    userRecord = await expireTrialIfNeeded(userRecord);
+
     const MAX_SIMULATOR_APUESTAS_ME = 200;
     const MAX_FAVORITES_ITEMS_ME = 400;
 
-    const [user, favorites, simulatorState] = await Promise.all([
-      User.findById(userId)
-        .select(
-          'nombre apellido email telefono pais ciudad direccion codigo_postal idioma timezone equipo_favorito ligas_favoritas role isMainAdmin premium legalAccepted legalAcceptedAt tipo plan billingLocked welcomeShown created_at updated_at'
-        )
-        .lean(),
-      // Obtener favoritos
-      Favorites.findOne({ user_id: userId }).lean(),
-      // Obtener estado del simulador
-      SimulatorState.findOne({ user_id: userId }).lean()
-    ]);
-
-    // Validar que el usuario existe
-    if (!user) {
+    if (!userRecord) {
       return res.status(404).json({
         success: false,
-        message: 'Usuario no encontrado'
+        message: 'Usuario no encontrado',
       });
     }
 
-    const premiumFromDb = user.premium === true;
+    const user = userRecord;
+
+    const [favorites, simulatorState] = await Promise.all([
+      Favorites.findOne({ user_id: userId }).lean(),
+      SimulatorState.findOne({ user_id: userId }).lean(),
+    ]);
+
     logger.info('auth_me_db_read', {
-      premium: premiumFromDb,
+      premium: user.premium === true,
+      plan: user.plan,
+      trialActive: user.trialActive,
       stripeMode: stripeApiModeFromEnv(),
       mongoUriHint: mongoUriHint(),
     });
@@ -536,6 +566,7 @@ router.get('/me', authJwt, async (req, res) => {
         apellido: user.apellido || null,
         telefono: user.telefono || null,
         email: user.email,
+        foto_perfil_url: user.foto_perfil_url || null,
         pais: user.pais || null,
         ciudad: user.ciudad || null,
         direccion: user.direccion || null,
@@ -563,6 +594,50 @@ router.get('/me', authJwt, async (req, res) => {
       success: false,
       message: 'Error al obtener perfil del usuario'
     });
+  }
+});
+
+/**
+ * PUT /api/auth/profile/photo
+ * Guarda la URL del avatar (Cloudinary) del usuario autenticado.
+ */
+router.put('/profile/photo', authJwt, async (req, res) => {
+  try {
+    const { foto_perfil_url: rawUrl } = req.body || {};
+    const foto_perfil_url = typeof rawUrl === 'string' ? rawUrl.trim() : '';
+
+    if (!foto_perfil_url) {
+      return res.status(400).json({ success: false, message: 'URL de foto requerida' });
+    }
+
+    if (!isCloudinaryAssetUrl(foto_perfil_url)) {
+      return res.status(400).json({
+        success: false,
+        message: 'La URL debe ser una imagen válida subida a Cloudinary.',
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
+
+    const previousUrl = user.foto_perfil_url;
+    user.foto_perfil_url = foto_perfil_url;
+    await user.save();
+
+    if (previousUrl && previousUrl !== foto_perfil_url) {
+      deleteCloudinaryImageByUrl(previousUrl).catch(() => {});
+    }
+
+    res.json({
+      success: true,
+      message: 'Foto de perfil actualizada',
+      foto_perfil_url: user.foto_perfil_url,
+    });
+  } catch (error) {
+    logger.error('auth_profile_photo_error', { message: error.message });
+    res.status(500).json({ success: false, message: 'Error al guardar foto de perfil' });
   }
 });
 

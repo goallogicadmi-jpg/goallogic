@@ -32,6 +32,13 @@
   background: rgba(242, 138, 0, 0.12);
 }
 
+.user-menu-avatar__photo.user-avatar-img,
+.user-menu-avatar__photo.user-initial-avatar {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
 .user-menu-avatar__circle {
   display: flex;
   align-items: center;

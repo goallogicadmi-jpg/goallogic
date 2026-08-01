@@ -1,0 +1,113 @@
+.analyst-messaging h2 {
+  margin: 0 0 8px;
+}
+
+.analyst-messaging__hint {
+  margin: 0 0 16px;
+  color: #444444;
+  font-size: 0.9rem;
+}
+
+.analyst-messaging__status {
+  color: #444444;
+}
+
+.analyst-messaging__subscribers ul {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.analyst-messaging__subscribers li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f5f7fa;
+  border: 1px solid rgba(0, 102, 255, 0.08);
+}
+
+.analyst-messaging__name {
+  font-weight: 600;
+}
+
+.analyst-messaging__public-id {
+  color: #0066ff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.analyst-messaging__form {
+  display: grid;
+  gap: 14px;
+}
+
+.analyst-messaging__field span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+  color: #444444;
+}
+
+.analyst-messaging__field input,
+.analyst-messaging__field textarea {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.analyst-messaging__targets {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.analyst-messaging__picker {
+  display: grid;
+  gap: 8px;
+  max-height: 220px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+}
+
+.analyst-messaging__picker-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.analyst-messaging__error {
+  color: #b00020;
+  margin: 0;
+}
+
+.analyst-messaging__success {
+  color: #0a7a2f;
+  margin: 0;
+}
+
+.analyst-messaging__form button {
+  justify-self: start;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  background: #0066ff;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.analyst-messaging__form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

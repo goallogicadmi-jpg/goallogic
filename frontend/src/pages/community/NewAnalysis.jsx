@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getToken } from '../../services/authService';
+import { useUser } from '../../context/UserContext';
+import PostImageUpload from '../../components/PostImageUpload';
 
 const PUBLICATION_TYPES = [
   'Tiros de esquina',
@@ -22,10 +24,13 @@ export function NewAnalysis() {
     },
     probability: '',
     text: '',
+    imagen_url: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { user } = useUser();
+  const isAnalyst = user?.role === 'analista';
 
   const isCommentOnly = formData.publicationType === 'Comentario';
 
@@ -53,6 +58,10 @@ export function NewAnalysis() {
         publicationType: formData.publicationType,
         text: formData.text,
       };
+
+      if (isAnalyst && formData.imagen_url) {
+        payload.imagen_url = formData.imagen_url;
+      }
 
       if (!isCommentOnly) {
         payload.matchInfo = {
@@ -163,8 +172,18 @@ export function NewAnalysis() {
           )}
 
           {formData.publicationType && (
-            <div className="form-group">
-              <label>{isCommentOnly ? 'Argumento o comentario *' : 'Análisis *'}</label>
+            <>
+              {isAnalyst && !isCommentOnly ? (
+                <div className="form-group">
+                  <PostImageUpload
+                    value={formData.imagen_url}
+                    onChange={(url) => setFormData((prev) => ({ ...prev, imagen_url: url }))}
+                  />
+                </div>
+              ) : null}
+
+              <div className="form-group">
+                <label>{isCommentOnly ? 'Argumento o comentario *' : 'Análisis *'}</label>
               <textarea
                 name="text"
                 value={formData.text}
@@ -181,6 +200,7 @@ export function NewAnalysis() {
                 Recuerda: Solo análisis estadístico. No se permiten recomendaciones de apuestas.
               </small>
             </div>
+            </>
           )}
 
           <div className="form-actions">

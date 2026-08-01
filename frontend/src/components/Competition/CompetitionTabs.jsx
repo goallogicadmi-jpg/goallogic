@@ -11,7 +11,9 @@ import SelectionRankingSection from './SelectionRankingSection';
 import CompetitionHistorySection from './CompetitionHistorySection';
 import CompetitionInfoSection from './CompetitionInfoSection';
 import CompetitionTablaPanel from './CompetitionTablaPanel';
+import CompetitionStatsSection from './CompetitionStatsSection';
 import LeagueKnockoutSection from './LeagueKnockoutSection';
+import useCompetitionPremiumNav from '../../hooks/useCompetitionPremiumNav';
 
 import { COMPETITION_TAB_IDS } from './competitionTabIds';
 import { hasCompetitionHistory } from '../../utils/competitionHistory';
@@ -40,6 +42,7 @@ export default function CompetitionTabs({
   onGoToAllMatches,
   onNavigateToTab,
 }) {
+  const { openTab } = useCompetitionPremiumNav(onTabChange);
   const partidoCardDomain = domain === 'selection' ? 'selection' : 'club';
 
   const cupDomain = isSelectionLayout ? 'selection' : 'club';
@@ -101,7 +104,8 @@ export default function CompetitionTabs({
     }
     tabs.push(
       { id: COMPETITION_TAB_IDS.PARTIDOS, label: 'Partidos' },
-      { id: COMPETITION_TAB_IDS.GOLEADORES, label: 'Goleadores' }
+      { id: COMPETITION_TAB_IDS.GOLEADORES, label: 'Goleadores' },
+      { id: COMPETITION_TAB_IDS.ESTADISTICAS, label: 'Estadísticas' }
     );
     if (showHistoryTab) {
       tabs.push({ id: COMPETITION_TAB_IDS.HISTORIAL, label: 'Historial' });
@@ -133,7 +137,8 @@ export default function CompetitionTabs({
     }
     tabs.push(
       { id: COMPETITION_TAB_IDS.PARTIDOS, label: 'Partidos' },
-      { id: COMPETITION_TAB_IDS.GOLEADORES, label: 'Goleadores' }
+      { id: COMPETITION_TAB_IDS.GOLEADORES, label: 'Goleadores' },
+      { id: COMPETITION_TAB_IDS.ESTADISTICAS, label: 'Estadísticas' }
     );
     if (showFifaRankingTab) {
       tabs.push({ id: COMPETITION_TAB_IDS.RANKING, label: 'Ranking' });
@@ -156,7 +161,7 @@ export default function CompetitionTabs({
   }, [isSelectionLayout, showGroupsTab]);
 
   useEffect(() => {
-    if (!tabIds.has(activeTab) || activeTab === COMPETITION_TAB_IDS.ESTADISTICAS) {
+    if (!tabIds.has(activeTab)) {
       onTabChange?.(COMPETITION_TAB_IDS.RESUMEN);
     }
   }, [activeTab, tabIds, onTabChange]);
@@ -202,7 +207,7 @@ export default function CompetitionTabs({
               aria-controls={`competition-panel-${tab.id}`}
               id={`competition-tab-${tab.id}`}
               style={getTabButtonStyle(isActive)}
-              onClick={() => onTabChange?.(tab.id)}
+              onClick={() => openTab(tab.id)}
             >
               {tab.label}
             </button>
@@ -225,7 +230,7 @@ export default function CompetitionTabs({
                 domain={partidoCardDomain}
                 onTeamNavigate={onTeamNavigate}
                 onGoToAllMatches={onGoToAllMatches}
-                onNavigateToTab={onNavigateToTab}
+                onNavigateToTab={openTab}
                 standingsTabId={standingsTabId}
               />
             ) : (
@@ -235,7 +240,7 @@ export default function CompetitionTabs({
                 domain={partidoCardDomain}
                 onTeamNavigate={onTeamNavigate}
                 onGoToAllMatches={onGoToAllMatches}
-                onNavigateToTab={onNavigateToTab}
+                onNavigateToTab={openTab}
               />
             )}
           </div>
@@ -312,7 +317,7 @@ export default function CompetitionTabs({
               leagueId={leagueId}
               season={season}
               domain={partidoCardDomain}
-              onNavigateToTab={onNavigateToTab}
+              onNavigateToTab={openTab}
             />
           </div>
         )}
@@ -329,7 +334,23 @@ export default function CompetitionTabs({
               isSelectionLayout={isSelectionLayout}
               competitionInfo={competitionInfo}
               onTeamNavigate={onTeamNavigate}
-              onNavigateToTab={onNavigateToTab}
+              onNavigateToTab={openTab}
+            />
+          </div>
+        )}
+
+        {activeTab === COMPETITION_TAB_IDS.ESTADISTICAS && (
+          <div
+            id="competition-panel-estadisticas"
+            role="tabpanel"
+            aria-labelledby="competition-tab-estadisticas"
+          >
+            <CompetitionStatsSection
+              leagueId={leagueId}
+              season={season}
+              onTeamNavigate={onTeamNavigate}
+              onNavigateToTab={openTab}
+              standingsTabId={standingsTabId}
             />
           </div>
         )}
@@ -346,7 +367,7 @@ export default function CompetitionTabs({
               domain={domain}
               competitionInfo={competitionInfo}
               onTeamNavigate={onTeamNavigate}
-              onNavigateToTab={onNavigateToTab}
+              onNavigateToTab={openTab}
             />
           </div>
         )}
