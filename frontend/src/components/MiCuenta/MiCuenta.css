@@ -293,6 +293,75 @@
   width: 100%;
 }
 
+.micuenta-top-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* —— Navegación interna PremiumTabs —— */
+.micuenta-tabs-wrap {
+  border-radius: var(--radius-container, 14px) var(--radius-container, 14px) 0 0;
+  margin-bottom: 0;
+}
+
+.micuenta-tabs-body {
+  background: var(--bg-premium, #181b20);
+  border: 1px solid var(--border-premium, rgba(255, 255, 255, 0.06));
+  border-top: none;
+  border-radius: 0 0 var(--radius-container, 14px) var(--radius-container, 14px);
+  box-shadow: var(--shadow-premium, 0 4px 12px rgba(0, 0, 0, 0.28));
+  overflow: hidden;
+}
+
+.micuenta-tab-panel {
+  display: none;
+  padding: 24px;
+  min-width: 0;
+}
+
+.micuenta-tab-panel.is-active {
+  display: block;
+}
+
+.micuenta-tab-panel > * + * {
+  margin-top: 24px;
+}
+
+/* —— Vista Perfil —— */
+.micuenta-perfil-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: var(--radius-card, 12px);
+  margin-bottom: 24px;
+}
+
+.micuenta-perfil-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.micuenta-perfil-info p {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: var(--text-secondary, #9aa4b2);
+  line-height: 1.5;
+}
+
+.micuenta-perfil-info p:last-child {
+  margin-bottom: 0;
+}
+
+.micuenta-perfil-info strong {
+  color: var(--text-primary, #ffffff);
+  font-weight: 600;
+}
+
 .micuenta-auth-section {
   max-width: 600px;
   margin: 0 auto;
@@ -316,10 +385,19 @@
     padding: 30px 20px;
   }
 
-  .micuenta-header-authenticated {
+  .micuenta-top-bar {
+    margin-bottom: 16px;
+  }
+
+  .micuenta-tab-panel {
+    padding: 16px;
+  }
+
+  .micuenta-perfil-hero {
     flex-direction: column;
     align-items: flex-start;
-    gap: 15px;
+    gap: 16px;
+    padding: 16px;
   }
 
   .logout-button {

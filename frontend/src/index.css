@@ -1,5 +1,6 @@
 /* Importar estilos globales */
 @import './styles/global.css';
+@import './styles/gl-buttons.css';
 @import './styles/goal-logic-brand.css';
 @import './styles/home.css';
 @import './styles/team-pages.css';

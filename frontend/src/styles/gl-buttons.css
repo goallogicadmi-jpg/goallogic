@@ -1,0 +1,79 @@
+/* ============================================
+   GoalLogic — Categorías de botones
+   (independientes de .gl-tabs / PremiumTabs)
+   ============================================ */
+
+/* Botón premium dorado — GoalLogic Predic */
+.gl-btn-gold,
+.predicciones-button {
+  background: var(--bg-card, #181b20);
+  border: 1px solid #d4af37;
+  color: #d4af37;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+  white-space: nowrap;
+  font-family: var(--font-family, inherit);
+}
+
+.gl-btn-gold:hover:not(:disabled),
+.predicciones-button:hover:not(:disabled) {
+  background: #d4af37;
+  color: #000000;
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.6);
+  transform: translateY(-1px);
+}
+
+.gl-btn-gold:active:not(:disabled),
+.predicciones-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+}
+
+.gl-btn-gold:disabled,
+.predicciones-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+}
+
+/* Botones secundarios — cerrar sesión, ajustes, acciones globales */
+.gl-btn-secondary,
+.logout-button,
+.admin-btn-logout {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid var(--border-color, #1f2630);
+  border-radius: 8px;
+  color: var(--text-secondary, #b3b8c2);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.gl-btn-secondary:hover,
+.logout-button:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--accent-negative, #ef4444);
+  color: var(--accent-negative, #ef4444);
+}
+
+.admin-btn-logout {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: rgba(244, 67, 54, 0.3);
+  color: #f44336;
+  font-weight: 500;
+}
+
+.admin-btn-logout:hover {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: #f44336;
+  transform: translateY(-1px);
+}

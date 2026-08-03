@@ -16,8 +16,15 @@ import HistorialApuestas from './HistorialApuestas';
 import MensajesUsuario from './MensajesUsuario';
 import PremiumRequired from '../PremiumRequired';
 import PlansPanel from '../Freemium/PlansPanel';
+import PremiumTabs from '../ui/PremiumTabs';
 import { GoalLogicTitle } from '../GoalLogicTitle';
 import './MiCuenta.css';
+
+const MICUENTA_TABS = [
+  { id: 'perfil', label: 'Perfil' },
+  { id: 'herramientas', label: 'Herramientas' },
+  { id: 'actividad', label: 'Actividad' },
+];
 
 /**
  * Componente principal de Mi Cuenta
@@ -40,6 +47,7 @@ const MiCuenta = () => {
   const location = useLocation();
   const [showLogin, setShowLogin] = useState(true);
   const [refreshHistorial, setRefreshHistorial] = useState(0);
+  const [activeTab, setActiveTab] = useState('perfil');
 
   const paymentUserId =
     user?.user_id || user?.id || user?._id || getUserIdFromToken() || undefined;
@@ -64,11 +72,23 @@ const MiCuenta = () => {
 
   useEffect(() => {
     if (location.state?.showPlans) {
+      setActiveTab('perfil');
       window.setTimeout(() => {
         document.getElementById('planes-usuario')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 150);
     }
   }, [location.state?.showPlans]);
+
+  // Accesos rápidos del dashboard apuntan a secciones en Herramientas
+  useEffect(() => {
+    const onQuickAccess = (event) => {
+      const button = event.target.closest('.quick-access-button');
+      if (!button?.closest('.dashboard-usuario')) return;
+      setActiveTab('herramientas');
+    };
+    document.addEventListener('click', onQuickAccess);
+    return () => document.removeEventListener('click', onQuickAccess);
+  }, []);
 
   const handleLoginSuccess = () => {
     // El UserContext ya maneja la carga del perfil
@@ -131,23 +151,9 @@ const MiCuenta = () => {
         <div className="micuenta-brand-top">
           <GoalLogicTitle as="h1" size="xl" />
         </div>
-        <div className="micuenta-header-authenticated">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            {user && (
-              <ProfilePhoto nombre={user.nombre} foto_perfil_url={user.foto_perfil_url} />
-            )}
-            <div>
-              {user && (
-                <div className="micuenta-user-info">
-                  <p><strong>Nombre:</strong> {user.nombre || 'No especificado'}</p>
-                  <p><strong>Email:</strong> {user.email}</p>
-                  {user.telefono && <p><strong>Teléfono:</strong> {user.telefono}</p>}
-                </div>
-              )}
-            </div>
-          </div>
+        <div className="micuenta-top-bar">
           <button
-            className="logout-button"
+            className="logout-button gl-btn-secondary"
             onClick={handleLogout}
             title="Cerrar sesión"
           >
@@ -160,28 +166,69 @@ const MiCuenta = () => {
             <PremiumRequired userId={paymentUserId} />
           ) : (
             <div className="micuenta-protected-content">
-              <ProfilePhotoSettings
-                user={user}
-                onUpdated={() => loadUserProfile()}
+              <PremiumTabs
+                tabs={MICUENTA_TABS}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                ariaLabel="Secciones de Mi Cuenta"
+                wrapClassName="micuenta-tabs-wrap"
+                sticky
               />
-              <div id="planes-usuario">
-                <PlansPanel />
-              </div>
-              <DashboardUsuario />
 
-              <EstadisticasApuestas refreshTrigger={refreshHistorial} />
-              <GraficoProfit refreshTrigger={refreshHistorial} />
-              <div id="panel-apuestas">
-                <PanelApuestas onBetCreated={() => setRefreshHistorial(prev => prev + 1)} />
-              </div>
-              <div id="historial-apuestas">
-                <HistorialApuestas refreshTrigger={refreshHistorial} />
-              </div>
-              <div id="simulador-apuestas">
-                <SimuladorApuestas />
-              </div>
-              <div id="mensajes-usuario">
-                <MensajesUsuario />
+              <div className="micuenta-tabs-body">
+                <div
+                  className={`micuenta-tab-panel${activeTab === 'perfil' ? ' is-active' : ''}`}
+                  role="tabpanel"
+                  aria-hidden={activeTab !== 'perfil'}
+                >
+                  {user && (
+                    <div className="micuenta-perfil-hero">
+                      <ProfilePhoto nombre={user.nombre} foto_perfil_url={user.foto_perfil_url} />
+                      <div className="micuenta-perfil-info">
+                        <p><strong>Nombre:</strong> {user.nombre || 'No especificado'}</p>
+                        <p><strong>Email:</strong> {user.email}</p>
+                        {user.pais && <p><strong>País:</strong> {user.pais}</p>}
+                        {user.telefono && <p><strong>Teléfono:</strong> {user.telefono}</p>}
+                      </div>
+                    </div>
+                  )}
+                  <ProfilePhotoSettings
+                    user={user}
+                    onUpdated={() => loadUserProfile()}
+                  />
+                  <div id="planes-usuario">
+                    <PlansPanel />
+                  </div>
+                </div>
+
+                <div
+                  className={`micuenta-tab-panel${activeTab === 'herramientas' ? ' is-active' : ''}`}
+                  role="tabpanel"
+                  aria-hidden={activeTab !== 'herramientas'}
+                >
+                  <div id="simulador-apuestas">
+                    <SimuladorApuestas />
+                  </div>
+                  <div id="panel-apuestas">
+                    <PanelApuestas onBetCreated={() => setRefreshHistorial(prev => prev + 1)} />
+                  </div>
+                  <div id="historial-apuestas">
+                    <HistorialApuestas refreshTrigger={refreshHistorial} />
+                  </div>
+                  <EstadisticasApuestas refreshTrigger={refreshHistorial} />
+                  <GraficoProfit refreshTrigger={refreshHistorial} />
+                </div>
+
+                <div
+                  className={`micuenta-tab-panel${activeTab === 'actividad' ? ' is-active' : ''}`}
+                  role="tabpanel"
+                  aria-hidden={activeTab !== 'actividad'}
+                >
+                  <DashboardUsuario />
+                  <div id="mensajes-usuario">
+                    <MensajesUsuario />
+                  </div>
+                </div>
               </div>
             </div>
           )}
