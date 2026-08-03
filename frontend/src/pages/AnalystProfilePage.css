@@ -177,6 +177,33 @@
 
 .analyst-profile-panel__tabs .gl-tabs {
   border-bottom: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.analyst-profile-panel__tabs .gl-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.analyst-profile-panel__tabs .gl-tab {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.analyst-profile-panel__owner-hint {
+  margin: 0;
+  padding: 10px 0 14px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #9aa4b2;
+}
+
+.analyst-profile-panel__owner-hint strong {
+  color: #4fc3f7;
+  font-weight: 600;
 }
 
 .analyst-profile-panel__actions {

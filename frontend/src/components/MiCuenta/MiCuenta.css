@@ -388,6 +388,37 @@
   transform: translateY(-1px);
 }
 
+.micuenta-suscriptores-section__title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.micuenta-suscriptores-section__desc {
+  margin: 0 0 24px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #9aa4b2;
+}
+
+.micuenta-tabs-wrap .gl-tabs {
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.micuenta-tabs-wrap .gl-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.micuenta-tabs-wrap .gl-tab {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .micuenta-auth-section {
   max-width: 600px;
   margin: 0 auto;

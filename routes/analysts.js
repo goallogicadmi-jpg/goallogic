@@ -48,12 +48,22 @@ function withCheckoutSessionPlaceholder(url) {
 }
 
 async function loadAnalystOr404(analystId) {
-  if (!mongoose.Types.ObjectId.isValid(analystId)) return null;
-  const user = await User.findById(analystId)
-    .select(
-      'nombre apellido pais foto_perfil_url role analystVerifiedAt analystStripePriceId analystSubscriptionPriceCents analystStatus analystPostsBlocked analystMessagesBlocked created_at publicId'
-    )
-    .lean();
+  const rawId = String(analystId || '').trim();
+  if (!rawId) return null;
+
+  const selectFields =
+    'nombre apellido pais foto_perfil_url role analystVerifiedAt analystStripePriceId analystSubscriptionPriceCents analystStatus analystPostsBlocked analystMessagesBlocked created_at publicId';
+
+  let user = null;
+
+  if (mongoose.Types.ObjectId.isValid(rawId)) {
+    user = await User.findById(rawId).select(selectFields).lean();
+  }
+
+  if (!user) {
+    user = await User.findOne({ publicId: rawId, role: 'analista' }).select(selectFields).lean();
+  }
+
   if (!user || !isSportsAnalyst(user)) return null;
   if (user.analystStatus === 'suspended') return null;
   return user;

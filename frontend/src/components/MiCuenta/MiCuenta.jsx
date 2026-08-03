@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getUserIdFromToken } from '../../services/authService';
 import { useUser } from '../../context/UserContext';
@@ -13,17 +13,28 @@ import PanelApuestas from './PanelApuestas';
 import SimuladorApuestas from '../../pages/SimuladorApuestas';
 import HistorialApuestas from './HistorialApuestas';
 import MensajesUsuario from './MensajesUsuario';
+import AnalystSubscriberMessaging from '../Analysts/AnalystSubscriberMessaging';
 import PremiumRequired from '../PremiumRequired';
 import PlansPanel from '../Freemium/PlansPanel';
 import PremiumTabs from '../ui/PremiumTabs';
 import { GoalLogicTitle } from '../GoalLogicTitle';
 import './MiCuenta.css';
 
-const MICUENTA_TABS = [
+const BASE_MICUENTA_TABS = [
   { id: 'perfil', label: 'Perfil' },
   { id: 'herramientas', label: 'Herramientas' },
   { id: 'actividad', label: 'Actividad' },
 ];
+
+const SUBSCRIBERS_MICUENTA_TAB = {
+  id: 'suscriptores',
+  label: 'Suscriptores y Mensajes',
+};
+
+function buildMicuentaTabs(isAnalyst) {
+  if (!isAnalyst) return BASE_MICUENTA_TABS;
+  return [...BASE_MICUENTA_TABS, SUBSCRIBERS_MICUENTA_TAB];
+}
 
 /**
  * Componente principal de Mi Cuenta
@@ -46,10 +57,15 @@ const MiCuenta = () => {
   const location = useLocation();
   const [showLogin, setShowLogin] = useState(true);
   const [refreshHistorial, setRefreshHistorial] = useState(0);
-  const [activeTab, setActiveTab] = useState('perfil');
+  const [activeTab, setActiveTab] = useState(() => location.state?.micuentaTab || 'perfil');
 
-  const paymentUserId =
-    user?.user_id || user?.id || user?._id || getUserIdFromToken() || undefined;
+  const micuentaTabs = useMemo(
+    () => buildMicuentaTabs(user?.role === 'analista'),
+    [user?.role]
+  );
+
+  const analystProfileId =
+    getUserIdFromToken() || user?.user_id || user?.id || user?._id || undefined;
   const mustCompletePayment =
     user &&
     !isAdmin &&
@@ -77,6 +93,18 @@ const MiCuenta = () => {
       }, 150);
     }
   }, [location.state?.showPlans]);
+
+  useEffect(() => {
+    if (location.state?.micuentaTab) {
+      setActiveTab(location.state.micuentaTab);
+    }
+  }, [location.state?.micuentaTab]);
+
+  useEffect(() => {
+    if (user?.role !== 'analista' && activeTab === 'suscriptores') {
+      setActiveTab('perfil');
+    }
+  }, [user?.role, activeTab]);
 
   // Accesos rápidos del dashboard apuntan a secciones en Herramientas
   useEffect(() => {
@@ -166,7 +194,7 @@ const MiCuenta = () => {
           ) : (
             <div className="micuenta-protected-content">
               <PremiumTabs
-                tabs={MICUENTA_TABS}
+                tabs={micuentaTabs}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
                 ariaLabel="Secciones de Mi Cuenta"
@@ -199,11 +227,12 @@ const MiCuenta = () => {
                       <button
                         type="button"
                         className="micuenta-analyst-profile-btn"
-                        onClick={() =>
-                          navigate(`/analista/${user.user_id || user.id}`, {
-                            state: { analystTab: 'suscriptores' },
-                          })
-                        }
+                        onClick={() => {
+                          if (!analystProfileId) return;
+                          navigate(`/analista/${analystProfileId}`, {
+                            state: { fromMiCuenta: true },
+                          });
+                        }}
                       >
                         Ver mi perfil de analista
                       </button>
@@ -242,6 +271,28 @@ const MiCuenta = () => {
                     <MensajesUsuario />
                   </div>
                 </div>
+
+                {user?.role === 'analista' ? (
+                  <div
+                    className={`micuenta-tab-panel${activeTab === 'suscriptores' ? ' is-active' : ''}`}
+                    role="tabpanel"
+                    aria-hidden={activeTab !== 'suscriptores'}
+                  >
+                    <section className="micuenta-suscriptores-section">
+                      <h2 className="micuenta-suscriptores-section__title">
+                        Suscriptores y Mensajes
+                      </h2>
+                      <p className="micuenta-suscriptores-section__desc">
+                        Gestiona tus suscriptores activos y envía mensajes a su bandeja en
+                        {' '}
+                        Actividad.
+                      </p>
+                      {analystProfileId ? (
+                        <AnalystSubscriberMessaging analystId={analystProfileId} />
+                      ) : null}
+                    </section>
+                  </div>
+                ) : null}
               </div>
             </div>
           )}

@@ -4,7 +4,6 @@ import axios from 'axios';
 import { UserAvatar } from '../components/UserAvatar';
 import AnalystVerifiedBadge from '../components/Analysts/AnalystVerifiedBadge';
 import AnalystSubscribeButton from '../components/Analysts/AnalystSubscribeButton';
-import AnalystSubscriberMessaging from '../components/Analysts/AnalystSubscriberMessaging';
 import AnalystPremiumPostCard from '../components/Analysts/AnalystPremiumPostCard';
 import AnalystHistorySummaryCard from '../components/Analysts/AnalystHistorySummaryCard';
 import PremiumTabs from '../components/ui/PremiumTabs';
@@ -18,20 +17,13 @@ import {
 } from '../services/analystService';
 import './AnalystProfilePage.css';
 
-const BASE_PROFILE_TABS = [
+const PROFILE_TABS = [
   { id: 'resumen', label: 'Resumen' },
   { id: 'historial', label: 'Historial' },
   { id: 'publicaciones', label: 'Publicaciones' },
 ];
 
-const SUBSCRIBERS_TAB = { id: 'suscriptores', label: 'Suscriptores y Mensajes' };
-
-function buildProfileTabs(isSelf) {
-  if (!isSelf) return BASE_PROFILE_TABS;
-  return [...BASE_PROFILE_TABS, SUBSCRIBERS_TAB];
-}
-
-function BackToCommunityButton({ onClick }) {
+function ProfileBackButton({ label, onClick }) {
   return (
     <button
       type="button"
@@ -39,7 +31,7 @@ function BackToCommunityButton({ onClick }) {
       onClick={onClick}
     >
       <span className="analyst-profile-page__back-icon" aria-hidden="true">←</span>
-      Volver a Comunidad
+      {label}
     </button>
   );
 }
@@ -100,9 +92,19 @@ export default function AnalystProfilePage() {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState(() => location.state?.analystTab || 'resumen');
 
-  const goToCommunity = useCallback(() => {
+  const returnToMiCuenta = Boolean(location.state?.fromMiCuenta);
+
+  const goBack = useCallback(() => {
+    if (returnToMiCuenta && (!profile || profile.isSelf)) {
+      navigate('/cuenta', { state: { micuentaTab: 'perfil' } });
+      return;
+    }
     navigate('/comunidad');
-  }, [navigate]);
+  }, [navigate, returnToMiCuenta, profile]);
+
+  const backLabel = returnToMiCuenta && (!profile || profile.isSelf)
+    ? 'Volver a Mi Cuenta'
+    : 'Volver a Comunidad';
 
   useEffect(() => {
     if (location.state?.analystTab) {
@@ -110,16 +112,11 @@ export default function AnalystProfilePage() {
     }
   }, [location.state?.analystTab]);
 
-  const profileTabs = useMemo(
-    () => buildProfileTabs(Boolean(profile?.isSelf)),
-    [profile?.isSelf]
-  );
-
   useEffect(() => {
-    if (!profile?.isSelf && activeTab === 'suscriptores') {
-      setActiveTab('resumen');
+    if (location.state?.analystTab === 'suscriptores') {
+      navigate('/cuenta', { state: { micuentaTab: 'suscriptores' }, replace: true });
     }
-  }, [profile?.isSelf, activeTab]);
+  }, [location.state?.analystTab, navigate]);
 
   useEffect(() => {
     let cancelled = false;
@@ -195,7 +192,7 @@ export default function AnalystProfilePage() {
   if (loading) {
     return (
       <div className="analyst-profile-page analyst-profile-page--loading">
-        <BackToCommunityButton onClick={goToCommunity} />
+        <ProfileBackButton label={backLabel} onClick={goBack} />
         <div className="analyst-profile-panel analyst-profile-panel--skeleton">
           Cargando analista…
         </div>
@@ -206,7 +203,7 @@ export default function AnalystProfilePage() {
   if (error || !profile) {
     return (
       <div className="analyst-profile-page analyst-profile-page--error">
-        <BackToCommunityButton onClick={goToCommunity} />
+        <ProfileBackButton label={backLabel} onClick={goBack} />
         <p>{error || 'Analista no encontrado'}</p>
       </div>
     );
@@ -222,7 +219,7 @@ export default function AnalystProfilePage() {
     <div className="analyst-profile-page">
       <GoalLogicSectionHeader size="md" className="analyst-profile-page__brand" />
 
-      <BackToCommunityButton onClick={goToCommunity} />
+      <ProfileBackButton label={backLabel} onClick={goBack} />
 
       <div className="analyst-profile-panel">
         <header className="analyst-profile-panel__hero">
@@ -294,7 +291,7 @@ export default function AnalystProfilePage() {
 
         <div className="analyst-profile-panel__tabs">
           <PremiumTabs
-            tabs={profileTabs}
+            tabs={PROFILE_TABS}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             ariaLabel="Secciones del perfil del analista"
@@ -333,16 +330,6 @@ export default function AnalystProfilePage() {
               <PerformanceChart timeline={timeline} />
             </section>
           </>
-        ) : null}
-
-        {activeTab === 'suscriptores' && profile.isSelf ? (
-          <section className="analyst-profile-panel__section analyst-profile-panel__section--subscribers">
-            <h2 className="analyst-profile-panel__section-title">Suscriptores y Mensajes</h2>
-            <p className="analyst-profile-panel__section-desc">
-              Gestiona tus suscriptores activos y envía mensajes a su bandeja en Mi Cuenta → Actividad.
-            </p>
-            <AnalystSubscriberMessaging analystId={profile.id} />
-          </section>
         ) : null}
 
         {activeTab === 'historial' ? (
