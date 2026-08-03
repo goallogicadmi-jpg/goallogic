@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import useMediaQuery from "../hooks/useMediaQuery";
@@ -378,31 +378,27 @@ export default function Predicciones() {
     }
   }, [homeTeam, awayTeam, equiposLocal, equiposVisitante, analisisAutomaticoEjecutado, equipoLocal, equipoVisitante]);
 
-  // Efecto para ejecutar automáticamente el análisis cuando ambos equipos estén seleccionados
-  useEffect(() => {
-    if (equipoLocal && equipoVisitante && analisisAutomaticoEjecutado && !loading && !resultados && !analisisAutomaticoIniciado) {
-      // Marcar que se inició el análisis automático para evitar múltiples ejecuciones
-      setAnalisisAutomaticoIniciado(true);
-      // Ejecutar el análisis automáticamente
-      handleAnalizar();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [equipoLocal, equipoVisitante, analisisAutomaticoEjecutado, loading, resultados, analisisAutomaticoIniciado]);
-
   // Función para manejar el análisis
-  const handleAnalizar = async () => {
+  const handleAnalizar = useCallback(async () => {
+    const ligaIdA = ligaLocal ?? ligaA;
+    const ligaIdB = ligaVisitante ?? ligaB;
+    const equipoSelA = equipoLocal ?? equipoA;
+    const equipoSelB = equipoVisitante ?? equipoB;
+
     // Validar que todos los datos estén seleccionados
-    if (!ligaA || !equipoA || !ligaB || !equipoB) {
+    if (!ligaIdA || !equipoSelA || !ligaIdB || !equipoSelB) {
       setError("Por favor, selecciona ambos equipos antes de analizar.");
+      setAnalisisAutomaticoIniciado(false);
       return;
     }
 
     // Obtener los objetos completos de las ligas seleccionadas
-    const ligaACompleta = ligasInDomain.find(l => l.id === ligaA);
-    const ligaBCompleta = ligasInDomain.find(l => l.id === ligaB);
+    const ligaACompleta = ligasInDomain.find((l) => l.id === ligaIdA);
+    const ligaBCompleta = ligasInDomain.find((l) => l.id === ligaIdB);
 
     if (!ligaACompleta || !ligaBCompleta) {
       setError("No se pudieron obtener los datos completos de las ligas.");
+      setAnalisisAutomaticoIniciado(false);
       return;
     }
 
@@ -436,15 +432,15 @@ export default function Predicciones() {
     phase2SeqRef.current += 1;
 
     const [statsSeasonA, statsSeasonB] = await Promise.all([
-      routeSeason != null ? Promise.resolve(String(routeSeason)) : fetchPreferredSeasonYearForLeague(ligaA),
-      routeSeason != null ? Promise.resolve(String(routeSeason)) : fetchPreferredSeasonYearForLeague(ligaB),
+      routeSeason != null ? Promise.resolve(String(routeSeason)) : fetchPreferredSeasonYearForLeague(ligaIdA),
+      routeSeason != null ? Promise.resolve(String(routeSeason)) : fetchPreferredSeasonYearForLeague(ligaIdB),
     ]);
 
     try {
       // Cargar datos detallados de ambos equipos en paralelo
       const [responseA, responseB] = await Promise.all([
-        axios.get(`/api/equipos/${equipoA.id}/detalle?leagueId=${ligaA}&season=${statsSeasonA}`),
-        axios.get(`/api/equipos/${equipoB.id}/detalle?leagueId=${ligaB}&season=${statsSeasonB}`)
+        axios.get(`/api/equipos/${equipoSelA.id}/detalle?leagueId=${ligaIdA}&season=${statsSeasonA}`),
+        axios.get(`/api/equipos/${equipoSelB.id}/detalle?leagueId=${ligaIdB}&season=${statsSeasonB}`)
       ]);
 
       if (responseA.data.success && responseB.data.success) {
@@ -466,10 +462,10 @@ export default function Predicciones() {
         setLoading(false);
 
         const skeletonLazy = buildSkeletonAccordionLazyContext({
-          equipoA: { id: equipoA.id, nombre: datosEquipoA.nombre ?? equipoA.nombre },
-          equipoB: { id: equipoB.id, nombre: datosEquipoB.nombre ?? equipoB.nombre },
-          ligaA,
-          ligaB,
+          equipoA: { id: equipoSelA.id, nombre: datosEquipoA.nombre ?? equipoSelA.nombre },
+          equipoB: { id: equipoSelB.id, nombre: datosEquipoB.nombre ?? equipoSelB.nombre },
+          ligaA: ligaIdA,
+          ligaB: ligaIdB,
           seasonA: statsSeasonA,
           seasonB: statsSeasonB,
           fixtureId: routeFixtureId ?? null,
@@ -481,10 +477,10 @@ export default function Predicciones() {
         setLoadingDatosAdicionales(true);
 
         fetchPrediccionesDatosAdicionales({
-          equipoA: { id: equipoA.id, nombre: datosEquipoA.nombre ?? equipoA.nombre },
-          equipoB: { id: equipoB.id, nombre: datosEquipoB.nombre ?? equipoB.nombre },
-          ligaA,
-          ligaB,
+          equipoA: { id: equipoSelA.id, nombre: datosEquipoA.nombre ?? equipoSelA.nombre },
+          equipoB: { id: equipoSelB.id, nombre: datosEquipoB.nombre ?? equipoSelB.nombre },
+          ligaA: ligaIdA,
+          ligaB: ligaIdB,
           seasonA: statsSeasonA,
           seasonB: statsSeasonB,
           routeFixtureId: routeFixtureId ?? null,
@@ -509,14 +505,68 @@ export default function Predicciones() {
           });
       } else {
         setError("No se pudieron obtener los datos completos de los equipos.");
+        setAnalisisAutomaticoIniciado(false);
         setLoading(false);
       }
     } catch (err) {
       console.error("Error analizando equipos:", err);
       setError(`Error al analizar: ${err.response?.data?.error || err.message}`);
+      setAnalisisAutomaticoIniciado(false);
       setLoading(false);
     }
-  };
+  }, [
+    ligaLocal,
+    ligaVisitante,
+    ligaA,
+    ligaB,
+    equipoLocal,
+    equipoVisitante,
+    equipoA,
+    equipoB,
+    ligasInDomain,
+    predictionDomain,
+    isAuthenticated,
+    user,
+    routeSeason,
+    routeFixtureId,
+    openUpgradeModal,
+  ]);
+
+  // Efecto para ejecutar automáticamente el análisis cuando ambos equipos estén seleccionados
+  useEffect(() => {
+    const ligaIdA = ligaLocal ?? ligaA;
+    const ligaIdB = ligaVisitante ?? ligaB;
+    const equipoSelA = equipoLocal ?? equipoA;
+    const equipoSelB = equipoVisitante ?? equipoB;
+
+    if (
+      ligaIdA &&
+      ligaIdB &&
+      equipoSelA &&
+      equipoSelB &&
+      analisisAutomaticoEjecutado &&
+      !loading &&
+      !resultados &&
+      !analisisAutomaticoIniciado
+    ) {
+      setAnalisisAutomaticoIniciado(true);
+      handleAnalizar();
+    }
+  }, [
+    ligaLocal,
+    ligaVisitante,
+    ligaA,
+    ligaB,
+    equipoLocal,
+    equipoVisitante,
+    equipoA,
+    equipoB,
+    analisisAutomaticoEjecutado,
+    loading,
+    resultados,
+    analisisAutomaticoIniciado,
+    handleAnalizar,
+  ]);
 
   return (
     <div className="predicciones-container">
@@ -684,7 +734,7 @@ export default function Predicciones() {
           type="button"
           className="btn-analizar"
           onClick={handleAnalizar}
-          disabled={!equipoA || !equipoB || loading}
+          disabled={!(equipoLocal ?? equipoA) || !(equipoVisitante ?? equipoB) || loading}
         >
           {loading ? "Analizando..." : "Analizar Comparación"}
         </button>
