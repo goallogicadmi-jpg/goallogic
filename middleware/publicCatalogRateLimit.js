@@ -8,6 +8,7 @@ function isPublicCatalogPath(pathname) {
   const p = pathname || '';
   if (p === '/api/leagues') return true;
   if (p.startsWith('/api/search-teams')) return true;
+  if (p.startsWith('/api/global-search')) return true;
   if (p === '/api/equipos') return true;
   return false;
 }

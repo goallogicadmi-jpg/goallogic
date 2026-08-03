@@ -8,19 +8,20 @@ export const tokens = {
   colors: {
     // Fondos
     bgMain: '#0D0D0D',
-    bgSecondary: '#1A1A1A',
-    bgCard: '#1A1A1A',
+    bgSecondary: '#181b20',
+    bgCard: '#181b20',
+    bgPremium: '#181b20',
     bgTertiary: '#0D0D0D',
     bgElevated: '#242424',
     
     // Bordes
-    borderDefault: '#1F2630',
-    borderHover: '#2A313D',
-    borderLight: '#2A313D',
+    borderDefault: 'rgba(255, 255, 255, 0.06)',
+    borderHover: 'rgba(255, 255, 255, 0.12)',
+    borderLight: 'rgba(255, 255, 255, 0.08)',
     
     // Textos
     textPrimary: '#FFFFFF',
-    textSecondary: '#B3B8C2',
+    textSecondary: '#9aa4b2',
     textMuted: '#7A8190',
     textDisabled: '#7A8190',
     
@@ -83,8 +84,10 @@ export const tokens = {
   radius: {
     sm: '6px',
     md: '8px',
-    lg: '10px',
-    xl: '12px',
+    lg: '12px',
+    xl: '14px',
+    container: '14px',
+    card: '12px',
     '2xl': '16px',
     full: '9999px',
   },

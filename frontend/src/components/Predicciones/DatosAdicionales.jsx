@@ -3,6 +3,7 @@ import AccordionBlock from './AccordionBlock';
 import { tokens } from '../../styles/tokens';
 import { PREDICCIONES_TITLES } from '../../constants/prediccionesSectionTitles';
 import PrediccionesSectionTitle from './PrediccionesSectionTitle';
+import AccordionPremiumLoader from './AccordionPremiumLoader';
 import {
   IconDatosComplementarios,
   IconHistorialDirecto,
@@ -13,6 +14,7 @@ import UltimosPartidosPredicciones from './UltimosPartidosPredicciones';
 
 export default function DatosAdicionales({
   datosAdicionales,
+  loadingDatosAdicionales = false,
   nombreEquipoA,
   nombreEquipoB,
   equipoAId,
@@ -22,6 +24,7 @@ export default function DatosAdicionales({
 
   const nombreA = nombreEquipoA || 'Equipo A';
   const nombreB = nombreEquipoB || 'Equipo B';
+  const phase2Ready = datosAdicionales.accordionLazy?.prefetch?.ready === true;
 
   const listaStyle = {
     listStyle: 'none',
@@ -32,27 +35,24 @@ export default function DatosAdicionales({
   const itemStyle = {
     padding: tokens.spacing.sm,
     marginBottom: tokens.spacing.xs,
-    backgroundColor: tokens.colors.bgSecondary,
-    borderRadius: tokens.radius.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderRadius: '12px',
     fontSize: tokens.typography.fontSizeSm,
-    color: tokens.colors.textSecondary,
-  };
-
-  const gridStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: tokens.spacing.md,
+    color: '#9aa4b2',
+    border: '1px solid rgba(255, 255, 255, 0.06)',
   };
 
   const cardStyle = {
-    backgroundColor: tokens.colors.bgSecondary,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
     padding: tokens.spacing.md,
-    borderRadius: tokens.radius.md,
-    border: `1px solid ${tokens.colors.borderDefault}`,
+    borderRadius: '12px',
+    border: '1px solid rgba(255, 255, 255, 0.06)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.18)',
+    minWidth: 0,
   };
 
   return (
-    <div style={{ marginTop: tokens.spacing.xl }}>
+    <div className="predicciones-datos-adicionales">
       <PrediccionesSectionTitle
         as="h3"
         size="lg"
@@ -62,7 +62,11 @@ export default function DatosAdicionales({
         {PREDICCIONES_TITLES.datosComplementarios}
       </PrediccionesSectionTitle>
 
-      {datosAdicionales.h2h && datosAdicionales.h2h.totalPartidos > 0 && (
+      {loadingDatosAdicionales && (
+        <AccordionPremiumLoader message="Preparando historial, goleadores y datos complementarios…" />
+      )}
+
+      {phase2Ready && datosAdicionales.h2h && datosAdicionales.h2h.totalPartidos > 0 && (
         <AccordionBlock
           title={PREDICCIONES_TITLES.historialDirecto}
           icon={<IconHistorialDirecto size={18} />}
@@ -76,21 +80,24 @@ export default function DatosAdicionales({
         equipoBId={equipoBId}
         nombreEquipoA={nombreA}
         nombreEquipoB={nombreB}
+        lazyContext={datosAdicionales.accordionLazy}
       />
 
-      {datosAdicionales.goleadores &&
-        (datosAdicionales.goleadores.equipoA.total > 0 || datosAdicionales.goleadores.equipoB.total > 0) && (
+      {phase2Ready &&
+        datosAdicionales.goleadores &&
+        (datosAdicionales.goleadores.equipoA.total > 0 ||
+          datosAdicionales.goleadores.equipoB.total > 0) && (
           <AccordionBlock
             title={PREDICCIONES_TITLES.referentesOfensivos}
             icon={<IconReferentesOfensivos size={18} />}
           >
-            <div style={gridStyle}>
+            <div className="predicciones-datos-goleadores-grid">
               <div style={cardStyle}>
                 <div
                   style={{
                     fontSize: tokens.typography.fontSizeBase,
                     fontWeight: tokens.typography.fontWeightSemibold,
-                    color: tokens.colors.textPrimary,
+                    color: '#ffffff',
                     marginBottom: tokens.spacing.sm,
                   }}
                 >
@@ -99,9 +106,9 @@ export default function DatosAdicionales({
                 <ul style={listaStyle}>
                   {datosAdicionales.goleadores.equipoA.jugadores.slice(0, 5).map((jugador, index) => (
                     <li key={index} style={itemStyle}>
-                      <strong>{jugador.nombre}</strong> - {jugador.goles} goles
+                      <strong style={{ color: '#ffffff' }}>{jugador.nombre}</strong> - {jugador.goles} goles
                       {jugador.asistencias > 0 && (
-                        <span style={{ color: tokens.colors.textMuted }}> ({jugador.asistencias} asistencias)</span>
+                        <span style={{ color: '#9aa4b2' }}> ({jugador.asistencias} asistencias)</span>
                       )}
                     </li>
                   ))}
@@ -112,7 +119,7 @@ export default function DatosAdicionales({
                   style={{
                     fontSize: tokens.typography.fontSizeBase,
                     fontWeight: tokens.typography.fontWeightSemibold,
-                    color: tokens.colors.textPrimary,
+                    color: '#ffffff',
                     marginBottom: tokens.spacing.sm,
                   }}
                 >
@@ -121,9 +128,9 @@ export default function DatosAdicionales({
                 <ul style={listaStyle}>
                   {datosAdicionales.goleadores.equipoB.jugadores.slice(0, 5).map((jugador, index) => (
                     <li key={index} style={itemStyle}>
-                      <strong>{jugador.nombre}</strong> - {jugador.goles} goles
+                      <strong style={{ color: '#ffffff' }}>{jugador.nombre}</strong> - {jugador.goles} goles
                       {jugador.asistencias > 0 && (
-                        <span style={{ color: tokens.colors.textMuted }}> ({jugador.asistencias} asistencias)</span>
+                        <span style={{ color: '#9aa4b2' }}> ({jugador.asistencias} asistencias)</span>
                       )}
                     </li>
                   ))}
@@ -135,5 +142,3 @@ export default function DatosAdicionales({
     </div>
   );
 }
-
-

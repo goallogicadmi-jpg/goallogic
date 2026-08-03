@@ -8,6 +8,7 @@ import {
   buildCompareMetricRows,
   getSideCompareClass,
 } from '../../../utils/playerCompare';
+import PremiumTabs from '../../ui/PremiumTabs';
 import '../../../styles/playerCompareModal.css';
 
 const EVENT_ICONS = {
@@ -278,26 +279,16 @@ export default function PlayerCompareModal({
           </div>
         </header>
 
-        <div className="player-compare-modal__tabs" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mobileTab === 'a'}
-            className={mobileTab === 'a' ? 'is-active' : ''}
-            onClick={() => setMobileTab('a')}
-          >
-            Jugador A
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mobileTab === 'b'}
-            className={mobileTab === 'b' ? 'is-active' : ''}
-            onClick={() => setMobileTab('b')}
-          >
-            Jugador B
-          </button>
-        </div>
+        <PremiumTabs
+          tabs={[
+            { id: 'a', label: 'Jugador A' },
+            { id: 'b', label: 'Jugador B' },
+          ]}
+          activeTab={mobileTab}
+          onTabChange={setMobileTab}
+          ariaLabel="Comparar jugadores"
+          wrapClassName="player-compare-modal__tabs-wrap"
+        />
 
         <div className="player-compare-modal__body">
           <ComparePanelColumn

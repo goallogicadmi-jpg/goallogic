@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { GoalLogicSectionHeader } from "./GoalLogicTitle";
 import EstadisticasEquipo from "./EstadisticasEquipo";
 import EstadisticasTorneo from "./EstadisticasTorneo";
 import EstadisticasAvanzadas from "./EstadisticasAvanzadas";
@@ -51,7 +52,9 @@ export default function EstadisticasDashboard() {
 
   return (
     <div style={{ padding: "20px", maxWidth: "1400px", margin: "0 auto" }}>
-      <h1 style={{ marginBottom: "20px" }}>Dashboard de Estadísticas</h1>
+      <GoalLogicSectionHeader size="lg" />
+
+      <h2 style={{ marginBottom: "20px", fontSize: "1.25rem", color: "#e8eaed" }}>Dashboard de Estadísticas</h2>
 
       {/* Selector de liga y temporada */}
       <div style={{ marginBottom: "20px", padding: "15px", backgroundColor: "#f5f5f5", borderRadius: "8px" }}>
@@ -79,22 +82,21 @@ export default function EstadisticasDashboard() {
         </select>
       </div>
 
-      {/* Botones de navegación */}
       <div style={{ marginBottom: "20px" }}>
-        <button 
-          onClick={() => setVista("equipo")} 
+        <button
+          onClick={() => setVista("equipo")}
           style={buttonStyle(vista === "equipo")}
         >
           Estadísticas por Equipo
         </button>
-        <button 
-          onClick={() => setVista("torneo")} 
+        <button
+          onClick={() => setVista("torneo")}
           style={buttonStyle(vista === "torneo")}
         >
           Estadísticas del Torneo
         </button>
-        <button 
-          onClick={() => setVista("avanzadas")} 
+        <button
+          onClick={() => setVista("avanzadas")}
           style={buttonStyle(vista === "avanzadas")}
         >
           Estadísticas Avanzadas

@@ -36,36 +36,14 @@ export default function TeamLastMatchesList({ fixtures = [], teamId, teamName = 
           <div
             key={fixtureKey}
             className="fixture-row team-last-matches-list__row"
-            style={{
-              backgroundColor: bgColor,
-              padding: '10px 12px',
-              borderRadius: '10px',
-              marginBottom: 0,
-              color: '#333',
-              fontWeight: 600,
-              boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
-              border: '1px solid rgba(0,0,0,0.05)',
-            }}
+            style={{ backgroundColor: bgColor }}
           >
-            <p
-              className="team-last-matches-list__match"
-              style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: 600, color: '#1a1a1a' }}
-            >
-              {textoPartido}
-            </p>
-            <p
-              className="team-last-matches-list__score"
-              style={{ margin: '0 0 2px 0', fontSize: '11px', color: '#64748b', fontWeight: 500 }}
-            >
+            <p className="team-last-matches-list__match">{textoPartido}</p>
+            <p className="team-last-matches-list__score">
               Marcador:{' '}
               {goalsFor !== null && goalsAgainst !== null ? `${goalsFor} - ${goalsAgainst}` : 'N/D'}
             </p>
-            <p
-              className="fixture-time team-last-matches-list__date"
-              style={{ margin: 0, fontSize: '10px', color: '#64748b', fontWeight: 400 }}
-            >
-              Fecha: {fechaFormateada}
-            </p>
+            <p className="fixture-time team-last-matches-list__date">Fecha: {fechaFormateada}</p>
           </div>
         );
       })}

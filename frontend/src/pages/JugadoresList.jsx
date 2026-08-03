@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getJugadoresEquipo, getJugadorInfo, getJugadorPartidos } from "../api/api";
 import PlayerCard from "../components/PlayerCard";
 import PlayerMatchesTable from "../components/PlayerMatchesTable";
+import "../styles/team-pages.css";
 
 export default function JugadoresList() {
   const { teamId } = useParams();
@@ -169,13 +170,6 @@ export default function JugadoresList() {
     minWidth: "180px"
   };
 
-  const gridStyle = {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-    gap: "20px",
-    maxWidth: "1400px",
-    margin: "0 auto"
-  };
 
   const loadingStyle = {
     textAlign: "center",
@@ -233,7 +227,7 @@ export default function JugadoresList() {
   }
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} className="jugadores-list-page">
       <button
         style={backButtonStyle}
         onClick={() => navigate(-1)}
@@ -282,7 +276,7 @@ export default function JugadoresList() {
             : "No hay jugadores disponibles"}
         </div>
       ) : (
-        <div style={gridStyle}>
+        <div className="jugadores-list-grid">
           {filteredJugadores.map((jugador) => {
             const data = playerData[jugador.id];
             const stats = data?.playerStats?.games || {};
@@ -309,7 +303,7 @@ export default function JugadoresList() {
                       <h3 style={{ color: "#4FC3F7", fontSize: "16px", fontWeight: "600", marginBottom: "12px" }}>
                         Datos Generales
                       </h3>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "8px" }}>
+                      <div className="jugadores-player-stats-grid">
                         {data.playerInfo?.age && (
                           <div>
                             <p style={{ color: "#B0BEC5", fontSize: "12px", margin: "0 0 4px 0" }}>Edad</p>
@@ -345,7 +339,7 @@ export default function JugadoresList() {
                         <h3 style={{ color: "#4FC3F7", fontSize: "16px", fontWeight: "600", marginBottom: "12px" }}>
                           Estadísticas de la Temporada
                         </h3>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "8px" }}>
+                        <div className="jugadores-player-detail-grid">
                           <div>
                             <p style={{ color: "#B0BEC5", fontSize: "12px", margin: "0 0 4px 0" }}>Partidos</p>
                             <p style={{ color: "#4FC3F7", fontSize: "18px", fontWeight: "700", margin: "0" }}>{stats.appearences || 0}</p>

@@ -313,7 +313,7 @@ function PartidoCard({
         {/* Botón de Predicciones - Movido a la derecha */}
         <div className="partido-card-actions">
           <button
-            className="predicciones-button"
+            className="predicciones-button gl-btn-gold"
             onClick={handlePrediccionesClick}
             disabled={cargandoPredicciones}
           >

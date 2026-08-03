@@ -4,6 +4,7 @@ import TeamLastMatchesList from '../TeamLastMatchesList';
 import { getTeamFixtures } from '../../api/api';
 import { PREDICCIONES_TITLES } from '../../constants/prediccionesSectionTitles';
 import { IconUltimosPartidos } from './PrediccionesIcons';
+import AccordionPremiumLoader from './AccordionPremiumLoader';
 
 const MATCH_LIMIT = 5;
 
@@ -14,11 +15,20 @@ const INITIAL_STATE = {
   error: null,
 };
 
+function resolvePrefetchedFixtures(prefetch, side) {
+  const list = side === 'A' ? prefetch?.fixturesA : prefetch?.fixturesB;
+  if (prefetch?.ready && Array.isArray(list)) {
+    return list.slice(0, MATCH_LIMIT);
+  }
+  return null;
+}
+
 export default function UltimosPartidosPredicciones({
   equipoAId,
   equipoBId,
   nombreEquipoA,
   nombreEquipoB,
+  lazyContext,
 }) {
   const [fetchState, setFetchState] = useState(INITIAL_STATE);
   const loadedRef = useRef(false);
@@ -26,15 +36,41 @@ export default function UltimosPartidosPredicciones({
 
   const nombreA = nombreEquipoA || 'Equipo A';
   const nombreB = nombreEquipoB || 'Equipo B';
+  const prefetch = lazyContext?.prefetch;
+
+  const contextKey = `${equipoAId}-${equipoBId}-${prefetch?.ready ? 'ready' : 'pending'}`;
 
   useEffect(() => {
     loadedRef.current = false;
     loadingRef.current = false;
     setFetchState(INITIAL_STATE);
-  }, [equipoAId, equipoBId]);
+  }, [contextKey]);
+
+  const applyLoadedFixtures = useCallback((fixturesA, fixturesB) => {
+    loadedRef.current = true;
+    setFetchState({
+      status: 'loaded',
+      fixturesA,
+      fixturesB,
+      error: null,
+    });
+  }, []);
 
   const loadFixtures = useCallback(async () => {
     if (!equipoAId || !equipoBId || loadedRef.current || loadingRef.current) {
+      return;
+    }
+
+    const prefetchedA = resolvePrefetchedFixtures(prefetch, 'A');
+    const prefetchedB = resolvePrefetchedFixtures(prefetch, 'B');
+
+    if (prefetchedA && prefetchedB) {
+      applyLoadedFixtures(prefetchedA, prefetchedB);
+      return;
+    }
+
+    if (prefetch && !prefetch.ready) {
+      setFetchState((prev) => ({ ...prev, status: 'loading', error: null }));
       return;
     }
 
@@ -47,13 +83,10 @@ export default function UltimosPartidosPredicciones({
         getTeamFixtures(equipoBId, MATCH_LIMIT),
       ]);
 
-      loadedRef.current = true;
-      setFetchState({
-        status: 'loaded',
-        fixturesA: (resA?.response || []).slice(0, MATCH_LIMIT),
-        fixturesB: (resB?.response || []).slice(0, MATCH_LIMIT),
-        error: null,
-      });
+      applyLoadedFixtures(
+        (resA?.response || []).slice(0, MATCH_LIMIT),
+        (resB?.response || []).slice(0, MATCH_LIMIT)
+      );
     } catch (err) {
       setFetchState({
         status: 'error',
@@ -64,7 +97,21 @@ export default function UltimosPartidosPredicciones({
     } finally {
       loadingRef.current = false;
     }
-  }, [equipoAId, equipoBId]);
+  }, [equipoAId, equipoBId, prefetch, applyLoadedFixtures]);
+
+  useEffect(() => {
+    if (fetchState.status !== 'loading' || prefetch?.ready !== true) {
+      return;
+    }
+
+    const prefetchedA = resolvePrefetchedFixtures(prefetch, 'A');
+    const prefetchedB = resolvePrefetchedFixtures(prefetch, 'B');
+
+    if (prefetchedA && prefetchedB) {
+      loadingRef.current = false;
+      applyLoadedFixtures(prefetchedA, prefetchedB);
+    }
+  }, [prefetch, fetchState.status, applyLoadedFixtures]);
 
   const handleOpenChange = useCallback(
     (isOpen) => {
@@ -88,9 +135,7 @@ export default function UltimosPartidosPredicciones({
       onOpenChange={handleOpenChange}
     >
       {status === 'loading' && (
-        <p className="predicciones-ultimos-partidos-loading" role="status" aria-live="polite">
-          Cargando últimos partidos…
-        </p>
+        <AccordionPremiumLoader message="Cargando últimos partidos…" />
       )}
 
       {status === 'error' && (

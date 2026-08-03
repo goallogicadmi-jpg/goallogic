@@ -221,23 +221,24 @@ router.get('/posts/:id', authJwt, async (req, res) => {
     const post = await CommunityPost.findOne({
       _id: req.params.id,
       ...notDeletedFilter(),
-    }).populate('user', 'nombre publicId role pais foto_perfil_url');
+    }).populate(
+      'user',
+      'nombre publicId role pais foto_perfil_url analystVerifiedAt analystStripePriceId analystSubscriptionPriceCents'
+    );
     if (!post) return res.status(404).json({ message: 'No encontrado' });
 
     const comments = await PostComment.find({ post: post._id, ...notDeletedFilter() })
       .populate('user', 'nombre publicId foto_perfil_url')
       .sort({ createdAt: 1 });
 
-    let payload = { post, comments };
-    if (isRequesterAnalyst(req)) {
-      if (post.user && typeof post.user === 'object') delete post.user.email;
-      payload = {
-        post: stripPrivateUserFieldsFromPosts([post], req)[0],
-        comments,
-      };
+    const [enrichedPost] = await enrichPostsWithAnalystData([post], req.user?.id);
+    let safePost = stripPrivateUserFieldsFromPosts([enrichedPost], req)[0];
+
+    if (isRequesterAnalyst(req) && safePost.user && typeof safePost.user === 'object') {
+      delete safePost.user.email;
     }
 
-    res.json(payload);
+    res.json({ post: safePost, comments });
   } catch (err) {
     console.error('Error obteniendo post:', err);
     res.status(500).json({ message: 'Error al obtener el post' });

@@ -158,7 +158,7 @@ router.get('/:id', authJwt, async (req, res) => {
     const posts = await CommunityPost.find({ user: analyst._id, ...notDeletedFilter() })
       .sort({ createdAt: -1 })
       .limit(20)
-      .select('publicationType matchInfo text probability createdAt reactionsCount')
+      .select('publicationType matchInfo text probability createdAt reactionsCount imagen_url')
       .lean();
 
     res.json({

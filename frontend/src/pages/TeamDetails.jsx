@@ -12,6 +12,7 @@ import {
 } from "../api/api";
 import SeasonStandingsStats from "../components/SeasonStandingsStats";
 import { hasSeasonStandingContent, hasStatValue } from "../utils/statDisplay";
+import "../styles/team-pages.css";
 
 export default function TeamDetails() {
   console.log("🔴 TeamDetails.jsx SE ESTÁ RENDERIZANDO");
@@ -385,7 +386,6 @@ export default function TeamDetails() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div style={{ marginBottom: "20px", display: "flex", flexWrap: "wrap" }}>
         <button
           onClick={() => {
@@ -394,7 +394,7 @@ export default function TeamDetails() {
           }}
           style={tabButtonStyle(activeTab === "info")}
         >
-          ℹ️ Información
+          Información
         </button>
         <button
           onClick={() => {
@@ -403,7 +403,7 @@ export default function TeamDetails() {
           }}
           style={tabButtonStyle(activeTab === "stats")}
         >
-          📊 Estadísticas
+          Estadísticas
         </button>
         <button
           onClick={() => {
@@ -412,7 +412,7 @@ export default function TeamDetails() {
           }}
           style={tabButtonStyle(activeTab === "partidos")}
         >
-          ⚽ Partidos
+          Partidos
         </button>
         <button
           onClick={() => {
@@ -421,7 +421,7 @@ export default function TeamDetails() {
           }}
           style={tabButtonStyle(activeTab === "jugadores")}
         >
-          👥 Jugadores
+          Jugadores
         </button>
         <button
           onClick={() => {
@@ -430,7 +430,7 @@ export default function TeamDetails() {
           }}
           style={tabButtonStyle(activeTab === "estadisticas")}
         >
-          📈 Estadísticas Avanzadas
+          Estadísticas Avanzadas
         </button>
         <button
           onClick={() => {
@@ -439,7 +439,7 @@ export default function TeamDetails() {
           }}
           style={tabButtonStyle(activeTab === "lesiones")}
         >
-          🏥 Lesiones
+          Lesiones
         </button>
         <button
           onClick={() => {
@@ -448,7 +448,7 @@ export default function TeamDetails() {
           }}
           style={tabButtonStyle(activeTab === "transferencias")}
         >
-          🔄 Transferencias
+          Transferencias
         </button>
       </div>
 
@@ -456,7 +456,7 @@ export default function TeamDetails() {
       {activeTab === "info" && (
         <div style={cardStyle}>
           <h2 style={{ marginBottom: "20px", color: "#1a1a1a" }}>Información General</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px" }}>
+          <div className="team-details-responsive-grid">
             {teamInfo.name && (
               <div>
                 <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "4px" }}>Nombre</p>
@@ -506,7 +506,7 @@ export default function TeamDetails() {
               {teamStatistics.length > 0 && (
                 <div style={{ marginTop: showSeasonStandings ? "20px" : 0 }}>
                   <h3 style={{ color: "#1a1a1a", marginBottom: "12px" }}>Estadísticas Detalladas</h3>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
+                  <div className="team-details-stats-grid">
                     {teamStatistics.map((stat, idx) => (
                       <div key={idx} style={{ padding: "12px", backgroundColor: "#f8fafc", borderRadius: "8px" }}>
                         <p style={{ color: "#64748b", fontSize: "12px", marginBottom: "4px" }}>{stat.type || "N/A"}</p>

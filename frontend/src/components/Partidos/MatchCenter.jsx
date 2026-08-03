@@ -21,6 +21,7 @@ import useMediaQuery from "../../hooks/useMediaQuery";
 import useSwipeTabs from "../../hooks/useSwipeTabs";
 
 import BadgeEstado from "./BadgeEstado";
+import PremiumTabs from "../ui/PremiumTabs";
 
 import {
 
@@ -95,10 +96,6 @@ export default function MatchCenter({ partido, onClose, domain = "club" }) {
 
   const contentRef = useRef(null);
 
-  const tabsRef = useRef(null);
-
-  const [tabsFadeState, setTabsFadeState] = useState({ left: false, right: false });
-
 
 
   const activeTabIndex = useMemo(
@@ -135,56 +132,6 @@ export default function MatchCenter({ partido, onClose, domain = "club" }) {
 
 
 
-  const updateTabsFadeState = useCallback(() => {
-
-    const container = tabsRef.current;
-
-    if (!container) return;
-
-
-
-    const { scrollLeft, scrollWidth, clientWidth } = container;
-
-    const maxScroll = scrollWidth - clientWidth;
-
-    const threshold = 2;
-
-
-
-    if (maxScroll <= threshold) {
-
-      setTabsFadeState((prev) => (
-
-        prev.left || prev.right ? { left: false, right: false } : prev
-
-      ));
-
-      return;
-
-    }
-
-
-
-    const next = {
-
-      left: scrollLeft > threshold,
-
-      right: scrollLeft < maxScroll - threshold,
-
-    };
-
-
-
-    setTabsFadeState((prev) => (
-
-      prev.left === next.left && prev.right === next.right ? prev : next
-
-    ));
-
-  }, []);
-
-
-
   useEffect(() => {
 
     setTabActiva("eventos");
@@ -197,42 +144,6 @@ export default function MatchCenter({ partido, onClose, domain = "club" }) {
 
   useEffect(() => {
 
-    const container = tabsRef.current;
-
-    if (!container) return undefined;
-
-
-
-    updateTabsFadeState();
-
-
-
-    const handleScroll = () => updateTabsFadeState();
-
-    container.addEventListener("scroll", handleScroll, { passive: true });
-
-
-
-    const resizeObserver = new ResizeObserver(() => updateTabsFadeState());
-
-    resizeObserver.observe(container);
-
-
-
-    return () => {
-
-      container.removeEventListener("scroll", handleScroll);
-
-      resizeObserver.disconnect();
-
-    };
-
-  }, [updateTabsFadeState, partido?.fixture?.id]);
-
-
-
-  useEffect(() => {
-
     if (contentRef.current) {
 
       contentRef.current.scrollTop = 0;
@@ -240,48 +151,6 @@ export default function MatchCenter({ partido, onClose, domain = "club" }) {
     }
 
   }, [tabActiva]);
-
-
-
-  useEffect(() => {
-
-    const container = tabsRef.current;
-
-    if (!container) return;
-
-
-
-    const activeTab = container.querySelector(".match-center-tab.activa");
-
-    if (!activeTab) return;
-
-
-
-    const tabStart = activeTab.offsetLeft;
-
-    const tabEnd = tabStart + activeTab.offsetWidth;
-
-    const maxScroll = container.scrollWidth - container.clientWidth;
-
-    const tabCenter = tabStart + activeTab.offsetWidth / 2;
-
-    const scrollTarget = tabCenter - container.clientWidth / 2;
-
-
-
-    container.scrollTo({
-
-      left: Math.max(0, Math.min(maxScroll, scrollTarget)),
-
-      behavior: "smooth",
-
-    });
-
-
-
-    requestAnimationFrame(updateTabsFadeState);
-
-  }, [tabActiva, updateTabsFadeState]);
 
 
 
@@ -539,45 +408,15 @@ export default function MatchCenter({ partido, onClose, domain = "club" }) {
 
 
 
-        <div
-
-          className={[
-
-            "match-center-tabs-wrap",
-
-            tabsFadeState.left ? "match-center-tabs-wrap--fade-left" : "",
-
-            tabsFadeState.right ? "match-center-tabs-wrap--fade-right" : "",
-
-          ].filter(Boolean).join(" ")}
-
-        >
-
-          <div className="match-center-tabs" ref={tabsRef}>
-
-            {MATCH_CENTER_TABS.map((tab) => (
-
-              <button
-
-                key={tab.id}
-
-                type="button"
-
-                className={`match-center-tab ${tabActiva === tab.id ? "activa" : ""}`}
-
-                onClick={() => setTabActiva(tab.id)}
-
-                aria-selected={tabActiva === tab.id}
-
-              >
-                {tab.label}
-              </button>
-
-            ))}
-
-          </div>
-
-        </div>
+        <PremiumTabs
+          tabs={MATCH_CENTER_TABS}
+          activeTab={tabActiva}
+          onTabChange={setTabActiva}
+          ariaLabel="Secciones del partido"
+          wrapClassName="match-center-tabs-wrap"
+          className="match-center-tabs"
+          tabClassName="match-center-tab"
+        />
 
 
 

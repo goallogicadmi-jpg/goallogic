@@ -1,16 +1,83 @@
+/* Tarjeta premium — publicaciones de analistas */
+
 .analyst-premium-post {
-  background: linear-gradient(180deg, #ffffff 0%, #f5f7fa 100%);
-  border: 1px solid rgba(0, 102, 255, 0.22);
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: 0 8px 24px rgba(0, 59, 153, 0.08);
+  background: var(--bg-premium, #181b20);
+  border: 1px solid var(--border-premium, rgba(255, 255, 255, 0.06));
+  border-radius: var(--radius-container, 14px);
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+  color: #e8eaed;
+  font-size: 15px;
+  line-height: 1.5;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
+.analyst-premium-post:hover {
+  border-color: rgba(79, 195, 247, 0.18);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.34);
+}
+
+.analyst-premium-post--profile {
+  padding: 16px;
+}
+
+.analyst-premium-post--profile .analyst-premium-post__body {
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: none;
+}
+
+.analyst-premium-post--profile .analyst-premium-post__footer {
+  gap: 14px;
+}
+
+.analyst-premium-post--profile .analyst-premium-post__reactions {
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.analyst-premium-post__footer-main--profile {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  gap: 10px;
+}
+
+.analyst-premium-post__footer-main--profile .analyst-premium-post__subscribe.analyst-subscribe-wrap {
+  width: 100%;
+}
+
+.analyst-premium-post__footer-main--profile .analyst-subscribe-btn,
+.analyst-premium-post__footer-main--profile .analyst-subscribe-btn--active {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+}
+
+.analyst-premium-post__footer-main--profile .analyst-premium-post__link-btn {
+  width: 100%;
+  text-align: center;
+}
+
+/* —— Header —— */
 .analyst-premium-post__header {
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.analyst-premium-post__header-main {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 14px;
   margin-bottom: 14px;
+}
+
+.analyst-premium-post__avatar {
+  flex-shrink: 0;
+  border: 2px solid rgba(212, 175, 55, 0.35);
+  border-radius: 50%;
 }
 
 .analyst-premium-post__author {
@@ -18,155 +85,486 @@
   min-width: 0;
 }
 
+.analyst-premium-post__name-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
 .analyst-premium-post__name {
-  display: block;
-  color: #111111;
-  font-size: 1rem;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.25;
 }
 
 .analyst-premium-post__badge {
-  background: #0066ff;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
   border-radius: 999px;
+  background: rgba(212, 175, 55, 0.14);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  color: #d4af37;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+}
+
+.analyst-premium-post .analyst-verified-badge__line {
+  color: #4fc3f7;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .analyst-premium-post__stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin-bottom: 14px;
-  padding: 12px;
+}
+
+.analyst-premium-post__stat {
+  padding: 10px 12px;
   border-radius: 10px;
-  background: #fff;
-  border: 1px solid rgba(0, 102, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
 }
 
 .analyst-premium-post__stat-label {
   display: block;
-  font-size: 0.72rem;
-  color: #444444;
-  margin-bottom: 2px;
-}
-
-.analyst-premium-post__history h4 {
-  margin: 0 0 8px;
-  font-size: 0.85rem;
-  color: #003b99;
-}
-
-.analyst-premium-post__history ul {
-  margin: 0 0 14px;
-  padding: 0;
-  list-style: none;
-}
-
-.analyst-premium-post__history li {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 0.85rem;
-  padding: 6px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.analyst-result--ganada {
-  color: #0d9488;
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8b949e;
+  margin-bottom: 4px;
 }
 
-.analyst-result--perdida {
-  color: #dc2626;
-  font-weight: 600;
+.analyst-premium-post__stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #4fc3f7;
 }
 
-.analyst-result--pendiente {
-  color: #444444;
+.analyst-premium-post__stat-value--positive {
+  color: #34d399;
 }
 
+.analyst-premium-post__stat-value--negative {
+  color: #f87171;
+}
+
+/* —— Body —— */
 .analyst-premium-post__body {
-  color: #111111;
-  line-height: 1.5;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.analyst-premium-post__match-block {
   margin-bottom: 14px;
 }
 
-.analyst-premium-post__match,
-.analyst-premium-post__prob {
-  font-size: 0.88rem;
-  color: #444444;
+.analyst-premium-post__match-label,
+.analyst-premium-post__prob-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8b949e;
+  margin-bottom: 6px;
 }
 
-.analyst-premium-post__actions {
+.analyst-premium-post__match {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.35;
+}
+
+.analyst-premium-post__match-vs {
+  color: #4fc3f7;
+  font-weight: 600;
+}
+
+.analyst-premium-post__league {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #8b949e;
+}
+
+.analyst-premium-post__prob-block {
+  margin-bottom: 14px;
+}
+
+.analyst-premium-post__prob-head {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.analyst-premium-post__prob-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #4fc3f7;
+}
+
+.analyst-premium-post__prob-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.analyst-premium-post__prob-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(79, 195, 247, 0.45), #4fc3f7);
+  box-shadow: 0 0 12px rgba(79, 195, 247, 0.35);
+  transition: width 0.4s ease;
+}
+
+.analyst-premium-post__prob-text {
+  margin: 0 0 14px;
+  font-size: 15px;
+  color: #4fc3f7;
+}
+
+.analyst-premium-post__prediction {
   margin-bottom: 12px;
 }
 
-.analyst-subscribe-btn {
-  border: none;
-  border-radius: 8px;
-  background: #0066ff;
-  color: #fff;
+.analyst-premium-post__prediction-type {
+  display: inline-flex;
+  margin-bottom: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(79, 195, 247, 0.1);
+  border: 1px solid rgba(79, 195, 247, 0.22);
+  color: #4fc3f7;
+  font-size: 12px;
   font-weight: 600;
-  padding: 10px 14px;
+}
+
+.analyst-premium-post__text {
+  margin: 0;
+  font-size: 15px;
+  color: #c9d1d9;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.analyst-premium-post__status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.analyst-premium-post__status {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.analyst-premium-post__status--neutral {
+  background: rgba(139, 148, 158, 0.12);
+  color: #8b949e;
+  border: 1px solid rgba(139, 148, 158, 0.2);
+}
+
+.analyst-premium-post__status--pending {
+  background: rgba(79, 195, 247, 0.1);
+  color: #4fc3f7;
+  border: 1px solid rgba(79, 195, 247, 0.25);
+}
+
+.analyst-premium-post__status--settled {
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+.analyst-premium-post__date {
+  font-size: 12px;
+  color: #8b949e;
+}
+
+.analyst-premium-post__image-wrap {
+  margin-top: 12px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.analyst-premium-post__image {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+}
+
+/* —— Footer —— */
+.analyst-premium-post__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.analyst-premium-post__footer-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.analyst-premium-post__subscribe.analyst-subscribe-wrap {
+  margin: 0;
+}
+
+.analyst-subscribe-btn {
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.12);
+  color: #d4af37;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 16px;
   cursor: pointer;
+  transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+  font-family: inherit;
+}
+
+.analyst-subscribe-btn:hover:not(:disabled) {
+  background: #d4af37;
+  color: #0f1419;
+  border-color: #d4af37;
+  transform: translateY(-1px);
+}
+
+.analyst-subscribe-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .analyst-subscribe-btn--active {
-  display: inline-block;
-  background: #f5f7fa;
-  color: #003b99;
-  border: 1px solid rgba(0, 102, 255, 0.3);
-  padding: 10px 14px;
-  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(79, 195, 247, 0.12);
+  color: #4fc3f7;
+  border: 1px solid rgba(79, 195, 247, 0.35);
+  padding: 10px 16px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .analyst-subscribe-hint,
 .analyst-subscribe-error {
-  font-size: 0.8rem;
+  font-size: 12px;
   margin: 6px 0 0;
 }
 
 .analyst-subscribe-error {
-  color: #dc2626;
+  color: #f87171;
 }
 
 .analyst-subscribe-hint {
-  color: #444444;
+  color: #8b949e;
 }
 
 .analyst-premium-post__link-btn {
-  border: 1px solid #0066ff;
+  border: 1px solid rgba(79, 195, 247, 0.35);
   background: transparent;
-  color: #0066ff;
-  border-radius: 8px;
-  padding: 10px 14px;
+  color: #4fc3f7;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  font-family: inherit;
+  transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
 }
 
-.analyst-premium-post__footer {
+.analyst-premium-post__link-btn:hover {
+  background: rgba(79, 195, 247, 0.1);
+  border-color: #4fc3f7;
+  transform: translateY(-1px);
+}
+
+.analyst-premium-post__reactions {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
   align-items: center;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  padding-top: 10px;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.analyst-premium-post__footer button {
-  background: none;
-  border: none;
+.analyst-premium-post__reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #8b949e;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  color: #444444;
+  font-family: inherit;
+  transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+}
+
+.analyst-premium-post__reaction:hover {
+  background: rgba(79, 195, 247, 0.08);
+  border-color: rgba(79, 195, 247, 0.25);
+  color: #4fc3f7;
 }
 
 .analyst-premium-post__delete {
   margin-left: auto;
-  color: #dc2626 !important;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  background: transparent;
+  color: #f87171;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.22s ease;
+}
+
+.analyst-premium-post__delete:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.analyst-premium-post__delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Resultados historial (perfil / admin) */
+.analyst-result--ganada {
+  color: #34d399;
+  font-weight: 600;
+}
+
+.analyst-result--perdida {
+  color: #f87171;
+  font-weight: 600;
+}
+
+.analyst-result--pendiente {
+  color: #8b949e;
+}
+
+@media (max-width: 768px) {
+  .analyst-premium-post {
+    padding: 16px;
+    font-size: 15px;
+  }
+
+  .analyst-premium-post__text {
+    font-size: 15px;
+  }
+
+  .analyst-premium-post__prob-block {
+    width: 100%;
+  }
+
+  .analyst-premium-post__prob-track {
+    width: 100%;
+  }
+
+  .analyst-premium-post__reactions {
+    gap: 16px;
+  }
+
+  .analyst-premium-post__reaction {
+    padding: 10px 16px;
+    font-size: 15px;
+    gap: 8px;
+  }
+
+  .analyst-premium-post__footer-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .analyst-premium-post__link-btn,
+  .analyst-premium-post__footer-main .analyst-subscribe-btn,
+  .analyst-premium-post__footer-main .analyst-subscribe-btn--active,
+  .analyst-premium-post__footer-main .analyst-subscribe-wrap {
+    width: 100%;
+  }
+
+  .analyst-premium-post__footer-main .analyst-subscribe-btn,
+  .analyst-premium-post__footer-main .analyst-subscribe-btn--active {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .analyst-premium-post--profile {
+    font-size: 16px;
+  }
+
+  .analyst-premium-post--profile .analyst-premium-post__text {
+    font-size: 16px;
+  }
+
+  .analyst-premium-post--profile .analyst-premium-post__reactions {
+    gap: 18px;
+  }
+
+  .analyst-premium-post--profile .analyst-premium-post__reaction {
+    padding: 10px 18px;
+    font-size: 15px;
+    gap: 8px;
+  }
+
+  .analyst-premium-post__footer-main--profile {
+    gap: 12px;
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 560px) {
+  .analyst-premium-post {
+    padding: 16px;
+  }
+
+  .analyst-premium-post__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .analyst-premium-post__footer-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .analyst-premium-post__link-btn,
+  .analyst-subscribe-btn,
+  .analyst-subscribe-btn--active {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
 }

@@ -1,168 +1,603 @@
 .analyst-profile-page {
-  max-width: 920px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
-  color: #111111;
+  padding: 24px 16px 56px;
+  color: #e8eaed;
+}
+
+.analyst-profile-page__brand {
+  margin-bottom: 16px;
 }
 
 .analyst-profile-page--loading,
 .analyst-profile-page--error {
   text-align: center;
   padding: 48px 16px;
-  color: #444444;
+  color: #8b949e;
 }
 
-.analyst-profile__hero {
-  display: flex;
-  gap: 18px;
+.analyst-profile-page__back {
+  display: inline-flex;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 20px;
-  border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 102, 255, 0.15);
-  box-shadow: 0 10px 30px rgba(0, 59, 153, 0.08);
-}
-
-.analyst-profile__identity h1 {
-  margin: 0 0 8px;
-  font-size: 1.6rem;
-}
-
-.analyst-profile__country {
-  margin: 8px 0 0;
-  color: #444444;
-}
-
-.analyst-profile__stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 20px;
 }
 
-.analyst-profile__stats-grid article {
-  background: #f5f7fa;
-  border-radius: 12px;
-  padding: 14px;
-  border: 1px solid rgba(0, 102, 255, 0.1);
+.analyst-profile-page__back-icon {
+  font-size: 16px;
+  line-height: 1;
 }
 
-.analyst-profile__stats-grid span {
-  display: block;
-  font-size: 0.78rem;
-  color: #444444;
-  margin-bottom: 4px;
-}
-
-.analyst-profile__stats-grid strong {
-  font-size: 1.2rem;
-  color: #0066ff;
-}
-
-.analyst-profile__subscribe {
-  margin-bottom: 24px;
-}
-
-.analyst-profile__price-note {
-  margin: 8px 0 0;
-  color: #444444;
-  font-size: 0.88rem;
-}
-
-.analyst-profile__section {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 18px;
-  margin-bottom: 18px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.analyst-profile__section h2 {
-  margin: 0 0 14px;
-  font-size: 1.1rem;
-  color: #003b99;
-}
-
-.analyst-profile__locked {
-  padding: 16px;
-  border-radius: 10px;
-  background: #f5f7fa;
-  border: 1px dashed rgba(0, 102, 255, 0.35);
-  color: #444444;
-}
-
-.analyst-profile__summary-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 14px;
-  font-size: 0.92rem;
-  color: #444444;
-}
-
-.analyst-performance-chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 120px;
-  margin-bottom: 16px;
-  padding: 10px;
-  background: #f5f7fa;
-  border-radius: 10px;
-}
-
-.analyst-performance-chart__bar {
-  flex: 1;
-  min-width: 6px;
-  border-radius: 4px 4px 0 0;
-  background: #0066ff;
-}
-
-.analyst-performance-chart__bar.is-neg {
-  background: #dc2626;
-}
-
-.analyst-profile__bets-table-wrap {
-  overflow-x: auto;
-}
-
-.analyst-profile__bets-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.88rem;
-}
-
-.analyst-profile__bets-table th,
-.analyst-profile__bets-table td {
-  padding: 8px 10px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+.analyst-profile-page--error {
   text-align: left;
 }
 
-.analyst-profile__posts {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.analyst-profile-page--error p {
+  margin: 0 0 16px;
+  text-align: center;
+  color: #8b949e;
 }
 
-.analyst-profile__posts li {
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+.analyst-profile-panel {
+  background: #181b20;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.analyst-profile-panel--skeleton {
+  padding: 56px 32px;
+  text-align: center;
+  color: #8b949e;
+}
+
+/* —— Hero —— */
+.analyst-profile-panel__hero {
+  position: relative;
+  padding: 32px 32px 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.analyst-profile-panel__hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(79, 195, 247, 0.12) 0%, transparent 42%),
+    linear-gradient(225deg, rgba(212, 175, 55, 0.1) 0%, transparent 48%),
+    #181b20;
+  pointer-events: none;
+}
+
+.analyst-profile-panel__hero-content {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.analyst-profile-panel__avatar {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  min-width: 120px;
+  min-height: 120px;
+  border: 3px solid rgba(212, 175, 55, 0.45);
+  border-radius: 50%;
+  box-shadow: 0 0 28px rgba(212, 175, 55, 0.22);
+  object-fit: cover;
+}
+
+.analyst-profile-panel__identity {
+  flex: 1;
+  min-width: 220px;
+}
+
+.analyst-profile-panel__name-row,
+.analyst-profile-panel__badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.analyst-profile-panel__badges-row {
+  margin-bottom: 10px;
+}
+
+.analyst-profile-panel__name {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.analyst-profile-panel__badge {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.14);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  color: #d4af37;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.15);
+}
+
+.analyst-profile-panel__identity .analyst-verified-badge__line {
+  color: #4fc3f7;
+  font-size: 13px;
+}
+
+.analyst-profile-panel__name-row .analyst-verified-badge,
+.analyst-profile-panel__badges-row .analyst-verified-badge {
+  flex-shrink: 0;
+}
+
+.analyst-profile-panel__role {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4fc3f7;
+}
+
+.analyst-profile-panel__country,
+.analyst-profile-panel__subscribers {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: #8b949e;
+}
+
+.analyst-profile-panel__country {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.analyst-profile-panel__country-flag {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.analyst-profile-panel__tabs {
+  padding: 0 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.analyst-profile-panel__tabs .gl-tabs-wrap {
+  margin: 0;
+}
+
+.analyst-profile-panel__tabs .gl-tabs {
+  border-bottom: none;
+}
+
+.analyst-profile-panel__actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.analyst-profile-panel__subscribe.analyst-subscribe-wrap {
+  margin: 0;
+}
+
+.analyst-profile-panel__subscribe .analyst-subscribe-btn,
+.analyst-profile-panel__subscribe.analyst-subscribe-btn--active {
+  border-radius: 999px;
+}
+
+.analyst-profile-panel__subscribe.analyst-subscribe-btn--active {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: rgba(79, 195, 247, 0.12);
+  border: 1px solid rgba(79, 195, 247, 0.35);
+  color: #4fc3f7;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.analyst-profile-panel__history-btn {
+  border-radius: 999px;
+  border-color: rgba(79, 195, 247, 0.35);
+  color: #4fc3f7;
+}
+
+.analyst-profile-panel__history-btn:hover {
+  background: rgba(79, 195, 247, 0.1);
+  border-color: #4fc3f7;
+  color: #4fc3f7;
+}
+
+.analyst-profile-panel__price-note {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 13px;
+  color: #8b949e;
+}
+
+/* —— Métricas —— */
+.analyst-profile-panel__metrics-scroll {
+  padding: 28px 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.analyst-profile-panel__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.analyst-profile-panel__metric {
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  text-align: center;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+.analyst-profile-panel__metric:hover {
+  border-color: rgba(79, 195, 247, 0.22);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  transform: translateY(-1px);
+}
+
+.analyst-profile-panel__metric-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8b949e;
+  margin-bottom: 6px;
+}
+
+.analyst-profile-panel__metric-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #4fc3f7;
+}
+
+.analyst-profile-panel__metric-value.is-positive {
+  color: #34d399;
+}
+
+.analyst-profile-panel__metric-value.is-negative {
+  color: #f87171;
+}
+
+/* —— Gráfico —— */
+.analyst-profile-panel__chart-section {
+  padding: 28px 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.analyst-profile-panel__section-title {
+  margin: 0 0 16px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.01em;
+}
+
+.analyst-profile__chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 128px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.analyst-profile__chart-bar {
+  flex: 1;
+  min-width: 8px;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, #4fc3f7, rgba(79, 195, 247, 0.45));
+  transition: opacity 0.22s ease;
+}
+
+.analyst-profile__chart-bar.is-neg {
+  background: linear-gradient(180deg, #f87171, rgba(248, 113, 113, 0.45));
+}
+
+.analyst-profile__chart-bar:hover {
+  opacity: 0.85;
+}
+
+/* —— Secciones —— */
+.analyst-profile-panel__section {
+  padding: 28px 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.analyst-profile-panel__section:last-child {
+  border-bottom: none;
+}
+
+.analyst-profile-panel__history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.analyst-profile-panel__locked {
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 12px;
+  background: rgba(79, 195, 247, 0.06);
+  border: 1px dashed rgba(79, 195, 247, 0.28);
+  color: #8b949e;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.analyst-profile-panel__locked p {
+  margin: 0;
+}
+
+.analyst-profile-panel__summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #8b949e;
+}
+
+.analyst-profile-panel__summary-row strong {
+  color: #e8eaed;
+}
+
+.analyst-profile-panel__table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.analyst-profile-panel__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.analyst-profile-panel__table th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8b949e;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.analyst-profile-panel__table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #c9d1d9;
+}
+
+.analyst-profile-panel__table tbody tr:hover {
+  background: rgba(79, 195, 247, 0.04);
+}
+
+.analyst-profile-panel__posts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .analyst-profile__empty {
-  color: #444444;
   margin: 0;
+  color: #8b949e;
+  font-size: 15px;
 }
 
 @media (max-width: 768px) {
-  .analyst-profile__stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .analyst-profile-page {
+    max-width: 100%;
+    padding: 16px 12px 40px;
+    font-size: 15px;
   }
 
-  .analyst-profile__hero {
+  .analyst-profile-page__back {
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+
+  .analyst-profile-panel {
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .analyst-profile-panel--skeleton {
+    padding: 40px 16px;
+  }
+
+  .analyst-profile-panel__hero {
+    padding: 20px 16px 18px;
+  }
+
+  .analyst-profile-panel__hero-content {
     flex-direction: column;
+    align-items: center;
     text-align: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .analyst-profile-panel__avatar {
+    width: 96px;
+    height: 96px;
+    min-width: 96px;
+    min-height: 96px;
+  }
+
+  .analyst-profile-panel__identity {
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .analyst-profile-panel__name {
+    font-size: 1.45rem;
+    text-align: center;
+    width: 100%;
+  }
+
+  .analyst-profile-panel__badges-row {
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .analyst-profile-panel__country {
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  .analyst-profile-panel__role {
+    text-align: center;
+    font-size: 15px;
+    margin-top: 4px;
+  }
+
+  .analyst-profile-panel__subscribers {
+    text-align: center;
+    font-size: 15px;
+  }
+
+  .analyst-profile-panel__tabs {
+    padding: 0 16px;
+  }
+
+  .analyst-profile-panel__actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .analyst-profile-panel__subscribe.analyst-subscribe-wrap,
+  .analyst-profile-panel__subscribe .analyst-subscribe-btn,
+  .analyst-profile-panel__subscribe.analyst-subscribe-btn--active,
+  .analyst-profile-panel__history-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .analyst-profile-panel__metrics-scroll {
+    padding: 20px 0 20px 16px;
+    overflow: hidden;
+  }
+
+  .analyst-profile-panel__metrics {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-right: 16px;
+  }
+
+  .analyst-profile-panel__metrics::-webkit-scrollbar {
+    display: none;
+  }
+
+  .analyst-profile-panel__metric {
+    flex: 0 0 150px;
+    scroll-snap-align: start;
+    padding: 14px 16px;
+  }
+
+  .analyst-profile-panel__metric-label {
+    font-size: 11px;
+  }
+
+  .analyst-profile-panel__metric-value {
+    font-size: 1.25rem;
+  }
+
+  .analyst-profile-panel__chart-section,
+  .analyst-profile-panel__section {
+    padding: 20px 16px;
+  }
+
+  .analyst-profile-panel__metrics-scroll {
+    margin-bottom: 0;
+  }
+
+  .analyst-profile-panel__chart-section {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .analyst-profile-panel__section-title {
+    font-size: 1rem;
+    margin-bottom: 14px;
+  }
+
+  .analyst-profile-panel__history-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  .analyst-profile-panel__posts {
+    gap: 20px;
+  }
+
+  .analyst-profile__empty {
+    font-size: 15px;
+  }
+
+  .analyst-profile-panel__locked {
+    font-size: 15px;
+    padding: 16px;
+  }
+
+  .analyst-profile-panel__summary-row {
+    font-size: 15px;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .analyst-profile-panel__table {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .analyst-profile-page {
+    padding: 12px 10px 36px;
+  }
+
+  .analyst-profile-panel__metric {
+    flex: 0 0 140px;
+  }
+
+  .analyst-profile-panel__name {
+    font-size: 1.35rem;
   }
 }

@@ -3,9 +3,10 @@ import { IconChevronDown } from './PrediccionesIcons';
 import usePrefersReducedMotion from '../../hooks/usePrefersReducedMotion';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import { useAccordionGroup } from './AccordionGroup';
+import { MEDIA_QUERIES } from '../../constants/breakpoints';
 
-const MOBILE_BREAKPOINT = '(max-width: 480px)';
-const ULTRA_COMPACT_BREAKPOINT = '(max-width: 360px)';
+const MOBILE_BREAKPOINT = MEDIA_QUERIES.COMPACT;
+const ULTRA_COMPACT_BREAKPOINT = MEDIA_QUERIES.ULTRA_COMPACT;
 
 function resolveInitialOpen(defaultOpen, defaultOpenDesktop, defaultOpenMobile) {
   if (typeof defaultOpen === 'boolean') {
@@ -152,7 +153,6 @@ export default function AccordionBlock({
         className="predicciones-accordion-block__panel"
         style={{
           maxHeight: isOpen ? `${contentHeight}px` : '0px',
-          opacity: isOpen ? 1 : 0,
         }}
         aria-hidden={!isOpen}
       >

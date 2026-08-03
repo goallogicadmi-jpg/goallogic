@@ -257,27 +257,16 @@ export default function AnalistasModule() {
 
 
       <div className="admin-panel-nav analyst-admin-tabs">
-
         {tabs.map((t) => (
-
           <button
-
             key={t.id}
-
             type="button"
-
             className={`admin-nav-btn${tab === t.id ? ' active' : ''}`}
-
             onClick={() => setTab(t.id)}
-
           >
-
             {t.label}
-
           </button>
-
         ))}
-
       </div>
 
 

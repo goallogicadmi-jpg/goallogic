@@ -7,7 +7,7 @@ import CupCompetitionView from "../components/CupCompetition/CupCompetitionView"
 import StandingsTable from "../components/StandingsTable";
 
 import CompetitionPageLayout from "../components/Competition/CompetitionPageLayout";
-
+import { GoalLogicSectionHeader } from "../components/GoalLogicTitle";
 import CompetitionTabs, { COMPETITION_TAB_IDS } from "../components/Competition/CompetitionTabs";
 
 import { getCompetitionSeasonsByDomain } from "../api/api";
@@ -373,8 +373,12 @@ export default function LeagueDetails({ domain }) {
 
 
   return (
+    <>
+      <div style={{ padding: '0 16px', maxWidth: 1400, margin: '0 auto' }}>
+        <GoalLogicSectionHeader size="lg" />
+      </div>
 
-    <CompetitionPageLayout
+      <CompetitionPageLayout
 
       loading={false}
 
@@ -413,9 +417,6 @@ export default function LeagueDetails({ domain }) {
       />
 
     </CompetitionPageLayout>
-
+    </>
   );
-
 }
-
-

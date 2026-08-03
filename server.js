@@ -2869,6 +2869,9 @@ app.use('/api/settings', settingsPublicRoutes);
 const communityRoutes = require('./routes/community.js');
 app.use('/api/community', communityRoutes);
 
+const globalSearchRoutes = require('./routes/globalSearch.js');
+app.use('/api/global-search', globalSearchRoutes);
+
 const paymentsRoutes = require('./routes/payments.js');
 app.use('/api/payments', paymentsRoutes);
 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { tokens } from '../../styles/tokens';
+import useMediaQuery from '../../hooks/useMediaQuery';
+import { MEDIA_QUERIES } from '../../constants/breakpoints';
 import {
   ADVANCED_METRIC_LABELS as ML,
   ADVANCED_METRIC_LABEL_CLASS,
@@ -18,16 +20,7 @@ function ComparadorPredicciones({ fixtureIdA, fixtureIdB, profile = 'balanceado'
   const [error, setError] = useState(null);
   const [historial, setHistorial] = useState(null);
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-  // Detectar cambios en el tamaño de la ventana
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const isMobile = useMediaQuery(MEDIA_QUERIES.MOBILE);
 
   // Cargar datos de comparación
   useEffect(() => {

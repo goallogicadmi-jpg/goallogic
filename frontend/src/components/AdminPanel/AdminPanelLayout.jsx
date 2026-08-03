@@ -68,7 +68,7 @@ export default function AdminPanelLayout() {
             <span className="admin-pro-user-chip">
               {user?.nombre || user?.email} · {roleLabel}
             </span>
-            <button type="button" className="admin-btn-logout" onClick={handleLogoutClick}>
+            <button type="button" className="admin-btn-logout gl-btn-secondary" onClick={handleLogoutClick}>
               Cerrar sesión
             </button>
           </div>

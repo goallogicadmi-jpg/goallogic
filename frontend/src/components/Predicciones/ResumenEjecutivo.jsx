@@ -53,15 +53,6 @@ export default function ResumenEjecutivo({ predicciones, equipoA, equipoB, fixtu
   const equipoFavorito = diferenciaForma > 2 ? 'A' : diferenciaForma < -2 ? 'B' : null;
   const nombreEquipoFavorito = equipoFavorito === 'A' ? equipoA?.nombre : equipoFavorito === 'B' ? equipoB?.nombre : null;
 
-  const containerStyle = {
-    backgroundColor: tokens.colors.bgCard,
-    border: `2px solid ${tokens.colors.accentOrange}`,
-    borderRadius: tokens.radius.xl,
-    padding: tokens.spacing.xl,
-    marginBottom: tokens.spacing.xl,
-    boxShadow: tokens.shadows.glow,
-  };
-
   const tituloStyle = {
     fontSize: tokens.typography.fontSize2xl,
     fontWeight: tokens.typography.fontWeightBold,
@@ -72,29 +63,7 @@ export default function ResumenEjecutivo({ predicciones, equipoA, equipoB, fixtu
     paddingBottom: tokens.spacing.md,
   };
 
-  const gridStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-    gap: tokens.spacing.md,
-    marginTop: tokens.spacing.lg,
-  };
-
-  const cardStyle = {
-    backgroundColor: tokens.colors.bgSecondary,
-    border: `1px solid ${tokens.colors.borderDefault}`,
-    borderRadius: tokens.radius.lg,
-    padding: tokens.spacing.md,
-    textAlign: 'center',
-  };
-
   const labelStyle = getAdvancedMetricLabelStyle({ marginBottom: tokens.spacing.xs }, 'dark', 'compact');
-
-  const valorStyle = {
-    fontSize: tokens.typography.fontSize2xl,
-    fontWeight: tokens.typography.fontWeightBold,
-    color: tokens.colors.accentOrange,
-    lineHeight: tokens.typography.lineHeightTight,
-  };
 
   const recomendacionStyle = {
     marginTop: tokens.spacing.lg,
@@ -138,7 +107,7 @@ export default function ResumenEjecutivo({ predicciones, equipoA, equipoB, fixtu
   );
 
   return (
-    <div style={containerStyle}>
+    <div className="predicciones-resumen-ejecutivo">
       <PrediccionesSectionTitle
         as="h2"
         size="xl"
@@ -236,20 +205,20 @@ export default function ResumenEjecutivo({ predicciones, equipoA, equipoB, fixtu
         </div>
       )}
 
-      <div style={gridStyle} className="predicciones-kpis-row">
-        <div style={cardStyle}>
-          <span style={labelStyle}>Goles Esperados</span>
-          <div style={valorStyle}>{totalGolesEsperados}</div>
+      <div className="predicciones-kpis-row">
+        <div className="predicciones-kpi-card">
+          <span className="predicciones-kpi-label" style={labelStyle}>Goles Esperados</span>
+          <div className="predicciones-kpi-value">{totalGolesEsperados}</div>
         </div>
-        
-        <div style={cardStyle}>
-          <span className={ADVANCED_METRIC_LABEL_CLASS} style={labelStyle}>{ML.over25}</span>
-          <div style={valorStyle}>{predicciones.promedioOver25?.toFixed(1) || '0'}%</div>
+
+        <div className="predicciones-kpi-card">
+          <span className={`predicciones-kpi-label ${ADVANCED_METRIC_LABEL_CLASS}`} style={labelStyle}>{ML.over25}</span>
+          <div className="predicciones-kpi-value">{predicciones.promedioOver25?.toFixed(1) || '0'}%</div>
         </div>
-        
-        <div style={cardStyle}>
-          <span style={labelStyle}>Diferencia de Forma</span>
-          <div style={valorStyle}>
+
+        <div className="predicciones-kpi-card">
+          <span className="predicciones-kpi-label" style={labelStyle}>Diferencia de Forma</span>
+          <div className="predicciones-kpi-value">
             {diferenciaForma > 0 ? `+${diferenciaForma}` : diferenciaForma}
           </div>
         </div>

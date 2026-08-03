@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import useTacticalView from '../../../hooks/useTacticalView';
+import PremiumTabs from '../../ui/PremiumTabs';
 import '../../../styles/tacticalView.css';
 
 const PHOTO_CDN = (id) => `https://media.api-sports.io/football/players/${id}.png`;
@@ -238,26 +239,16 @@ export default function TacticalView({ fixtureId, partido }) {
         )}
       </header>
 
-      <div className="tactical-view__team-select" role="tablist">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={selectedTeam === 'home'}
-          className={selectedTeam === 'home' ? 'is-active' : ''}
-          onClick={() => setSelectedTeam('home')}
-        >
-          {homeName}
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={selectedTeam === 'away'}
-          className={selectedTeam === 'away' ? 'is-active' : ''}
-          onClick={() => setSelectedTeam('away')}
-        >
-          {awayName}
-        </button>
-      </div>
+      <PremiumTabs
+        tabs={[
+          { id: 'home', label: homeName },
+          { id: 'away', label: awayName },
+        ]}
+        activeTab={selectedTeam}
+        onTabChange={setSelectedTeam}
+        ariaLabel="Seleccionar equipo"
+        inset
+      />
 
       <TacticalPitch
         teamData={teamData}

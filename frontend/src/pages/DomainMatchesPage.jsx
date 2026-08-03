@@ -7,9 +7,7 @@ import {
   SESSION_REQUIRED_TOAST_DURATION_MS,
 } from "../constants/sessionMessages";
 import { getMatchesFeed } from "../api/api";
-import FiltrosPartidos from "../components/Partidos/FiltrosPartidos";
-import BusquedaPartidos from "../components/Partidos/BusquedaPartidos";
-import OrdenPartidos from "../components/Partidos/OrdenPartidos";
+import PartidosFilterBar from "../components/Partidos/PartidosFilterBar";
 import AgrupadorPartidos from "../components/Partidos/AgrupadorPartidos";
 import MatchCenter from "../components/Partidos/MatchCenter";
 import { useLiveFixturesPolling } from "../hooks/useLiveFixturesPolling";
@@ -151,11 +149,11 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
     <div className="partidos-container">
       <div className="partidos-header">
         <GoalLogicSectionHeader size="lg" className="partidos-brand-header" />
-        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "16px" }}>
+        <div className="partidos-scope-nav">
           {resolvedScope !== "all" && (
             <button
               type="button"
-              className="fecha-button"
+              className="partidos-scope-nav__btn"
               onClick={() => navigate("/partidos")}
             >
               Ver feed global
@@ -164,7 +162,7 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
           {resolvedScope !== "club" && (
             <button
               type="button"
-              className="fecha-button"
+              className="partidos-scope-nav__btn"
               onClick={() => navigate("/clubes/partidos")}
             >
               Ver solo clubes
@@ -173,7 +171,7 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
           {resolvedScope !== "selection" && (
             <button
               type="button"
-              className="fecha-button"
+              className="partidos-scope-nav__btn"
               onClick={() => navigate("/selecciones/partidos")}
             >
               Ver solo selecciones
@@ -182,33 +180,42 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
         </div>
       </div>
 
-      <div className="fechas-container">
-        {dates.length > 0 && dates.map((dateObj) => {
-          const isSelected = dateObj.dateString === selectedDate;
+      <div className="fechas-panel" aria-label="Seleccionar fecha">
+        <div className="fechas-container" role="tablist">
+          {dates.length > 0 && dates.map((dateObj) => {
+            const isSelected = dateObj.dateString === selectedDate;
 
-          return (
-            <button
-              key={dateObj.dateString}
-              className={`fecha-button ${dateObj.isToday ? "today" : ""} ${isSelected ? "selected" : ""}`}
-              onClick={() => setSelectedDate(dateObj.dateString)}
-            >
-              {dateObj.display}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={dateObj.dateString}
+                type="button"
+                role="tab"
+                aria-selected={isSelected}
+                className={`fecha-button ${dateObj.isToday ? "today" : ""} ${isSelected ? "selected" : ""}`}
+                onClick={() => setSelectedDate(dateObj.dateString)}
+              >
+                <span className="fecha-button__weekday">{dateObj.weekdayLabel}</span>
+                <span className="fecha-button__body">
+                  <span className="fecha-button__day">{dateObj.dayNumber}</span>
+                  <span className="fecha-button__month">{dateObj.monthLabel}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {!loading && partidos.length > 0 && (
-        <div className="controles-container">
-          <FiltrosPartidos
-            partidos={partidos}
-            filtros={filtros}
-            setFiltros={setFiltros}
-            domain={domain}
-          />
-          <BusquedaPartidos busqueda={busqueda} setBusqueda={setBusqueda} />
-          <OrdenPartidos orden={orden} setOrden={setOrden} />
-        </div>
+        <PartidosFilterBar
+          partidos={partidos}
+          filtros={filtros}
+          setFiltros={setFiltros}
+          busqueda={busqueda}
+          setBusqueda={setBusqueda}
+          orden={orden}
+          setOrden={setOrden}
+          domain={domain}
+        />
       )}
 
       {loading && (

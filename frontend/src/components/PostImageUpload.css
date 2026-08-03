@@ -48,10 +48,10 @@
 
 .analyst-premium-post__image-wrap,
 .post-detail-image-wrap {
-  margin: 12px 0;
+  margin: 12px 0 0;
   border-radius: 10px;
   overflow: hidden;
-  border: 1px solid rgba(0, 102, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .analyst-premium-post__image,

@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from 'react';
-import { tokens } from '../../styles/tokens';
 import { useCupCompetitionData } from '../../hooks/useCupCompetitionData';
 import CompetitionFixturesSection from './CompetitionFixturesSection';
 import CompetitionSummary from './CompetitionSummary';
@@ -21,6 +20,7 @@ import { shouldShowLeagueKnockoutTab } from '../../utils/ligaBetPlayFormat';
 import { isFifaSelectionRankingCompetition } from '../../utils/competitionRanking';
 import { competitionExpectsGroupPhase } from '../../utils/selectionCompetition';
 import { hasOfficialKnockoutFormat } from '../../config/officialKnockoutFormats';
+import PremiumTabs from '../ui/PremiumTabs';
 
 export { COMPETITION_TAB_IDS };
 
@@ -166,54 +166,23 @@ export default function CompetitionTabs({
     }
   }, [activeTab, tabIds, onTabChange]);
 
-  const tabListStyle = {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: tokens.spacing.sm,
-    marginBottom: tokens.spacing.lg,
-    padding: tokens.spacing.xs,
-    backgroundColor: '#1a1a1a',
-    borderRadius: '12px',
-    border: '1px solid rgba(79, 195, 247, 0.15)',
-  };
-
-  const getTabButtonStyle = (isActive) => ({
-    padding: `${tokens.spacing.sm} ${tokens.spacing.md}`,
-    borderRadius: tokens.radius.md,
-    border: isActive ? '1px solid rgba(79, 195, 247, 0.5)' : '1px solid transparent',
-    backgroundColor: isActive ? 'rgba(79, 195, 247, 0.12)' : 'transparent',
-    color: isActive ? '#4FC3F7' : tokens.colors.textSecondary,
-    fontSize: tokens.typography.fontSizeMd,
-    fontWeight: isActive ? tokens.typography.fontWeightSemibold : tokens.typography.fontWeightMedium,
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-  });
-
   const panelStyle = {
     minHeight: '120px',
   };
 
   return (
     <div>
-      <nav style={tabListStyle} role="tablist" aria-label="Secciones de la competición">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              aria-controls={`competition-panel-${tab.id}`}
-              id={`competition-tab-${tab.id}`}
-              style={getTabButtonStyle(isActive)}
-              onClick={() => openTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          );
+      <PremiumTabs
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={openTab}
+        ariaLabel="Secciones de la competición"
+        sticky
+        getTabProps={(tab, isActive) => ({
+          'aria-controls': `competition-panel-${tab.id}`,
+          id: `competition-tab-${tab.id}`,
         })}
-      </nav>
+      />
 
       <div style={panelStyle}>
         {activeTab === COMPETITION_TAB_IDS.RESUMEN && (

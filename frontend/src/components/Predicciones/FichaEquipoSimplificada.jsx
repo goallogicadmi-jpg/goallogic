@@ -58,28 +58,6 @@ export default function FichaEquipoSimplificada({ equipo, tipo }) {
   const xgDisplay = resolveDisplayXg(equipo);
   const xgaDisplay = resolveDisplayXga(equipo);
 
-  const containerStyle = {
-    backgroundColor: tokens.colors.bgCard,
-    border: `1px solid ${tokens.colors.borderDefault}`,
-    borderRadius: tokens.radius.xl,
-    padding: tokens.spacing.lg,
-  };
-
-  const headerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacing.md,
-    marginBottom: tokens.spacing.lg,
-    paddingBottom: tokens.spacing.md,
-    borderBottom: `2px solid ${tokens.colors.borderDefault}`,
-  };
-
-  const logoStyle = {
-    width: '64px',
-    height: '64px',
-    objectFit: 'contain',
-  };
-
   const nombreStyle = {
     fontSize: tokens.typography.fontSizeXl,
     fontWeight: tokens.typography.fontWeightBold,
@@ -91,13 +69,6 @@ export default function FichaEquipoSimplificada({ equipo, tipo }) {
     fontSize: tokens.typography.fontSizeSm,
     color: tokens.colors.textSecondary,
     margin: 0,
-  };
-
-  const statsGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
-    gap: tokens.spacing.md,
-    marginBottom: tokens.spacing.md,
   };
 
   const statCardStyle = {
@@ -163,10 +134,10 @@ export default function FichaEquipoSimplificada({ equipo, tipo }) {
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={headerStyle} className="predicciones-ficha-header">
+    <div className="predicciones-ficha-card">
+      <div className="predicciones-ficha-header">
         {equipo.logo && (
-          <img src={equipo.logo} alt={equipo.nombre} style={logoStyle} className="predicciones-ficha-logo" />
+          <img src={equipo.logo} alt={equipo.nombre} className="predicciones-ficha-logo" />
         )}
         <div className="predicciones-ficha-info">
           <h3 style={nombreStyle}>{equipo.nombre}</h3>
@@ -175,7 +146,7 @@ export default function FichaEquipoSimplificada({ equipo, tipo }) {
       </div>
 
       {/* Estadísticas esenciales */}
-      <div style={statsGridStyle}>
+      <div className="predicciones-ficha-stats-grid">
         {equipo.posicion !== null && equipo.posicion !== undefined && (
           <div style={statCardStyle}>
             <div style={statLabelStyle}>Posición</div>
@@ -238,14 +209,7 @@ export default function FichaEquipoSimplificada({ equipo, tipo }) {
 
       {/* Tendencias básicas */}
       {tendencias && (
-        <div
-          style={{
-            marginTop: tokens.spacing.md,
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-            gap: tokens.spacing.md,
-          }}
-        >
+        <div className="predicciones-ficha-tendencias-grid">
           <div style={statCardStyle}>
             <div className={ADVANCED_METRIC_LABEL_CLASS} style={statLabelStyle}>{ML.over25}</div>
             <div style={statValueStyle}>{tendencias.over25Porcentaje}%</div>

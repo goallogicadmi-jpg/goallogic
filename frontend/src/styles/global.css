@@ -4,21 +4,23 @@
 
 /* Variables CSS - Paleta de Colores (Tema Oscuro + Naranja) */
 :root {
-  /* Fondos (GoalLogic Branding - Dark Theme) */
+  /* Fondos (GoalLogic Branding - Dark Theme Premium) */
   --bg-main: #0D0D0D;
-  --bg-secondary: #1A1A1A;
-  --bg-card: #1A1A1A;
+  --bg-secondary: #181b20;
+  --bg-card: #181b20;
   --bg-primary: #0D0D0D;
-  --bg-tertiary: #1A1A1A;
+  --bg-tertiary: #181b20;
   --bg-header: #0D0D0D;
+  --bg-premium: #181b20;
   
-  /* Bordes */
-  --border-color: #1F2630;
-  --border-hover: #2A313D;
+  /* Bordes premium */
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.12);
+  --border-premium: rgba(255, 255, 255, 0.06);
   
   /* Textos */
   --text-primary: #FFFFFF;
-  --text-secondary: #B3B8C2;
+  --text-secondary: #9aa4b2;
   --text-muted: #7A8190;
   --text-tertiary: #FFFFFF;
   --text-disabled: #7A8190;
@@ -58,11 +60,17 @@
   --spacing-lg: 24px;
   --spacing-xl: 32px;
   
-  /* Border radius */
+  /* Border radius — contenedores 14px / tarjetas internas 12px */
   --radius-sm: 6px;
   --radius-md: 8px;
-  --radius-lg: 10px;
-  --radius-xl: 12px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --radius-container: 14px;
+  --radius-card: 12px;
+
+  /* Sombras premium */
+  --shadow-premium: 0 4px 12px rgba(0, 0, 0, 0.28);
+  --shadow-premium-hover: 0 6px 18px rgba(0, 0, 0, 0.34);
   
   /* Tipografía */
   --font-family: 'Inter', 'Roboto', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -85,10 +93,10 @@
   --layout-max-width: 1400px;
   --layout-gutter: 16px;
 
-  /* Breakpoints (referencia para media queries) */
-  --breakpoint-mobile: 480px;
-  --breakpoint-tablet: 768px;
-  --breakpoint-laptop: 1024px;
+  /* Breakpoints — referencia: constants/breakpoints.js */
+  --breakpoint-mobile: 768px;
+  --breakpoint-compact: 480px;
+  --breakpoint-ultra-compact: 360px;
 }
 
 /* Reset y Base */
@@ -1120,13 +1128,7 @@ section {
     max-width: 100%;
   }
 
-  /* Tabs internos de competición: visibles al hacer scroll */
-  nav[aria-label='Secciones de la competición'] {
-    position: sticky;
-    top: var(--layout-header-height, 60px);
-    z-index: 90;
-    background-color: #1a1a1a;
-  }
+  /* Tabs premium: cargados vía PremiumTabs → gl-tabs.css (no import global) */
 
   .table-responsive {
     overflow-x: auto;

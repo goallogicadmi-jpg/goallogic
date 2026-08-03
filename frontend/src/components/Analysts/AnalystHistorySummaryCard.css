@@ -1,0 +1,169 @@
+.analyst-history-card {
+  background: #181b20;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.analyst-history-card:hover {
+  border-color: rgba(79, 195, 247, 0.18);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.34);
+}
+
+.analyst-history-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.analyst-history-card__label,
+.analyst-history-card__prob-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8b949e;
+  margin-bottom: 4px;
+}
+
+.analyst-history-card__match {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.35;
+}
+
+.analyst-history-card__status {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.analyst-history-card__status--won {
+  background: rgba(52, 211, 153, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.28);
+}
+
+.analyst-history-card__status--lost {
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.28);
+}
+
+.analyst-history-card__status--pending {
+  background: rgba(79, 195, 247, 0.1);
+  color: #4fc3f7;
+  border: 1px solid rgba(79, 195, 247, 0.25);
+}
+
+.analyst-history-card__status--neutral {
+  background: rgba(139, 148, 158, 0.12);
+  color: #8b949e;
+  border: 1px solid rgba(139, 148, 158, 0.2);
+}
+
+.analyst-history-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.analyst-history-card__tag {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(79, 195, 247, 0.1);
+  border: 1px solid rgba(79, 195, 247, 0.22);
+  color: #4fc3f7;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.analyst-history-card__pick {
+  font-size: 13px;
+  color: #c9d1d9;
+}
+
+.analyst-history-card__prob {
+  margin-bottom: 12px;
+}
+
+.analyst-history-card__prob-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.analyst-history-card__prob-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #4fc3f7;
+}
+
+.analyst-history-card__prob-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.analyst-history-card__prob-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(79, 195, 247, 0.45), #4fc3f7);
+  transition: width 0.4s ease;
+}
+
+.analyst-history-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: #8b949e;
+}
+
+.analyst-history-card__footer strong {
+  color: #e8eaed;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .analyst-history-card {
+    padding: 16px;
+    font-size: 15px;
+  }
+
+  .analyst-history-card__match {
+    font-size: 16px;
+  }
+
+  .analyst-history-card__status {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .analyst-history-card__prob {
+    width: 100%;
+  }
+
+  .analyst-history-card__prob-track {
+    width: 100%;
+  }
+
+  .analyst-history-card__prob-value {
+    font-size: 17px;
+  }
+}

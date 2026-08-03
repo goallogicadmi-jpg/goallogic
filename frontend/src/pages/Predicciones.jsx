@@ -5,21 +5,9 @@ import useMediaQuery from "../hooks/useMediaQuery";
 import EstadisticasAvanzadasEquipo from "../components/EstadisticasAvanzadasEquipo";
 import { cruzarDatosEquipos } from "../utils/cruzarDatosEquipos";
 import {
-  getH2H,
-  getTeamInjuries,
-  getTeamStats,
-  getTeamPlayersStats,
-  getTeamFixtures,
-  getUpcomingFixtureWithOdds,
-  getFixtureStatistics,
-  getFixturePlayers,
-} from "../api/api";
-import { 
-  procesarCornersDeFixtures, 
-  expectedCorners,
-  procesarTarjetasDeFixtures,
-  expectedCards
-} from "../utils/calcularCorners";
+  fetchPrediccionesDatosAdicionales,
+  buildSkeletonAccordionLazyContext,
+} from "../utils/prediccionesDatosAdicionales";
 import { tokens } from "../styles/tokens";
 import {
   ADVANCED_METRIC_LABELS as ML,
@@ -33,7 +21,7 @@ import {
   formatXgaPromedioLabel,
 } from "../utils/xgDisplayUtils";
 import "../styles/predicciones.css";
-import { GoalLogicTitle } from "../components/GoalLogicTitle";
+import { GoalLogicSectionHeader } from "../components/GoalLogicTitle";
 // Componentes visuales reorganizados (solo presentación)
 import ResumenEjecutivo from "../components/Predicciones/ResumenEjecutivo";
 import ComparacionConTabs from "../components/Predicciones/ComparacionConTabs";
@@ -43,12 +31,10 @@ import LesionadosEquipo from "../components/Predicciones/LesionadosEquipo";
 import JugadoresImportantesPartido from "../components/Predicciones/JugadoresImportantesPartido";
 import AccordionBlock from "../components/Predicciones/AccordionBlock";
 import AccordionGroup from "../components/Predicciones/AccordionGroup";
-import { enrichTeamInjuries } from "../utils/evaluateInjuryImpact";
-import { buildH2HDisplayData } from "../utils/h2hFixturesUtils";
 import PrediccionesMatchHeader from "../components/Predicciones/PrediccionesMatchHeader";
+import AccordionPremiumLoader from "../components/Predicciones/AccordionPremiumLoader";
 import { IconPanoramaEquipo } from "../components/Predicciones/PrediccionesIcons";
 import { PREDICCIONES_TITLES } from "../constants/prediccionesSectionTitles";
-import { buildImportantPlayersViewModel } from "../utils/prediccionesImportantPlayers";
 import { buildConclusionesComparativaEquipos } from "../utils/conclusionesCopy";
 import { useUser } from "../context/UserContext";
 import { usePlanAccess } from "../context/PlanAccessContext";
@@ -60,6 +46,7 @@ import {
   getLeagueSeasonMode,
   getPredictionsLeaguesFromCatalog,
 } from "../utils/predictionsCatalog";
+import { MEDIA_QUERIES } from "../constants/breakpoints";
 
 function getDefaultEuropeanSeasonString() {
   const now = new Date();
@@ -153,8 +140,10 @@ export default function Predicciones() {
 
   // Estado para datos adicionales reales (FASE 2)
   const [datosAdicionales, setDatosAdicionales] = useState(null);
+  const [loadingDatosAdicionales, setLoadingDatosAdicionales] = useState(false);
 
   const ligasFetchSeqRef = useRef(0);
+  const phase2SeqRef = useRef(0);
 
   const ligasInDomain = useMemo(
     () => ligas.filter((l) => l.domain === predictionDomain),
@@ -201,7 +190,7 @@ export default function Predicciones() {
     [fromMatchesRoute, homeTeam?.id, awayTeam?.id, leagueId]
   );
 
-  const isMobileCompactLayout = useMediaQuery("(max-width: 480px)");
+  const isMobileCompactLayout = useMediaQuery(MEDIA_QUERIES.COMPACT);
   const collapseMobileFilters = isFromMatchNavigation && isMobileCompactLayout;
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -443,6 +432,8 @@ export default function Predicciones() {
     setError(null);
     setResultados(null);
     setDatosAdicionales(null);
+    setLoadingDatosAdicionales(false);
+    phase2SeqRef.current += 1;
 
     const [statsSeasonA, statsSeasonB] = await Promise.all([
       routeSeason != null ? Promise.resolve(String(routeSeason)) : fetchPreferredSeasonYearForLeague(ligaA),
@@ -472,273 +463,57 @@ export default function Predicciones() {
           predicciones
         });
 
-        // ============================================
-        // FASE 2: OBTENER DATOS ADICIONALES REALES
-        // ============================================
-        try {
-          // 0. Buscar fixture próximo y odds (probabilidades del mercado)
-          let fixtureConOdds = null;
-          try {
-            fixtureConOdds = await getUpcomingFixtureWithOdds(equipoA.id, equipoB.id, {
-              leagueId: ligaA,
-              season: statsSeasonA,
-              fixtureId: routeFixtureId ?? null,
-            });
-          } catch (err) {
-            console.warn("⚠️ Error obteniendo fixture próximo y odds:", err);
-            fixtureConOdds = { fixture: null, odds: null };
-          }
+        setLoading(false);
 
-          // 1. H2H (Historial de enfrentamientos directos)
-          const h2hData = await getH2H(equipoA.id, equipoB.id).catch(err => {
-            console.warn("⚠️ Error obteniendo H2H:", err);
-            return { response: [] };
+        const skeletonLazy = buildSkeletonAccordionLazyContext({
+          equipoA: { id: equipoA.id, nombre: datosEquipoA.nombre ?? equipoA.nombre },
+          equipoB: { id: equipoB.id, nombre: datosEquipoB.nombre ?? equipoB.nombre },
+          ligaA,
+          ligaB,
+          seasonA: statsSeasonA,
+          seasonB: statsSeasonB,
+          fixtureId: routeFixtureId ?? null,
+        });
+
+        setDatosAdicionales({ accordionLazy: skeletonLazy });
+
+        const phase2Seq = phase2SeqRef.current;
+        setLoadingDatosAdicionales(true);
+
+        fetchPrediccionesDatosAdicionales({
+          equipoA: { id: equipoA.id, nombre: datosEquipoA.nombre ?? equipoA.nombre },
+          equipoB: { id: equipoB.id, nombre: datosEquipoB.nombre ?? equipoB.nombre },
+          ligaA,
+          ligaB,
+          seasonA: statsSeasonA,
+          seasonB: statsSeasonB,
+          routeFixtureId: routeFixtureId ?? null,
+        })
+          .then((datosAdicionalesEstructurados) => {
+            if (phase2SeqRef.current !== phase2Seq) {
+              return;
+            }
+            setDatosAdicionales(datosAdicionalesEstructurados);
+            console.log("✅ Datos adicionales obtenidos y guardados:", datosAdicionalesEstructurados);
+          })
+          .catch((err) => {
+            if (phase2SeqRef.current !== phase2Seq) {
+              return;
+            }
+            console.error("⚠️ Error obteniendo datos adicionales (no crítico):", err);
+          })
+          .finally(() => {
+            if (phase2SeqRef.current === phase2Seq) {
+              setLoadingDatosAdicionales(false);
+            }
           });
-
-          // 2. Lesiones y sanciones
-          const upcomingFixtureId =
-            fixtureConOdds?.fixture?.fixture?.id ?? fixtureConOdds?.fixture?.id ?? routeFixtureId ?? null;
-
-          const [injuriesA, injuriesB] = await Promise.all([
-            getTeamInjuries(equipoA.id, {
-              leagueId: ligaA,
-              season: statsSeasonA,
-              fixtureId: upcomingFixtureId,
-            }).catch(err => {
-              console.warn("⚠️ Error obteniendo lesiones equipo A:", err);
-              return { response: [], meta: { error: err.message } };
-            }),
-            getTeamInjuries(equipoB.id, {
-              leagueId: ligaB,
-              season: statsSeasonB,
-              fixtureId: upcomingFixtureId,
-            }).catch(err => {
-              console.warn("⚠️ Error obteniendo lesiones equipo B:", err);
-              return { response: [], meta: { error: err.message } };
-            })
-          ]);
-
-          // 3. Estadísticas detalladas del equipo (incluye local/visitante si está disponible)
-          const [statsA, statsB] = await Promise.all([
-            getTeamStats(equipoA.id, ligaA, statsSeasonA).catch(err => {
-              console.warn("⚠️ Error obteniendo estadísticas equipo A:", err);
-              return { response: [] };
-            }),
-            getTeamStats(equipoB.id, ligaB, statsSeasonB).catch(err => {
-              console.warn("⚠️ Error obteniendo estadísticas equipo B:", err);
-              return { response: [] };
-            })
-          ]);
-
-          // 4. Estadísticas de jugadores (goleadores, asistencias, etc.)
-          const [playersStatsA, playersStatsB] = await Promise.all([
-            getTeamPlayersStats(equipoA.id, ligaA, statsSeasonA).catch(err => {
-              console.warn("⚠️ Error obteniendo estadísticas de jugadores equipo A:", err);
-              return { response: [] };
-            }),
-            getTeamPlayersStats(equipoB.id, ligaB, statsSeasonB).catch(err => {
-              console.warn("⚠️ Error obteniendo estadísticas de jugadores equipo B:", err);
-              return { response: [] };
-            })
-          ]);
-
-          // 5. Últimos partidos (para calcular promedios de corners, faltas, etc.)
-          const [fixturesA, fixturesB] = await Promise.all([
-            getTeamFixtures(equipoA.id, 10).catch(err => {
-              console.warn("⚠️ Error obteniendo fixtures equipo A:", err);
-              return { response: [] };
-            }),
-            getTeamFixtures(equipoB.id, 10).catch(err => {
-              console.warn("⚠️ Error obteniendo fixtures equipo B:", err);
-              return { response: [] };
-            })
-          ]);
-
-          // Procesar corners de los fixtures
-          const [cornersDataA, cornersDataB] = await Promise.all([
-            procesarCornersDeFixtures(fixturesA?.response || [], equipoA.id, 5),
-            procesarCornersDeFixtures(fixturesB?.response || [], equipoB.id, 5)
-          ]);
-
-          // Calcular corners esperados
-          const cornersEsperados = expectedCorners(
-            { cornersFor: cornersDataA.cornersFor, cornersAgainst: cornersDataA.cornersAgainst },
-            { cornersFor: cornersDataB.cornersFor, cornersAgainst: cornersDataB.cornersAgainst }
-          );
-
-          // Procesar tarjetas de los fixtures
-          const [tarjetasDataA, tarjetasDataB] = await Promise.all([
-            procesarTarjetasDeFixtures(fixturesA?.response || [], equipoA.id, 5),
-            procesarTarjetasDeFixtures(fixturesB?.response || [], equipoB.id, 5)
-          ]);
-
-          // Calcular tarjetas esperadas
-          const tarjetasEsperadas = expectedCards(
-            { cardsFor: tarjetasDataA.cardsFor, cardsAgainst: tarjetasDataA.cardsAgainst },
-            { cardsFor: tarjetasDataB.cardsFor, cardsAgainst: tarjetasDataB.cardsAgainst }
-          );
-
-          let fixturePlayerStats = null;
-          let fixtureTeamStatistics = null;
-
-          if (upcomingFixtureId) {
-            [fixtureTeamStatistics, fixturePlayerStats] = await Promise.all([
-              getFixtureStatistics(upcomingFixtureId).catch((err) => {
-                console.warn('⚠️ Error obteniendo estadísticas del fixture:', err);
-                return null;
-              }),
-              getFixturePlayers(upcomingFixtureId).catch((err) => {
-                console.warn('⚠️ Error obteniendo jugadores del fixture:', err);
-                return null;
-              }),
-            ]);
-          }
-
-          const jugadoresImportantes = buildImportantPlayersViewModel({
-            fixturePlayersResponse: fixturePlayerStats,
-            seasonPlayersResponseA: playersStatsA,
-            seasonPlayersResponseB: playersStatsB,
-            fixtureStatisticsResponse: fixtureTeamStatistics,
-            teamAId: equipoA.id,
-            teamBId: equipoB.id,
-            teamAName: equipoA.nombre,
-            teamBName: equipoB.nombre,
-          });
-
-          // Procesar y estructurar los datos adicionales
-          const datosAdicionalesEstructurados = {
-            // 1. H2H (últimos 4 enfrentamientos más recientes)
-            h2h: buildH2HDisplayData(h2hData?.response || []),
-
-            // 2. Lesiones con evaluación de impacto
-            lesiones: {
-              equipoA: {
-                ...enrichTeamInjuries(injuriesA, playersStatsA),
-                fetchMeta: injuriesA?.meta || null,
-              },
-              equipoB: {
-                ...enrichTeamInjuries(injuriesB, playersStatsB),
-                fetchMeta: injuriesB?.meta || null,
-              },
-            },
-
-            // 3. Estadísticas local/visitante
-            estadisticasLocalVisitante: {
-              equipoA: {
-                estadisticas: statsA?.response || null,
-                // Extraer promedios de local/visitante si están disponibles
-                local: statsA?.response?.fixtures?.home || null,
-                visitante: statsA?.response?.fixtures?.away || null
-              },
-              equipoB: {
-                estadisticas: statsB?.response || null,
-                local: statsB?.response?.fixtures?.home || null,
-                visitante: statsB?.response?.fixtures?.away || null
-              }
-            },
-
-            // 4. Goleadores y estadísticas de jugadores
-            goleadores: {
-              equipoA: {
-                total: playersStatsA?.response?.length || 0,
-                jugadores: (playersStatsA?.response || [])
-                  .filter(j => j.statistics && j.statistics.length > 0)
-                  .map(jugador => ({
-                    nombre: jugador.player?.name,
-                    posicion: jugador.statistics[0]?.games?.position,
-                    goles: jugador.statistics[0]?.goals?.total || 0,
-                    asistencias: jugador.statistics[0]?.goals?.assists || 0,
-                    partidos: jugador.statistics[0]?.games?.appearences || 0,
-                    minutos: jugador.statistics[0]?.games?.minutes || 0
-                  }))
-                  .sort((a, b) => b.goles - a.goles)
-                  .slice(0, 10) // Top 10 goleadores
-              },
-              equipoB: {
-                total: playersStatsB?.response?.length || 0,
-                jugadores: (playersStatsB?.response || [])
-                  .filter(j => j.statistics && j.statistics.length > 0)
-                  .map(jugador => ({
-                    nombre: jugador.player?.name,
-                    posicion: jugador.statistics[0]?.games?.position,
-                    goles: jugador.statistics[0]?.goals?.total || 0,
-                    asistencias: jugador.statistics[0]?.goals?.assists || 0,
-                    partidos: jugador.statistics[0]?.games?.appearences || 0,
-                    minutos: jugador.statistics[0]?.games?.minutes || 0
-                  }))
-                  .sort((a, b) => b.goles - a.goles)
-                  .slice(0, 10) // Top 10 goleadores
-              }
-            },
-
-            // 5. Corners y tarjetas (extraídos de fixtures recientes)
-            cornersYFaltas: {
-              equipoA: {
-                fixtures: fixturesA?.response || [],
-                cornersFor: cornersDataA.cornersFor,
-                cornersAgainst: cornersDataA.cornersAgainst,
-                promedioCorners: cornersDataA.promedioFor,
-                promedioCornersContra: cornersDataA.promedioAgainst,
-                cardsFor: tarjetasDataA.cardsFor,
-                cardsAgainst: tarjetasDataA.cardsAgainst,
-                promedioTarjetas: tarjetasDataA.promedioFor,
-                promedioTarjetasContra: tarjetasDataA.promedioAgainst
-              },
-              equipoB: {
-                fixtures: fixturesB?.response || [],
-                cornersFor: cornersDataB.cornersFor,
-                cornersAgainst: cornersDataB.cornersAgainst,
-                promedioCorners: cornersDataB.promedioFor,
-                promedioCornersContra: cornersDataB.promedioAgainst,
-                cardsFor: tarjetasDataB.cardsFor,
-                cardsAgainst: tarjetasDataB.cardsAgainst,
-                promedioTarjetas: tarjetasDataB.promedioFor,
-                promedioTarjetasContra: tarjetasDataB.promedioAgainst
-              },
-              // Corners esperados del partido
-              cornersEsperados: cornersEsperados,
-              // Tarjetas esperadas del partido
-              tarjetasEsperadas: tarjetasEsperadas
-            },
-
-            // 6. Árbitro (se obtendrá cuando haya un fixture específico)
-            arbitro: {
-              disponible: false,
-              nombre: null,
-              promedioTarjetas: null,
-              tendencias: null
-            },
-
-            // 7. Alineaciones probables (se obtendrá cuando haya un fixture específico)
-            alineaciones: {
-              disponible: false,
-              equipoA: null,
-              equipoB: null
-            },
-
-            // 8. Fixture próximo y odds (probabilidades del mercado)
-            fixtureConOdds: fixtureConOdds,
-
-            // 9. Jugadores importantes del partido
-            jugadoresImportantes,
-          };
-
-          // Guardar los datos adicionales en el estado
-          setDatosAdicionales(datosAdicionalesEstructurados);
-
-          console.log("✅ Datos adicionales obtenidos y guardados:", datosAdicionalesEstructurados);
-
-        } catch (err) {
-          console.error("⚠️ Error obteniendo datos adicionales (no crítico):", err);
-          // No bloqueamos el flujo principal si fallan los datos adicionales
-        }
       } else {
         setError("No se pudieron obtener los datos completos de los equipos.");
+        setLoading(false);
       }
     } catch (err) {
       console.error("Error analizando equipos:", err);
       setError(`Error al analizar: ${err.response?.data?.error || err.message}`);
-    } finally {
       setLoading(false);
     }
   };
@@ -746,7 +521,7 @@ export default function Predicciones() {
   return (
     <div className="predicciones-container">
       <div className="predicciones-header">
-        <GoalLogicTitle as="h1" size="lg" className="predicciones-title" />
+        <GoalLogicSectionHeader size="lg" className="predicciones-title-header" />
         <p className={`predicciones-subtitle${collapseMobileFilters ? " predicciones-subtitle--from-match-mobile" : ""}`}>
           Selecciona dos equipos para generar predicciones basadas en datos estadísticos.
         </p>
@@ -970,18 +745,24 @@ export default function Predicciones() {
             </PremiumFeatureGate>
           )}
 
+          {loadingDatosAdicionales && (
+            <div className="predicciones-datos-adicionales-status" role="status" aria-live="polite">
+              <AccordionPremiumLoader message="Cargando datos complementarios del análisis…" />
+            </div>
+          )}
+
           <AccordionGroup singleOpen={isMobileCompactLayout}>
-            {datosAdicionales?.lesiones && (
+            {datosAdicionales?.accordionLazy && (
               <LesionadosEquipo
-                lesiones={datosAdicionales.lesiones}
+                lazyContext={datosAdicionales.accordionLazy}
                 nombreEquipoA={resultados.equipoA?.nombre}
                 nombreEquipoB={resultados.equipoB?.nombre}
               />
             )}
 
-            {datosAdicionales?.jugadoresImportantes && (
+            {datosAdicionales?.accordionLazy && (
               <JugadoresImportantesPartido
-                data={datosAdicionales.jugadoresImportantes}
+                lazyContext={datosAdicionales.accordionLazy}
                 nombreEquipoA={resultados.equipoA?.nombre}
                 nombreEquipoB={resultados.equipoB?.nombre}
               />
@@ -1016,6 +797,7 @@ export default function Predicciones() {
             {datosAdicionales && (
               <DatosAdicionales
                 datosAdicionales={datosAdicionales}
+                loadingDatosAdicionales={loadingDatosAdicionales}
                 nombreEquipoA={resultados.equipoA?.nombre}
                 nombreEquipoB={resultados.equipoB?.nombre}
                 equipoAId={resultados.equipoA?.id}
@@ -1032,18 +814,7 @@ export default function Predicciones() {
 
 // Componente para comparación de datos reales
 function ComparacionDatosReales({ predicciones, equipoA, equipoB, datosAdicionales }) {
-  // Detectar viewport para responsive
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Calcular eficiencias
+  const isMobile = useMediaQuery(MEDIA_QUERIES.MOBILE);
   const xgDisplayA = useMemo(() => resolveDisplayXg(equipoA), [equipoA]);
   const xgDisplayB = useMemo(() => resolveDisplayXg(equipoB), [equipoB]);
   const xgaDisplayA = useMemo(() => resolveDisplayXga(equipoA), [equipoA]);

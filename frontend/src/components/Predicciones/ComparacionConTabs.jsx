@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { tokens } from '../../styles/tokens';
+import useMediaQuery from '../../hooks/useMediaQuery';
+import { MEDIA_QUERIES } from '../../constants/breakpoints';
 import {
   ADVANCED_METRIC_LABELS as ML,
   ADVANCED_METRIC_LABEL_CLASS,
@@ -24,6 +26,7 @@ import {
   IconProyeccionDisciplinaria,
   IconConclusiones,
 } from './PrediccionesIcons';
+import PremiumTabs from '../ui/PremiumTabs';
 
 const COMPARACION_TABS = [
   { id: 'especiales', label: PREDICCIONES_TITLES.mercadosEspeciales, Icon: IconMercadosEspeciales },
@@ -38,13 +41,7 @@ const COMPARACION_TABS = [
  */
 export default function ComparacionConTabs({ predicciones, equipoA, equipoB, datosAdicionales }) {
   const [activeTab, setActiveTab] = useState('especiales');
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const isMobile = useMediaQuery(MEDIA_QUERIES.MOBILE);
 
   const xgDisplayA = useMemo(() => resolveDisplayXg(equipoA), [equipoA]);
   const xgDisplayB = useMemo(() => resolveDisplayXg(equipoB), [equipoB]);
@@ -84,50 +81,9 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
     [predicciones, equipoA, equipoB]
   );
 
-  const containerStyle = {
-    backgroundColor: tokens.colors.bgCard,
-    border: `1px solid ${tokens.colors.borderDefault}`,
-    borderRadius: tokens.radius.xl,
-    padding: tokens.spacing.lg,
-    marginTop: tokens.spacing.xl,
-  };
-
-  const tabsContainerStyle = {
-    display: 'flex',
-    gap: tokens.spacing.sm,
-    marginBottom: tokens.spacing.lg,
-    borderBottom: `2px solid ${tokens.colors.borderDefault}`,
-    paddingBottom: tokens.spacing.sm,
-    flexWrap: 'wrap',
-  };
-
-  const tabStyle = (active) => ({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: tokens.spacing.sm,
-    padding: `${tokens.spacing.sm} ${tokens.spacing.md}`,
-    backgroundColor: active ? tokens.colors.accentOrange : 'transparent',
-    color: active ? tokens.colors.textPrimary : tokens.colors.textSecondary,
-    border: 'none',
-    borderRadius: tokens.radius.md,
-    cursor: 'pointer',
-    fontSize: tokens.typography.fontSizeBase,
-    fontWeight: active ? tokens.typography.fontWeightSemibold : tokens.typography.fontWeightNormal,
-    transition: tokens.transitions.normal,
-  });
-
-  const comparacionGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-    gap: tokens.spacing.md,
-  };
-
-  const columnaStyle = {
-    backgroundColor: tokens.colors.bgSecondary,
-    padding: tokens.spacing.md,
-    borderRadius: tokens.radius.md,
-    border: `1px solid ${tokens.colors.borderDefault}`,
-  };
+  const comparacionGridClassName = `predicciones-comparacion-grid${
+    isMobile ? ' predicciones-comparacion-grid--stacked' : ''
+  }`;
 
   const columnaTituloStyle = {
     fontSize: tokens.typography.fontSizeBase,
@@ -268,8 +224,8 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
     switch (activeTab) {
       case 'rendimiento':
         return (
-          <div style={comparacionGridStyle}>
-            <div style={columnaStyle}>
+          <div className={comparacionGridClassName}>
+            <div className="predicciones-comparacion-column">
               <div style={columnaTituloStyle}>{equipoA?.nombre || 'Equipo A'}</div>
               <div style={metricaStyle}>
                 <span style={metricaLabelStyle}>G / E / P</span>
@@ -282,7 +238,7 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                 <div style={metricaValorStyle}>{predicciones.puntosFormaA} pts</div>
               </div>
             </div>
-            <div style={columnaStyle}>
+            <div className="predicciones-comparacion-column">
               <div style={columnaTituloStyle}>{equipoB?.nombre || 'Equipo B'}</div>
               <div style={metricaStyle}>
                 <span style={metricaLabelStyle}>G / E / P</span>
@@ -300,8 +256,8 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
 
       case 'ataque':
         return (
-          <div style={comparacionGridStyle}>
-            <div style={columnaStyle}>
+          <div className={comparacionGridClassName}>
+            <div className="predicciones-comparacion-column">
               <div style={columnaTituloStyle}>{equipoA?.nombre || 'Equipo A'}</div>
               <div style={metricaStyle}>
                 <span style={metricaLabelStyle}>Promedio Goles</span>
@@ -333,7 +289,7 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                 </div>
               )}
             </div>
-            <div style={columnaStyle}>
+            <div className="predicciones-comparacion-column">
               <div style={columnaTituloStyle}>{equipoB?.nombre || 'Equipo B'}</div>
               <div style={metricaStyle}>
                 <span style={metricaLabelStyle}>Promedio Goles</span>
@@ -408,8 +364,8 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
         }
 
         return (
-          <div style={comparacionGridStyle}>
-            <div style={columnaStyle}>
+          <div className={comparacionGridClassName}>
+            <div className="predicciones-comparacion-column">
               <div style={columnaTituloStyle}>{equipoA?.nombre || 'Equipo A'}</div>
               <div style={metricaStyle}>
                 <span style={metricaLabelStyle}>Promedio Goles Recibidos</span>
@@ -468,7 +424,7 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                 );
               })()}
             </div>
-            <div style={columnaStyle}>
+            <div className="predicciones-comparacion-column">
               <div style={columnaTituloStyle}>{equipoB?.nombre || 'Equipo B'}</div>
               <div style={metricaStyle}>
                 <span style={metricaLabelStyle}>Promedio Goles Recibidos</span>
@@ -543,8 +499,8 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                 >
                   {PREDICCIONES_TITLES.proyeccionCorners}
                 </PrediccionesSectionTitle>
-                <div style={comparacionGridStyle}>
-                  <div style={columnaStyle}>
+                <div className={comparacionGridClassName}>
+                  <div className="predicciones-comparacion-column">
                     <div style={columnaTituloStyle}>{equipoA?.nombre || 'Equipo A'}</div>
                     <div style={metricaStyle}>
                       <span style={metricaLabelStyle}>Corners Esperados</span>
@@ -553,7 +509,7 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                       </div>
                     </div>
                   </div>
-                  <div style={columnaStyle}>
+                  <div className="predicciones-comparacion-column">
                     <div style={columnaTituloStyle}>{equipoB?.nombre || 'Equipo B'}</div>
                     <div style={metricaStyle}>
                       <span style={metricaLabelStyle}>Corners Esperados</span>
@@ -563,7 +519,7 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                     </div>
                   </div>
                 </div>
-                <div style={{ ...columnaStyle, marginTop: tokens.spacing.md, textAlign: 'center' }}>
+                <div className="predicciones-comparacion-column predicciones-comparacion-column--centered">
                   <span style={metricaLabelStyle}>Corners Totales Esperados</span>
                   <div style={{ ...metricaValorStyle, fontSize: tokens.typography.fontSize3xl, color: tokens.colors.accentOrange }}>
                     {datosAdicionales.cornersYFaltas.cornersEsperados.total}
@@ -582,8 +538,8 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                 >
                   {PREDICCIONES_TITLES.proyeccionDisciplinaria}
                 </PrediccionesSectionTitle>
-                <div style={comparacionGridStyle}>
-                  <div style={columnaStyle}>
+                <div className={comparacionGridClassName}>
+                  <div className="predicciones-comparacion-column">
                     <div style={columnaTituloStyle}>{equipoA?.nombre || 'Equipo A'}</div>
                     <div style={metricaStyle}>
                       <span style={metricaLabelStyle}>Tarjetas Esperadas</span>
@@ -592,7 +548,7 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                       </div>
                     </div>
                   </div>
-                  <div style={columnaStyle}>
+                  <div className="predicciones-comparacion-column">
                     <div style={columnaTituloStyle}>{equipoB?.nombre || 'Equipo B'}</div>
                     <div style={metricaStyle}>
                       <span style={metricaLabelStyle}>Tarjetas Esperadas</span>
@@ -602,7 +558,7 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                     </div>
                   </div>
                 </div>
-                <div style={{ ...columnaStyle, marginTop: tokens.spacing.md, textAlign: 'center' }}>
+                <div className="predicciones-comparacion-column predicciones-comparacion-column--centered">
                   <span style={metricaLabelStyle}>Tarjetas Totales Esperadas</span>
                   <div style={{ ...metricaValorStyle, fontSize: tokens.typography.fontSize3xl, color: tokens.colors.accentGold }}>
                     {datosAdicionales.cornersYFaltas.tarjetasEsperadas.total}
@@ -636,7 +592,7 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
   };
 
   return (
-    <div style={containerStyle}>
+    <div className="predicciones-comparacion-panel">
       <PrediccionesSectionTitle
         as="h3"
         size="xl"
@@ -646,20 +602,28 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
         {PREDICCIONES_TITLES.analisisGlobal}
       </PrediccionesSectionTitle>
       
-      <div style={tabsContainerStyle}>
-        {COMPARACION_TABS.map(({ id, label, Icon }) => (
-          <button
-            key={id}
-            type="button"
-            className="predicciones-tab-btn"
-            style={tabStyle(activeTab === id)}
-            onClick={() => setActiveTab(id)}
-          >
-            <Icon size={16} color={activeTab === id ? tokens.colors.textPrimary : tokens.colors.accentOrange} />
-            {label}
-          </button>
-        ))}
-      </div>
+      <PremiumTabs
+        tabs={COMPARACION_TABS.map(({ id, label }) => ({ id, label }))}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        ariaLabel="Análisis comparativo"
+        renderTab={(tab) => {
+          const tabDef = COMPARACION_TABS.find((item) => item.id === tab.id);
+          const Icon = tabDef?.Icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <span className="gl-tab__content">
+              {Icon ? (
+                <Icon
+                  size={16}
+                  color={isActive ? '#4fc3f7' : tokens.colors.textSecondary}
+                />
+              ) : null}
+              {tab.label}
+            </span>
+          );
+        }}
+      />
 
       <div>
         {renderTabContent()}

@@ -5,6 +5,7 @@ import axios from 'axios';
 import { getToken } from '../../services/authService';
 import { deletePost, deleteComment } from '../../services/communityService';
 import { UserAvatar } from '../../components/UserAvatar';
+import AnalystPremiumPostCard from '../../components/Analysts/AnalystPremiumPostCard';
 import '../../components/PostImageUpload.css';
 
 export function PostDetail() {
@@ -126,6 +127,15 @@ export function PostDetail() {
         ← Volver al feed
       </button>
 
+      {post.isAnalystPremiumPost ? (
+        <AnalystPremiumPostCard
+          post={post}
+          onReaction={(_id, type) => handleReaction(type)}
+          onDelete={() => handleDeletePost()}
+          deletingPostId={deletingPost ? post._id : null}
+          isAdmin={isAdmin}
+        />
+      ) : (
       <div className="post-card post-card-detail">
         <div className="post-header">
           <div className="post-author">
@@ -211,6 +221,7 @@ export function PostDetail() {
           )}
         </div>
       </div>
+      )}
 
       <div className="comments-section">
         <h3>Comentarios ({comments.length})</h3>

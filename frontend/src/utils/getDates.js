@@ -30,9 +30,25 @@ export function toUtcDateString(date) {
   return `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}`;
 }
 
+const WEEKDAY_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const MONTH_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+/**
+ * Etiquetas para el selector premium de fechas en Partidos.
+ * @param {{ date: Date, isToday: boolean }} dateObj
+ */
+export function getDateButtonLabels(dateObj) {
+  const date = dateObj?.date instanceof Date ? dateObj.date : new Date();
+  return {
+    weekdayLabel: dateObj?.isToday ? 'Hoy' : WEEKDAY_SHORT[date.getDay()],
+    dayNumber: pad2(date.getDate()),
+    monthLabel: MONTH_SHORT[date.getMonth()],
+  };
+}
+
 /**
  * Genera un array de 7 fechas consecutivas (3 antes, hoy, 3 después) en calendario local.
- * @returns {Array<{ date: Date, dateString: string, display: string, isToday: boolean }>}
+ * @returns {Array<{ date: Date, dateString: string, display: string, isToday: boolean, weekdayLabel: string, dayNumber: string, monthLabel: string }>}
  */
 export function getDateRange() {
   const today = new Date();
@@ -44,12 +60,14 @@ export function getDateRange() {
 
     const dateString = toLocalDateString(date);
     const display = `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}`;
+    const labels = getDateButtonLabels({ date, isToday: i === 0 });
 
     dates.push({
       date,
       dateString,
       display,
       isToday: i === 0,
+      ...labels,
     });
   }
 

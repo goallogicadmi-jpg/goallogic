@@ -320,16 +320,16 @@ export default function MatchAnalysis() {
         <>
           <div style={{ marginBottom: "20px", display: "flex", flexWrap: "wrap" }}>
             <button onClick={() => setActiveTab("analysis")} style={tabButtonStyle(activeTab === "analysis")}>
-              📊 Análisis Básico
+              Análisis Básico
             </button>
             <button onClick={() => setActiveTab("predictions")} style={tabButtonStyle(activeTab === "predictions")}>
-              🔮 Predicciones Estadísticas
+              Predicciones Estadísticas
             </button>
             <button onClick={() => setActiveTab("comparison")} style={tabButtonStyle(activeTab === "comparison")}>
-              ⚔️ Comparación Detallada
+              Comparación Detallada
             </button>
             <button onClick={() => setActiveTab("h2h")} style={tabButtonStyle(activeTab === "h2h")}>
-              📜 Historial H2H
+              Historial H2H
             </button>
           </div>
 

@@ -32,58 +32,298 @@
   color: var(--text-secondary);
 }
 
-/* Selector de fechas */
-.fechas-container {
+/* Selector de fechas — premium */
+.partidos-scope-nav {
   display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-  overflow-x: auto;
-  padding: 10px 0;
-  scrollbar-width: thin;
-  scrollbar-color: #30363d #161b22;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
 }
 
-.fecha-button {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
+.partidos-scope-nav__btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(79, 195, 247, 0.22);
+  background: rgba(79, 195, 247, 0.08);
+  color: #4fc3f7;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-normal);
-  white-space: nowrap;
-  transition: all 0.2s ease;
-  font-family: var(--font-family);
-  min-width: fit-content;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   font-family: inherit;
 }
 
-.fecha-button:hover {
-  background: #21262d;
-  border-color: #30363d;
+.partidos-scope-nav__btn:hover {
+  background: rgba(79, 195, 247, 0.16);
+  border-color: rgba(79, 195, 247, 0.4);
+  color: #ffffff;
 }
 
-.fecha-button.today {
-  background: #21262d;
-  color: #58a6ff;
+.fechas-panel {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 24px;
+  padding: 10px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(28, 31, 38, 0.98) 0%, rgba(24, 27, 32, 1) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.fechas-container {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 2px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(154, 164, 178, 0.45) transparent;
+}
+
+.fechas-container::-webkit-scrollbar {
+  height: 5px;
+}
+
+.fechas-container::-webkit-scrollbar-thumb {
+  background: rgba(154, 164, 178, 0.35);
+  border-radius: 999px;
+}
+
+.fecha-button {
+  flex: 1 1 0;
+  min-width: 84px;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  min-height: 68px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, #1e2128 0%, #181b20 100%);
+  color: #ffffff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  font-family: inherit;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.24);
+}
+
+.fecha-button__weekday {
+  display: block;
+  width: 100%;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #9aa4b2;
+}
+
+.fecha-button__body {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.fecha-button__day {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.fecha-button__month {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  color: #9aa4b2;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.fecha-button:hover {
+  background: linear-gradient(180deg, #252932 0%, #1c1f26 100%);
+  border-color: rgba(79, 195, 247, 0.28);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.fecha-button.today:not(.selected) .fecha-button__weekday {
+  color: #4fc3f7;
 }
 
 .fecha-button.selected {
-  border: 2px solid #1f6feb;
-  background: #1f6feb;
-  color: #fff;
-  font-weight: 600;
+  border-color: rgba(79, 195, 247, 0.5);
+  background: linear-gradient(180deg, rgba(79, 195, 247, 0.22) 0%, #181b20 100%);
+  box-shadow:
+    0 8px 20px rgba(79, 195, 247, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* Controles (filtros, búsqueda, orden) */
+.fecha-button.selected .fecha-button__weekday,
+.fecha-button.selected .fecha-button__day {
+  color: #ffffff;
+}
+
+.fecha-button.selected .fecha-button__month {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.fecha-button:focus-visible {
+  outline: 2px solid rgba(79, 195, 247, 0.65);
+  outline-offset: 2px;
+}
+
+/* Barra de filtros premium — exclusiva de Partidos */
+.partidos-filter-bar {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  max-height: 56px;
+  margin-bottom: 20px;
+  padding: 0 16px;
+  background: #181b20;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+}
+
+.partidos-filter-bar__scroll {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.partidos-filter-bar__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.partidos-filter-bar__field {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.partidos-filter-bar__field--search {
+  flex: 1 1 160px;
+  min-width: 140px;
+  max-width: 240px;
+}
+
+.partidos-filter-bar__field--sort {
+  gap: 6px;
+}
+
+.partidos-filter-bar__icon {
+  flex-shrink: 0;
+  color: #9aa4b2;
+  pointer-events: none;
+}
+
+.partidos-filter-bar__control {
+  height: 34px;
+  min-width: 118px;
+  max-width: 180px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #1f2329;
+  color: #9aa4b2;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%239aa4b2' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+.partidos-filter-bar__control:hover {
+  border-color: rgba(79, 195, 247, 0.28);
+  background-color: #252a32;
+  color: #c9d1d9;
+}
+
+.partidos-filter-bar__control:focus {
+  outline: none;
+  border-color: rgba(79, 195, 247, 0.45);
+  box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.12);
+  color: #e8eaed;
+}
+
+.partidos-filter-bar__control--search {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  padding-left: 0;
+  padding-right: 12px;
+  background-image: none;
+  cursor: text;
+}
+
+.partidos-filter-bar__field--search .partidos-filter-bar__icon {
+  margin-left: 10px;
+}
+
+.partidos-filter-bar__control--search::placeholder {
+  color: #6e7681;
+}
+
+.partidos-filter-bar__control--sort {
+  min-width: 148px;
+  padding-left: 0;
+  background-position: right 10px center;
+}
+
+.partidos-filter-bar__field--sort .partidos-filter-bar__icon {
+  margin-left: 2px;
+}
+
+.partidos-filter-bar__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Legacy — mantener por compatibilidad con otros módulos que usen filtro-select */
 .controles-container {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 24px;
   padding: 16px;
-  background: #1a1a1a;
+  background: var(--bg-card, #181b20);
   border-radius: 12px;
   border: 1px solid rgba(79, 195, 247, 0.1);
 }
@@ -209,7 +449,7 @@
   text-align: center;
   padding: 20px;
   color: #e74c3c;
-  background: #1A1A1A;
+  background: var(--bg-card, #181b20);
   border-radius: 8px;
   border: 1px solid rgba(231, 76, 60, 0.3);
   margin-top: 20px;
@@ -229,7 +469,7 @@
 }
 
 .grupo-liga {
-  background: #1a1a1a;
+  background: var(--bg-card, #181b20);
   border-radius: 12px;
   border: 1px solid rgba(79, 195, 247, 0.1);
   overflow: hidden;
@@ -444,7 +684,7 @@
 }
 
 .predicciones-button {
-  background: #1A1A1A;
+  background: var(--bg-card, #181b20);
   border: 1px solid #D4AF37;
   color: #D4AF37;
   padding: 10px 20px;
@@ -540,7 +780,7 @@
 }
 
 .partido-detalle-modal {
-  background: #1a1a1a;
+  background: var(--bg-card, #181b20);
   border-radius: 12px;
   border: 1px solid rgba(79, 195, 247, 0.2);
   max-width: 600px;
@@ -698,7 +938,7 @@
 }
 
 .match-center-modal {
-  background: #1a1a1a;
+  background: var(--bg-card, #181b20);
   border-radius: 16px;
   border: 1px solid rgba(79, 195, 247, 0.2);
   max-width: 90vw;
@@ -853,84 +1093,7 @@
   color: #e74c3c;
 }
 
-/* Pestañas del Match Center */
-.match-center-tabs-wrap {
-  position: relative;
-  z-index: 30;
-  flex-shrink: 0;
-  min-width: 0;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  border-bottom: 1px solid rgba(79, 195, 247, 0.1);
-  background: #1a1a1a;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
-}
-
-.match-center-tabs {
-  display: flex;
-}
-
-.match-center-tab {
-  flex: 1;
-  position: relative;
-  padding: 14px 18px;
-  background: transparent;
-  border: none;
-  color: #8b949e;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.22s ease, background-color 0.22s ease;
-  border-bottom: none;
-  border-radius: 999px;
-  font-family: inherit;
-}
-
-.match-center-tab-inner {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-.match-center-tab-label {
-  line-height: 1.2;
-}
-
-.match-center-tab:hover {
-  color: #4FC3F7;
-  background: rgba(79, 195, 247, 0.06);
-}
-
-.match-center-tab.activa {
-  color: #4FC3F7;
-  background: rgba(79, 195, 247, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(79, 195, 247, 0.18);
-}
-
-.match-center-tab.activa::after {
-  content: "";
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: 5px;
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, rgba(79, 195, 247, 0.2), #4FC3F7, rgba(79, 195, 247, 0.2));
-  animation: matchCenterTabUnderline 0.28s ease;
-}
-
-@keyframes matchCenterTabUnderline {
-  from {
-    opacity: 0;
-    transform: scaleX(0.55);
-  }
-  to {
-    opacity: 1;
-    transform: scaleX(1);
-  }
-}
+/* Pestañas del Match Center — estilos globales en gl-tabs.css */
 
 /* Contenido del Match Center */
 .match-center-content {
@@ -1029,7 +1192,7 @@
   border-radius: 10px;
   border: 1px solid rgba(79, 195, 247, 0.12);
   border-left: 3px solid var(--event-team-color, #4fc3f7);
-  background: rgba(26, 26, 26, 0.85);
+  background: rgba(24, 27, 32, 0.85);
   transition: background-color 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -1343,10 +1506,13 @@
 }
 
 .estadistica-nombre {
+  display: block;
+  width: 100%;
   font-size: 13px;
   font-weight: 500;
   color: #b0b0b0;
   margin-bottom: 4px;
+  text-align: center;
 }
 
 .estadistica-barras {
@@ -1459,6 +1625,86 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .partidos-container {
+    padding: 16px 12px;
+  }
+
+  .partidos-filter-bar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    min-height: 48px;
+    max-height: min(56px, 20vh);
+    margin-bottom: 16px;
+    padding: 0 12px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .partidos-filter-bar__scroll {
+    min-height: 48px;
+    gap: 8px;
+  }
+
+  .partidos-filter-bar__control {
+    height: 32px;
+    min-width: 108px;
+    max-width: 150px;
+    font-size: 12px;
+    padding: 0 10px;
+    padding-right: 26px;
+    background-position: right 8px center;
+  }
+
+  .partidos-filter-bar__field--search {
+    flex: 0 0 130px;
+    min-width: 120px;
+    max-width: 150px;
+  }
+
+  .partidos-filter-bar__control--search {
+    font-size: 12px;
+  }
+
+  .partidos-filter-bar__control--sort {
+    min-width: 132px;
+  }
+
+  .partidos-filter-bar__icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .estadisticas-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+  }
+
+  .estadisticas-lista {
+    gap: 20px;
+  }
+
+  .estadistica-nombre {
+    font-size: 14px;
+  }
+
+  .estadistica-barras {
+    gap: 8px;
+  }
+
+  .estadistica-barra-wrapper {
+    height: 28px;
+  }
+
+  .estadistica-valor {
+    font-size: 12px;
+  }
+
   .controles-container {
     flex-direction: column;
   }
@@ -1565,74 +1811,6 @@
     justify-content: center;
   }
 
-  .match-center-tabs-wrap::before,
-  .match-center-tabs-wrap::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 28px;
-    z-index: 2;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  .match-center-tabs-wrap::before {
-    left: 0;
-    background: linear-gradient(to right, #1a1a1a 0%, rgba(26, 26, 26, 0) 100%);
-  }
-
-  .match-center-tabs-wrap::after {
-    right: 0;
-    background: linear-gradient(to left, #1a1a1a 0%, rgba(26, 26, 26, 0) 100%);
-  }
-
-  .match-center-tabs-wrap--fade-left::before {
-    opacity: 1;
-  }
-
-  .match-center-tabs-wrap--fade-right::after {
-    opacity: 1;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .match-center-tabs-wrap::before,
-    .match-center-tabs-wrap::after {
-      transition: none;
-    }
-  }
-
-  .match-center-tabs {
-    overflow-x: auto;
-    overflow-y: hidden;
-    flex-wrap: nowrap;
-    min-width: 0;
-    width: 100%;
-    max-width: 100%;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    gap: 4px;
-    padding: 6px 8px;
-    box-sizing: border-box;
-  }
-
-  .match-center-tabs::-webkit-scrollbar {
-    display: none;
-  }
-
-  .match-center-tab {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    padding: 12px 14px;
-    font-size: 14px;
-    white-space: nowrap;
-  }
-
   .match-center-content {
     padding: 16px;
   }
@@ -1726,46 +1904,6 @@
     gap: 6px;
   }
 
-  .match-center-tabs-wrap::before,
-  .match-center-tabs-wrap::after {
-    width: 22px;
-  }
-
-  .match-center-tabs {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    min-width: 0;
-    width: 100%;
-    max-width: 100%;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    touch-action: pan-x;
-    gap: 4px;
-    padding: 5px 6px;
-    box-sizing: border-box;
-  }
-
-  .match-center-tabs::-webkit-scrollbar {
-    display: none;
-  }
-
-  .match-center-tab {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    scroll-snap-align: start;
-    white-space: nowrap;
-    padding: 14px 16px;
-    font-size: 14px;
-  }
-
   .match-center-content {
     padding: 12px;
   }
@@ -1815,6 +1953,25 @@
   }
 
   /* Fixtures / tarjetas de partido — compactación móvil */
+  .fechas-panel {
+    padding: 8px;
+    border-radius: 10px;
+  }
+
+  .fecha-button {
+    min-width: 72px;
+    min-height: 62px;
+    padding: 8px 10px;
+  }
+
+  .fecha-button__day {
+    font-size: 18px;
+  }
+
+  .fecha-button__month {
+    font-size: 11px;
+  }
+
   .partido-card {
     padding: 10px 8px;
   }
@@ -2075,6 +2232,7 @@
     font-size: 22px;
   }
 
+  .match-center-modal--ultra-compact .gl-tab,
   .match-center-modal--ultra-compact .match-center-tab {
     padding: 10px 12px;
     font-size: 12px;
@@ -2141,16 +2299,7 @@
   }
 }
 
-@media (max-width: 768px) {
-  .match-center-tab.activa::after {
-    left: 10px;
-    right: 10px;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .match-center-tab,
-  .match-center-tab.activa::after,
   .partido-card--goal-flash,
   .partido-card-goal-badge {
     animation: none;
@@ -2175,7 +2324,7 @@
 }
 
 .player-modal-content {
-  background: #1a1a1a;
+  background: var(--bg-card, #181b20);
   border-radius: 16px;
   border: 1px solid rgba(79, 195, 247, 0.2);
   max-width: 600px;

@@ -1,5 +1,6 @@
 import '../styles/goal-logic-brand.css';
 import { BRAND_NAME } from '../constants/brand';
+import GoalLogicGlobalSearch from './search/GoalLogicGlobalSearch';
 
 /**
  * Título de marca oficial: GOAL_ (gris metálico) + LOGIC (naranja), Orbitron Bold, centrado.
@@ -18,10 +19,20 @@ export function GoalLogicTitle({ as: Tag = 'h1', size = 'lg', className = '' }) 
   );
 }
 
-export function GoalLogicSectionHeader({ size = 'lg', className = '' }) {
+export function GoalLogicSectionHeader({ size = 'lg', className = '', showSearch = true }) {
   return (
     <header className={`goal-logic-section-header ${className}`.trim()}>
-      <GoalLogicTitle size={size} />
+      <div className="goal-logic-section-header__spacer" aria-hidden="true" />
+      <div className="goal-logic-section-header__title">
+        <GoalLogicTitle size={size} />
+      </div>
+      {showSearch ? (
+        <div className="goal-logic-section-header__search">
+          <GoalLogicGlobalSearch />
+        </div>
+      ) : (
+        <div className="goal-logic-section-header__spacer" aria-hidden="true" />
+      )}
     </header>
   );
 }
