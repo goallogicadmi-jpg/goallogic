@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   getAnalystSubscribers,
   sendAnalystMessage,
@@ -37,14 +37,6 @@ export default function AnalystSubscriberMessaging({ analystId }) {
       cancelled = true;
     };
   }, [analystId]);
-
-  const subscriberKeyMap = useMemo(() => {
-    const map = new Map();
-    subscribers.forEach((sub, index) => {
-      map.set(sub.publicId || `row-${index}`, sub);
-    });
-    return map;
-  }, [subscribers]);
 
   function toggleSubscriber(publicId) {
     setSelectedIds((prev) => {
@@ -86,33 +78,63 @@ export default function AnalystSubscriberMessaging({ analystId }) {
     }
   }
 
-  return (
-    <section className="analyst-messaging">
-      <h2>Enviar mensaje a suscriptores</h2>
-      <p className="analyst-messaging__hint">
-        Los suscriptores recibirán el mensaje en su bandeja interna.
-      </p>
-
-      {loading ? (
+  if (loading) {
+    return (
+      <div className="analyst-messaging">
         <p className="analyst-messaging__status">Cargando suscriptores…</p>
-      ) : subscribers.length === 0 ? (
-        <p className="analyst-messaging__status">Aún no tienes suscriptores activos.</p>
-      ) : (
-        <>
-          <div className="analyst-messaging__subscribers">
-            <h3>Suscriptores ({subscribers.length})</h3>
-            <ul>
-              {subscribers.map((sub, index) => {
-                const key = sub.publicId || `row-${index}`;
-                return (
-                  <li key={key}>
-                    <span className="analyst-messaging__name">{sub.name}</span>
-                    <span className="analyst-messaging__public-id">{sub.publicId || '—'}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
+      </div>
+    );
+  }
+
+  if (error && subscribers.length === 0) {
+    return (
+      <div className="analyst-messaging">
+        <p className="analyst-messaging__error">{error}</p>
+      </div>
+    );
+  }
+
+  if (subscribers.length === 0) {
+    return (
+      <div className="analyst-messaging">
+        <div className="analyst-messaging__empty">
+          <p className="analyst-messaging__status">Aún no tienes suscriptores activos.</p>
+          <p className="analyst-messaging__hint">
+            Cuando alguien se suscriba a tu perfil, podrás verlo aquí y enviarle mensajes.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="analyst-messaging">
+      <div className="analyst-messaging__layout">
+        <div className="analyst-messaging__card analyst-messaging__subscribers">
+          <h3 className="analyst-messaging__card-title">
+            Suscriptores ({subscribers.length})
+          </h3>
+          <p className="analyst-messaging__hint">
+            Lista de usuarios con suscripción activa a tu perfil.
+          </p>
+          <ul>
+            {subscribers.map((sub, index) => {
+              const key = sub.publicId || `row-${index}`;
+              return (
+                <li key={key}>
+                  <span className="analyst-messaging__name">{sub.name}</span>
+                  <span className="analyst-messaging__public-id">{sub.publicId || '—'}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        <div className="analyst-messaging__card analyst-messaging__compose">
+          <h3 className="analyst-messaging__card-title">Enviar mensaje</h3>
+          <p className="analyst-messaging__hint">
+            Los suscriptores recibirán el mensaje en su bandeja interna (Mi Cuenta → Actividad).
+          </p>
 
           <form className="analyst-messaging__form" onSubmit={handleSubmit}>
             <label className="analyst-messaging__field">
@@ -181,12 +203,12 @@ export default function AnalystSubscriberMessaging({ analystId }) {
             {error ? <p className="analyst-messaging__error">{error}</p> : null}
             {success ? <p className="analyst-messaging__success">{success}</p> : null}
 
-            <button type="submit" disabled={sending}>
+            <button type="submit" className="analyst-messaging__submit" disabled={sending}>
               {sending ? 'Enviando…' : 'Enviar mensaje'}
             </button>
           </form>
-        </>
-      )}
-    </section>
+        </div>
+      </div>
+    </div>
   );
 }

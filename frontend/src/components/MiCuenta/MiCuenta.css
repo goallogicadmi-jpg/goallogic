@@ -362,6 +362,31 @@
   font-weight: 600;
 }
 
+.micuenta-analyst-profile-actions {
+  margin-bottom: 24px;
+}
+
+.micuenta-analyst-profile-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(79, 195, 247, 0.35);
+  background: rgba(79, 195, 247, 0.1);
+  color: #4fc3f7;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.micuenta-analyst-profile-btn:hover {
+  background: rgba(79, 195, 247, 0.18);
+  border-color: rgba(79, 195, 247, 0.55);
+  transform: translateY(-1px);
+}
+
 .micuenta-auth-section {
   max-width: 600px;
   margin: 0 auto;

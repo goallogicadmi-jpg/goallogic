@@ -192,6 +192,21 @@ const MiCuenta = () => {
                       </div>
                     </div>
                   )}
+                  {user?.role === 'analista' && (
+                    <div className="micuenta-analyst-profile-actions">
+                      <button
+                        type="button"
+                        className="micuenta-analyst-profile-btn"
+                        onClick={() =>
+                          navigate(`/analista/${user.user_id || user.id}`, {
+                            state: { analystTab: 'suscriptores' },
+                          })
+                        }
+                      >
+                        Ver mi perfil de analista
+                      </button>
+                    </div>
+                  )}
                   <ProfilePhotoSettings
                     user={user}
                     onUpdated={() => loadUserProfile()}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { UserAvatar } from '../components/UserAvatar';
 import AnalystVerifiedBadge from '../components/Analysts/AnalystVerifiedBadge';
@@ -18,11 +18,18 @@ import {
 } from '../services/analystService';
 import './AnalystProfilePage.css';
 
-const PROFILE_TABS = [
+const BASE_PROFILE_TABS = [
   { id: 'resumen', label: 'Resumen' },
   { id: 'historial', label: 'Historial' },
   { id: 'publicaciones', label: 'Publicaciones' },
 ];
+
+const SUBSCRIBERS_TAB = { id: 'suscriptores', label: 'Suscriptores y Mensajes' };
+
+function buildProfileTabs(isSelf) {
+  if (!isSelf) return BASE_PROFILE_TABS;
+  return [...BASE_PROFILE_TABS, SUBSCRIBERS_TAB];
+}
 
 function BackToCommunityButton({ onClick }) {
   return (
@@ -84,17 +91,35 @@ function mapProfilePosts(profile) {
 export default function AnalystProfilePage() {
   const { analystId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const historyRef = useRef(null);
   const [profile, setProfile] = useState(null);
   const [history, setHistory] = useState(null);
   const [historyLocked, setHistoryLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('resumen');
+  const [activeTab, setActiveTab] = useState(() => location.state?.analystTab || 'resumen');
 
   const goToCommunity = useCallback(() => {
     navigate('/comunidad');
   }, [navigate]);
+
+  useEffect(() => {
+    if (location.state?.analystTab) {
+      setActiveTab(location.state.analystTab);
+    }
+  }, [location.state?.analystTab]);
+
+  const profileTabs = useMemo(
+    () => buildProfileTabs(Boolean(profile?.isSelf)),
+    [profile?.isSelf]
+  );
+
+  useEffect(() => {
+    if (!profile?.isSelf && activeTab === 'suscriptores') {
+      setActiveTab('resumen');
+    }
+  }, [profile?.isSelf, activeTab]);
 
   useEffect(() => {
     let cancelled = false;
@@ -269,7 +294,7 @@ export default function AnalystProfilePage() {
 
         <div className="analyst-profile-panel__tabs">
           <PremiumTabs
-            tabs={PROFILE_TABS}
+            tabs={profileTabs}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             ariaLabel="Secciones del perfil del analista"
@@ -307,13 +332,17 @@ export default function AnalystProfilePage() {
               <h2 className="analyst-profile-panel__section-title">Rendimiento</h2>
               <PerformanceChart timeline={timeline} />
             </section>
-
-            {profile.isSelf ? (
-              <section className="analyst-profile-panel__section">
-                <AnalystSubscriberMessaging analystId={profile.id} />
-              </section>
-            ) : null}
           </>
+        ) : null}
+
+        {activeTab === 'suscriptores' && profile.isSelf ? (
+          <section className="analyst-profile-panel__section analyst-profile-panel__section--subscribers">
+            <h2 className="analyst-profile-panel__section-title">Suscriptores y Mensajes</h2>
+            <p className="analyst-profile-panel__section-desc">
+              Gestiona tus suscriptores activos y envía mensajes a su bandeja en Mi Cuenta → Actividad.
+            </p>
+            <AnalystSubscriberMessaging analystId={profile.id} />
+          </section>
         ) : null}
 
         {activeTab === 'historial' ? (
