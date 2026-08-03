@@ -5,7 +5,6 @@ import { useUser } from '../../context/UserContext';
 import Login from './Login';
 import Register from './Register';
 import ProtectedView from './ProtectedView';
-import ProfilePhoto from './ProfilePhoto';
 import ProfilePhotoSettings from './ProfilePhotoSettings';
 import DashboardUsuario from './DashboardUsuario';
 import EstadisticasApuestas from './EstadisticasApuestas';
@@ -183,7 +182,10 @@ const MiCuenta = () => {
                 >
                   {user && (
                     <div className="micuenta-perfil-hero">
-                      <ProfilePhoto nombre={user.nombre} foto_perfil_url={user.foto_perfil_url} />
+                      <ProfilePhotoSettings
+                        user={user}
+                        onUpdated={() => loadUserProfile()}
+                      />
                       <div className="micuenta-perfil-info">
                         <p><strong>Nombre:</strong> {user.nombre || 'No especificado'}</p>
                         <p><strong>Email:</strong> {user.email}</p>
@@ -207,10 +209,6 @@ const MiCuenta = () => {
                       </button>
                     </div>
                   )}
-                  <ProfilePhotoSettings
-                    user={user}
-                    onUpdated={() => loadUserProfile()}
-                  />
                   <div id="planes-usuario">
                     <PlansPanel />
                   </div>
@@ -221,17 +219,17 @@ const MiCuenta = () => {
                   role="tabpanel"
                   aria-hidden={activeTab !== 'herramientas'}
                 >
-                  <div id="simulador-apuestas">
-                    <SimuladorApuestas />
+                  <EstadisticasApuestas refreshTrigger={refreshHistorial} />
+                  <GraficoProfit refreshTrigger={refreshHistorial} />
+                  <div id="historial-apuestas">
+                    <HistorialApuestas refreshTrigger={refreshHistorial} />
                   </div>
                   <div id="panel-apuestas">
                     <PanelApuestas onBetCreated={() => setRefreshHistorial(prev => prev + 1)} />
                   </div>
-                  <div id="historial-apuestas">
-                    <HistorialApuestas refreshTrigger={refreshHistorial} />
+                  <div id="simulador-apuestas">
+                    <SimuladorApuestas />
                   </div>
-                  <EstadisticasApuestas refreshTrigger={refreshHistorial} />
-                  <GraficoProfit refreshTrigger={refreshHistorial} />
                 </div>
 
                 <div

@@ -606,8 +606,25 @@ router.put('/profile/photo', authJwt, async (req, res) => {
     const { foto_perfil_url: rawUrl } = req.body || {};
     const foto_perfil_url = typeof rawUrl === 'string' ? rawUrl.trim() : '';
 
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
+
     if (!foto_perfil_url) {
-      return res.status(400).json({ success: false, message: 'URL de foto requerida' });
+      const previousUrl = user.foto_perfil_url;
+      user.foto_perfil_url = null;
+      await user.save();
+
+      if (previousUrl) {
+        deleteCloudinaryImageByUrl(previousUrl).catch(() => {});
+      }
+
+      return res.json({
+        success: true,
+        message: 'Foto de perfil eliminada',
+        foto_perfil_url: null,
+      });
     }
 
     if (!isCloudinaryAssetUrl(foto_perfil_url)) {
@@ -615,11 +632,6 @@ router.put('/profile/photo', authJwt, async (req, res) => {
         success: false,
         message: 'La URL debe ser una imagen válida subida a Cloudinary.',
       });
-    }
-
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
     }
 
     const previousUrl = user.foto_perfil_url;

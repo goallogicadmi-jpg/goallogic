@@ -101,6 +101,7 @@ export function NewAnalysis() {
               name="publicationType"
               value={formData.publicationType}
               onChange={handleChange}
+              className="new-analysis-form__select"
               required
             >
               <option value="">Selecciona un tipo</option>
