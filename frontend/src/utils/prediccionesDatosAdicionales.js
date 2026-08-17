@@ -251,11 +251,11 @@ export async function fetchPrediccionesDatosAdicionales({
         console.warn('⚠️ Error obteniendo estadísticas de jugadores equipo B:', err);
         return { response: [] };
       }),
-      getTeamFixtures(equipoNormA.id, 10).catch((err) => {
+      getTeamFixtures(equipoNormA.id, 25).catch((err) => {
         console.warn('⚠️ Error obteniendo fixtures equipo A:', err);
         return { response: [] };
       }),
-      getTeamFixtures(equipoNormB.id, 10).catch((err) => {
+      getTeamFixtures(equipoNormB.id, 25).catch((err) => {
         console.warn('⚠️ Error obteniendo fixtures equipo B:', err);
         return { response: [] };
       }),
