@@ -144,6 +144,7 @@ export default function Predicciones() {
 
   const ligasFetchSeqRef = useRef(0);
   const phase2SeqRef = useRef(0);
+  const analysisInFlightRef = useRef(false);
 
   const ligasInDomain = useMemo(
     () => ligas.filter((l) => l.domain === predictionDomain),
@@ -368,8 +369,12 @@ export default function Predicciones() {
   useEffect(() => {
     if (homeTeam && awayTeam && equiposLocal.length > 0 && equiposVisitante.length > 0 && analisisAutomaticoEjecutado && !equipoLocal && !equipoVisitante) {
       // Buscar el equipo local en la lista de equipos
-      const equipoLocalEncontrado = equiposLocal.find(eq => eq.id === homeTeam.id);
-      const equipoVisitanteEncontrado = equiposVisitante.find(eq => eq.id === awayTeam.id);
+      const equipoLocalEncontrado = equiposLocal.find(
+        (eq) => Number(eq.id) === Number(homeTeam.id)
+      );
+      const equipoVisitanteEncontrado = equiposVisitante.find(
+        (eq) => Number(eq.id) === Number(awayTeam.id)
+      );
 
       if (equipoLocalEncontrado && equipoVisitanteEncontrado) {
         setEquipoLocal(equipoLocalEncontrado);
@@ -379,7 +384,11 @@ export default function Predicciones() {
   }, [homeTeam, awayTeam, equiposLocal, equiposVisitante, analisisAutomaticoEjecutado, equipoLocal, equipoVisitante]);
 
   // Función para manejar el análisis
-  const handleAnalizar = useCallback(async () => {
+  const handleAnalizar = useCallback(async ({ force = false } = {}) => {
+    if (analysisInFlightRef.current && !force) {
+      return;
+    }
+
     const ligaIdA = ligaLocal ?? ligaA;
     const ligaIdB = ligaVisitante ?? ligaB;
     const equipoSelA = equipoLocal ?? equipoA;
@@ -406,6 +415,7 @@ export default function Predicciones() {
     const domainB = ligaBCompleta.domain;
     if (domainA !== predictionDomain || domainB !== predictionDomain) {
       setError("Las competiciones elegidas no corresponden al modo Clubes o Selecciones activo.");
+      setAnalisisAutomaticoIniciado(false);
       return;
     }
 
@@ -423,13 +433,14 @@ export default function Predicciones() {
       }
     }
 
+    analysisInFlightRef.current = true;
+
     // Activar estado de carga
     setLoading(true);
     setError(null);
     setResultados(null);
     setDatosAdicionales(null);
     setLoadingDatosAdicionales(false);
-    phase2SeqRef.current += 1;
 
     const [statsSeasonA, statsSeasonB] = await Promise.all([
       routeSeason != null ? Promise.resolve(String(routeSeason)) : fetchPreferredSeasonYearForLeague(ligaIdA),
@@ -461,9 +472,18 @@ export default function Predicciones() {
 
         setLoading(false);
 
+        const equipoPhase2A = {
+          id: datosEquipoA.id ?? equipoSelA.id,
+          nombre: datosEquipoA.nombre ?? equipoSelA.nombre,
+        };
+        const equipoPhase2B = {
+          id: datosEquipoB.id ?? equipoSelB.id,
+          nombre: datosEquipoB.nombre ?? equipoSelB.nombre,
+        };
+
         const skeletonLazy = buildSkeletonAccordionLazyContext({
-          equipoA: { id: equipoSelA.id, nombre: datosEquipoA.nombre ?? equipoSelA.nombre },
-          equipoB: { id: equipoSelB.id, nombre: datosEquipoB.nombre ?? equipoSelB.nombre },
+          equipoA: equipoPhase2A,
+          equipoB: equipoPhase2B,
           ligaA: ligaIdA,
           ligaB: ligaIdB,
           seasonA: statsSeasonA,
@@ -473,12 +493,12 @@ export default function Predicciones() {
 
         setDatosAdicionales({ accordionLazy: skeletonLazy });
 
-        const phase2Seq = phase2SeqRef.current;
+        const phase2Seq = ++phase2SeqRef.current;
         setLoadingDatosAdicionales(true);
 
         fetchPrediccionesDatosAdicionales({
-          equipoA: { id: equipoSelA.id, nombre: datosEquipoA.nombre ?? equipoSelA.nombre },
-          equipoB: { id: equipoSelB.id, nombre: datosEquipoB.nombre ?? equipoSelB.nombre },
+          equipoA: equipoPhase2A,
+          equipoB: equipoPhase2B,
           ligaA: ligaIdA,
           ligaB: ligaIdB,
           seasonA: statsSeasonA,
@@ -502,16 +522,19 @@ export default function Predicciones() {
             if (phase2SeqRef.current === phase2Seq) {
               setLoadingDatosAdicionales(false);
             }
+            analysisInFlightRef.current = false;
           });
       } else {
         setError("No se pudieron obtener los datos completos de los equipos.");
         setAnalisisAutomaticoIniciado(false);
+        analysisInFlightRef.current = false;
         setLoading(false);
       }
     } catch (err) {
       console.error("Error analizando equipos:", err);
       setError(`Error al analizar: ${err.response?.data?.error || err.message}`);
       setAnalisisAutomaticoIniciado(false);
+      analysisInFlightRef.current = false;
       setLoading(false);
     }
   }, [
@@ -733,7 +756,7 @@ export default function Predicciones() {
         <button
           type="button"
           className="btn-analizar"
-          onClick={handleAnalizar}
+          onClick={() => handleAnalizar({ force: true })}
           disabled={!(equipoLocal ?? equipoA) || !(equipoVisitante ?? equipoB) || loading}
         >
           {loading ? "Analizando..." : "Analizar Comparación"}
@@ -791,6 +814,7 @@ export default function Predicciones() {
                 equipoA={resultados.equipoA}
                 equipoB={resultados.equipoB}
                 datosAdicionales={datosAdicionales}
+                loadingDatosAdicionales={loadingDatosAdicionales}
               />
             </PremiumFeatureGate>
           )}

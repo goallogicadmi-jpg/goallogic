@@ -13,6 +13,18 @@ import {
 } from './calcularCorners';
 import { buildH2HDisplayData } from './h2hFixturesUtils';
 
+function normalizeTeamId(teamId) {
+  const parsed = Number(teamId);
+  return Number.isFinite(parsed) ? parsed : teamId;
+}
+
+function normalizeEquipoRef(equipo) {
+  return {
+    id: normalizeTeamId(equipo?.id),
+    nombre: equipo?.nombre ?? equipo?.name ?? 'Equipo',
+  };
+}
+
 function mapGoleadoresFromPlayersStats(playersStats) {
   return (playersStats?.response || [])
     .filter((j) => j.statistics && j.statistics.length > 0)
@@ -198,9 +210,13 @@ export async function fetchPrediccionesDatosAdicionales({
   seasonB,
   routeFixtureId,
 }) {
+  const equipoNormA = normalizeEquipoRef(equipoA);
+  const equipoNormB = normalizeEquipoRef(equipoB);
+
+  try {
   let fixtureConOdds = null;
   try {
-    fixtureConOdds = await getUpcomingFixtureWithOdds(equipoA.id, equipoB.id, {
+    fixtureConOdds = await getUpcomingFixtureWithOdds(equipoNormA.id, equipoNormB.id, {
       leagueId: ligaA,
       season: seasonA,
       fixtureId: routeFixtureId ?? null,
@@ -215,39 +231,42 @@ export async function fetchPrediccionesDatosAdicionales({
 
   const [h2hData, statsA, statsB, playersStatsA, playersStatsB, fixturesA, fixturesB] =
     await Promise.all([
-      getH2H(equipoA.id, equipoB.id).catch((err) => {
+      getH2H(equipoNormA.id, equipoNormB.id).catch((err) => {
         console.warn('⚠️ Error obteniendo H2H:', err);
         return { response: [] };
       }),
-      getTeamStats(equipoA.id, ligaA, seasonA).catch((err) => {
+      getTeamStats(equipoNormA.id, ligaA, seasonA).catch((err) => {
         console.warn('⚠️ Error obteniendo estadísticas equipo A:', err);
         return { response: [] };
       }),
-      getTeamStats(equipoB.id, ligaB, seasonB).catch((err) => {
+      getTeamStats(equipoNormB.id, ligaB, seasonB).catch((err) => {
         console.warn('⚠️ Error obteniendo estadísticas equipo B:', err);
         return { response: [] };
       }),
-      getTeamPlayersStats(equipoA.id, ligaA, seasonA).catch((err) => {
+      getTeamPlayersStats(equipoNormA.id, ligaA, seasonA).catch((err) => {
         console.warn('⚠️ Error obteniendo estadísticas de jugadores equipo A:', err);
         return { response: [] };
       }),
-      getTeamPlayersStats(equipoB.id, ligaB, seasonB).catch((err) => {
+      getTeamPlayersStats(equipoNormB.id, ligaB, seasonB).catch((err) => {
         console.warn('⚠️ Error obteniendo estadísticas de jugadores equipo B:', err);
         return { response: [] };
       }),
-      getTeamFixtures(equipoA.id, 10).catch((err) => {
+      getTeamFixtures(equipoNormA.id, 10).catch((err) => {
         console.warn('⚠️ Error obteniendo fixtures equipo A:', err);
         return { response: [] };
       }),
-      getTeamFixtures(equipoB.id, 10).catch((err) => {
+      getTeamFixtures(equipoNormB.id, 10).catch((err) => {
         console.warn('⚠️ Error obteniendo fixtures equipo B:', err);
         return { response: [] };
       }),
     ]);
 
+  const fixturesListA = fixturesA?.response || [];
+  const fixturesListB = fixturesB?.response || [];
+
   const [cornersDataA, cornersDataB] = await Promise.all([
-    procesarCornersDeFixtures(fixturesA?.response || [], equipoA.id, 5),
-    procesarCornersDeFixtures(fixturesB?.response || [], equipoB.id, 5),
+    procesarCornersDeFixtures(fixturesListA, equipoNormA.id, 5),
+    procesarCornersDeFixtures(fixturesListB, equipoNormB.id, 5),
   ]);
 
   const cornersEsperados = expectedCorners(
@@ -256,8 +275,8 @@ export async function fetchPrediccionesDatosAdicionales({
   );
 
   const [tarjetasDataA, tarjetasDataB] = await Promise.all([
-    procesarTarjetasDeFixtures(fixturesA?.response || [], equipoA.id, 5),
-    procesarTarjetasDeFixtures(fixturesB?.response || [], equipoB.id, 5),
+    procesarTarjetasDeFixtures(fixturesListA, equipoNormA.id, 5),
+    procesarTarjetasDeFixtures(fixturesListB, equipoNormB.id, 5),
   ]);
 
   const tarjetasEsperadas = expectedCards(
@@ -281,11 +300,37 @@ export async function fetchPrediccionesDatosAdicionales({
     tarjetasDataB,
     cornersEsperados,
     tarjetasEsperadas,
-    equipoA,
-    equipoB,
+    equipoA: equipoNormA,
+    equipoB: equipoNormB,
     ligaA,
     ligaB,
     seasonA,
     seasonB,
   });
+  } catch (err) {
+    console.error('❌ Error crítico en fetchPrediccionesDatosAdicionales:', err);
+    return buildDatosAdicionalesEstructurados({
+      h2hData: { response: [] },
+      fixtureConOdds: { fixture: null, odds: null },
+      upcomingFixtureId: routeFixtureId ?? null,
+      statsA: { response: [] },
+      statsB: { response: [] },
+      playersStatsA: { response: [] },
+      playersStatsB: { response: [] },
+      fixturesA: { response: [] },
+      fixturesB: { response: [] },
+      cornersDataA: { cornersFor: [], cornersAgainst: [], promedioFor: 0, promedioAgainst: 0 },
+      cornersDataB: { cornersFor: [], cornersAgainst: [], promedioFor: 0, promedioAgainst: 0 },
+      tarjetasDataA: { cardsFor: [], cardsAgainst: [], promedioFor: 0, promedioAgainst: 0 },
+      tarjetasDataB: { cardsFor: [], cardsAgainst: [], promedioFor: 0, promedioAgainst: 0 },
+      cornersEsperados: { expectedA: 0, expectedB: 0, total: 0 },
+      tarjetasEsperadas: { expectedA: 0, expectedB: 0, total: 0 },
+      equipoA: equipoNormA,
+      equipoB: equipoNormB,
+      ligaA,
+      ligaB,
+      seasonA,
+      seasonB,
+    });
+  }
 }

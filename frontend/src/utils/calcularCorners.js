@@ -1,5 +1,15 @@
 import { getFixtureStatistics } from '../api/api';
 
+function normalizeTeamId(teamId) {
+  const parsed = Number(teamId);
+  return Number.isFinite(parsed) ? parsed : teamId;
+}
+
+function isSameTeamId(left, right) {
+  if (left == null || right == null) return false;
+  return normalizeTeamId(left) === normalizeTeamId(right);
+}
+
 /**
  * Extrae los corners de un fixture obteniendo sus estadísticas
  * @param {Object} fixture - Objeto fixture con fixture.id
@@ -12,21 +22,22 @@ export const extraerCornersDeFixture = async (fixture, teamId) => {
       return { cornersFor: 0, cornersAgainst: 0 };
     }
 
+    const normalizedTeamId = normalizeTeamId(teamId);
     const statsData = await getFixtureStatistics(fixture.fixture.id);
     
     if (!statsData?.response || !Array.isArray(statsData.response)) {
       return { cornersFor: 0, cornersAgainst: 0 };
     }
 
-    const isHome = fixture.teams?.home?.id === teamId;
+    const isHome = isSameTeamId(fixture.teams?.home?.id, normalizedTeamId);
     const teamStats = statsData.response.find(s => 
-      (isHome && s.team?.id === fixture.teams?.home?.id) ||
-      (!isHome && s.team?.id === fixture.teams?.away?.id)
+      (isHome && isSameTeamId(s.team?.id, fixture.teams?.home?.id)) ||
+      (!isHome && isSameTeamId(s.team?.id, fixture.teams?.away?.id))
     );
 
     const rivalStats = statsData.response.find(s => 
-      (isHome && s.team?.id === fixture.teams?.away?.id) ||
-      (!isHome && s.team?.id === fixture.teams?.home?.id)
+      (isHome && isSameTeamId(s.team?.id, fixture.teams?.away?.id)) ||
+      (!isHome && isSameTeamId(s.team?.id, fixture.teams?.home?.id))
     );
 
     if (!teamStats?.statistics || !rivalStats?.statistics) {
@@ -58,6 +69,7 @@ export const extraerCornersDeFixture = async (fixture, teamId) => {
  * @returns {Promise<{cornersFor: Array, cornersAgainst: Array, promedioFor: number, promedioAgainst: number}>}
  */
 export const procesarCornersDeFixtures = async (fixtures, teamId, maxFixtures = 5) => {
+  const normalizedTeamId = normalizeTeamId(teamId);
   if (!Array.isArray(fixtures) || fixtures.length === 0) {
     return {
       cornersFor: [],
@@ -83,7 +95,7 @@ export const procesarCornersDeFixtures = async (fixtures, teamId, maxFixtures = 
 
   // Extraer corners de cada fixture (en paralelo para mejor rendimiento)
   const cornersData = await Promise.all(
-    fixturesFinalizados.map(fixture => extraerCornersDeFixture(fixture, teamId))
+    fixturesFinalizados.map(fixture => extraerCornersDeFixture(fixture, normalizedTeamId))
   );
 
   const cornersFor = cornersData.map(d => d.cornersFor);
@@ -157,21 +169,22 @@ export const extraerTarjetasDeFixture = async (fixture, teamId) => {
       return { cardsFor: 0, cardsAgainst: 0 };
     }
 
+    const normalizedTeamId = normalizeTeamId(teamId);
     const statsData = await getFixtureStatistics(fixture.fixture.id);
     
     if (!statsData?.response || !Array.isArray(statsData.response)) {
       return { cardsFor: 0, cardsAgainst: 0 };
     }
 
-    const isHome = fixture.teams?.home?.id === teamId;
+    const isHome = isSameTeamId(fixture.teams?.home?.id, normalizedTeamId);
     const teamStats = statsData.response.find(s => 
-      (isHome && s.team?.id === fixture.teams?.home?.id) ||
-      (!isHome && s.team?.id === fixture.teams?.away?.id)
+      (isHome && isSameTeamId(s.team?.id, fixture.teams?.home?.id)) ||
+      (!isHome && isSameTeamId(s.team?.id, fixture.teams?.away?.id))
     );
 
     const rivalStats = statsData.response.find(s => 
-      (isHome && s.team?.id === fixture.teams?.away?.id) ||
-      (!isHome && s.team?.id === fixture.teams?.home?.id)
+      (isHome && isSameTeamId(s.team?.id, fixture.teams?.away?.id)) ||
+      (!isHome && isSameTeamId(s.team?.id, fixture.teams?.home?.id))
     );
 
     if (!teamStats?.statistics || !rivalStats?.statistics) {
@@ -217,6 +230,7 @@ export const extraerTarjetasDeFixture = async (fixture, teamId) => {
  * @returns {Promise<{cardsFor: Array, cardsAgainst: Array, promedioFor: number, promedioAgainst: number}>}
  */
 export const procesarTarjetasDeFixtures = async (fixtures, teamId, maxFixtures = 5) => {
+  const normalizedTeamId = normalizeTeamId(teamId);
   if (!Array.isArray(fixtures) || fixtures.length === 0) {
     return {
       cardsFor: [],
@@ -242,7 +256,7 @@ export const procesarTarjetasDeFixtures = async (fixtures, teamId, maxFixtures =
 
   // Extraer tarjetas de cada fixture (en paralelo para mejor rendimiento)
   const cardsData = await Promise.all(
-    fixturesFinalizados.map(fixture => extraerTarjetasDeFixture(fixture, teamId))
+    fixturesFinalizados.map(fixture => extraerTarjetasDeFixture(fixture, normalizedTeamId))
   );
 
   const cardsFor = cardsData.map(d => d.cardsFor);

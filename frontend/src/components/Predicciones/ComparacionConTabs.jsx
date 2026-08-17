@@ -39,7 +39,7 @@ const COMPARACION_TABS = [
  * ComparacionConTabs - Reorganización visual de ComparacionDatosReales con tabs
  * Solo reorganización visual, no modifica lógica de datos
  */
-export default function ComparacionConTabs({ predicciones, equipoA, equipoB, datosAdicionales }) {
+export default function ComparacionConTabs({ predicciones, equipoA, equipoB, datosAdicionales, loadingDatosAdicionales = false }) {
   const [activeTab, setActiveTab] = useState('especiales');
   const isMobile = useMediaQuery(MEDIA_QUERIES.MOBILE);
 
@@ -80,6 +80,21 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
     () => buildConclusionesComparativaEquipos(predicciones, equipoA, equipoB),
     [predicciones, equipoA, equipoB]
   );
+
+  const cornersEsperados = datosAdicionales?.cornersYFaltas?.cornersEsperados;
+  const tarjetasEsperadas = datosAdicionales?.cornersYFaltas?.tarjetasEsperadas;
+  const hasCornersData = Boolean(cornersEsperados);
+  const hasTarjetasData = Boolean(tarjetasEsperadas);
+
+  const mercadoEspecialPlaceholderStyle = {
+    padding: tokens.spacing.md,
+    color: tokens.colors.textSecondary,
+    fontSize: tokens.typography.fontSizeSm,
+    textAlign: 'center',
+    backgroundColor: tokens.colors.bgSecondary,
+    borderRadius: tokens.radius.md,
+    border: `1px solid ${tokens.colors.borderDefault}`,
+  };
 
   const comparacionGridClassName = `predicciones-comparacion-grid${
     isMobile ? ' predicciones-comparacion-grid--stacked' : ''
@@ -489,7 +504,7 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
       case 'especiales':
         return (
           <div>
-            {datosAdicionales?.cornersYFaltas?.cornersEsperados && (
+            {(loadingDatosAdicionales || hasCornersData) && (
               <div style={{ marginBottom: tokens.spacing.xl }}>
                 <PrediccionesSectionTitle
                   as="h4"
@@ -499,36 +514,44 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                 >
                   {PREDICCIONES_TITLES.proyeccionCorners}
                 </PrediccionesSectionTitle>
-                <div className={comparacionGridClassName}>
-                  <div className="predicciones-comparacion-column">
-                    <div style={columnaTituloStyle}>{equipoA?.nombre || 'Equipo A'}</div>
-                    <div style={metricaStyle}>
-                      <span style={metricaLabelStyle}>Corners Esperados</span>
-                      <div style={{ ...metricaValorStyle, color: tokens.colors.accentOrange }}>
-                        {datosAdicionales.cornersYFaltas.cornersEsperados.expectedA}
+                {loadingDatosAdicionales && !hasCornersData ? (
+                  <div style={mercadoEspecialPlaceholderStyle} role="status">
+                    Calculando tiros de esquina esperados…
+                  </div>
+                ) : (
+                  <>
+                    <div className={comparacionGridClassName}>
+                      <div className="predicciones-comparacion-column">
+                        <div style={columnaTituloStyle}>{equipoA?.nombre || 'Equipo A'}</div>
+                        <div style={metricaStyle}>
+                          <span style={metricaLabelStyle}>Corners Esperados</span>
+                          <div style={{ ...metricaValorStyle, color: tokens.colors.accentOrange }}>
+                            {cornersEsperados.expectedA}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="predicciones-comparacion-column">
+                        <div style={columnaTituloStyle}>{equipoB?.nombre || 'Equipo B'}</div>
+                        <div style={metricaStyle}>
+                          <span style={metricaLabelStyle}>Corners Esperados</span>
+                          <div style={{ ...metricaValorStyle, color: tokens.colors.accentOrange }}>
+                            {cornersEsperados.expectedB}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="predicciones-comparacion-column">
-                    <div style={columnaTituloStyle}>{equipoB?.nombre || 'Equipo B'}</div>
-                    <div style={metricaStyle}>
-                      <span style={metricaLabelStyle}>Corners Esperados</span>
-                      <div style={{ ...metricaValorStyle, color: tokens.colors.accentOrange }}>
-                        {datosAdicionales.cornersYFaltas.cornersEsperados.expectedB}
+                    <div className="predicciones-comparacion-column predicciones-comparacion-column--centered">
+                      <span style={metricaLabelStyle}>Corners Totales Esperados</span>
+                      <div style={{ ...metricaValorStyle, fontSize: tokens.typography.fontSize3xl, color: tokens.colors.accentOrange }}>
+                        {cornersEsperados.total}
                       </div>
                     </div>
-                  </div>
-                </div>
-                <div className="predicciones-comparacion-column predicciones-comparacion-column--centered">
-                  <span style={metricaLabelStyle}>Corners Totales Esperados</span>
-                  <div style={{ ...metricaValorStyle, fontSize: tokens.typography.fontSize3xl, color: tokens.colors.accentOrange }}>
-                    {datosAdicionales.cornersYFaltas.cornersEsperados.total}
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
             )}
 
-            {datosAdicionales?.cornersYFaltas?.tarjetasEsperadas && (
+            {(loadingDatosAdicionales || hasTarjetasData) && (
               <div style={{ marginBottom: tokens.spacing.xl }}>
                 <PrediccionesSectionTitle
                   as="h4"
@@ -538,32 +561,40 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                 >
                   {PREDICCIONES_TITLES.proyeccionDisciplinaria}
                 </PrediccionesSectionTitle>
-                <div className={comparacionGridClassName}>
-                  <div className="predicciones-comparacion-column">
-                    <div style={columnaTituloStyle}>{equipoA?.nombre || 'Equipo A'}</div>
-                    <div style={metricaStyle}>
-                      <span style={metricaLabelStyle}>Tarjetas Esperadas</span>
-                      <div style={{ ...metricaValorStyle, color: tokens.colors.accentGold }}>
-                        {datosAdicionales.cornersYFaltas.tarjetasEsperadas.expectedA}
+                {loadingDatosAdicionales && !hasTarjetasData ? (
+                  <div style={mercadoEspecialPlaceholderStyle} role="status">
+                    Calculando tarjetas esperadas…
+                  </div>
+                ) : (
+                  <>
+                    <div className={comparacionGridClassName}>
+                      <div className="predicciones-comparacion-column">
+                        <div style={columnaTituloStyle}>{equipoA?.nombre || 'Equipo A'}</div>
+                        <div style={metricaStyle}>
+                          <span style={metricaLabelStyle}>Tarjetas Esperadas</span>
+                          <div style={{ ...metricaValorStyle, color: tokens.colors.accentGold }}>
+                            {tarjetasEsperadas.expectedA}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="predicciones-comparacion-column">
+                        <div style={columnaTituloStyle}>{equipoB?.nombre || 'Equipo B'}</div>
+                        <div style={metricaStyle}>
+                          <span style={metricaLabelStyle}>Tarjetas Esperadas</span>
+                          <div style={{ ...metricaValorStyle, color: tokens.colors.accentGold }}>
+                            {tarjetasEsperadas.expectedB}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="predicciones-comparacion-column">
-                    <div style={columnaTituloStyle}>{equipoB?.nombre || 'Equipo B'}</div>
-                    <div style={metricaStyle}>
-                      <span style={metricaLabelStyle}>Tarjetas Esperadas</span>
-                      <div style={{ ...metricaValorStyle, color: tokens.colors.accentGold }}>
-                        {datosAdicionales.cornersYFaltas.tarjetasEsperadas.expectedB}
+                    <div className="predicciones-comparacion-column predicciones-comparacion-column--centered">
+                      <span style={metricaLabelStyle}>Tarjetas Totales Esperadas</span>
+                      <div style={{ ...metricaValorStyle, fontSize: tokens.typography.fontSize3xl, color: tokens.colors.accentGold }}>
+                        {tarjetasEsperadas.total}
                       </div>
                     </div>
-                  </div>
-                </div>
-                <div className="predicciones-comparacion-column predicciones-comparacion-column--centered">
-                  <span style={metricaLabelStyle}>Tarjetas Totales Esperadas</span>
-                  <div style={{ ...metricaValorStyle, fontSize: tokens.typography.fontSize3xl, color: tokens.colors.accentGold }}>
-                    {datosAdicionales.cornersYFaltas.tarjetasEsperadas.total}
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
             )}
 
