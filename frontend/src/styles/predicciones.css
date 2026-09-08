@@ -178,6 +178,9 @@
   align-self: stretch;
   width: 100%;
   max-width: 100%;
+  /* Anula section { padding: 80px 0 } de global.css */
+  padding: 0;
+  margin-bottom: 0;
   background-color: var(--bg-premium, #181b20);
   border: 1px solid var(--border-premium, rgba(255, 255, 255, 0.06));
   border-radius: var(--accordion-radius);
@@ -187,6 +190,17 @@
   box-sizing: border-box;
   box-shadow: none;
   transition: box-shadow 0.32s var(--accordion-easing);
+}
+
+.predicciones-accordion-block.is-closed {
+  min-height: 0;
+}
+
+.predicciones-accordion-block.is-closed .predicciones-accordion-block__panel {
+  max-height: 0 !important;
+  padding: 0;
+  margin: 0;
+  border: 0;
 }
 
 .predicciones-accordion-block.is-open {
@@ -295,6 +309,7 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
+  min-height: 0;
   box-sizing: border-box;
   overflow: hidden;
   transition: max-height 0.38s var(--accordion-easing);

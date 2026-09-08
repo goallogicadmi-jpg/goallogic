@@ -26,6 +26,19 @@ function isExcludedStatsFixture(fixture) {
   return leagueName.includes('friendly') || leagueName.includes('amistoso');
 }
 
+function sortFixturesByRecency(fixtures) {
+  return [...fixtures].sort((a, b) => {
+    const tsA = Number(a?.fixture?.timestamp) || 0;
+    const tsB = Number(b?.fixture?.timestamp) || 0;
+    if (tsB !== tsA) {
+      return tsB - tsA;
+    }
+    const idA = Number(a?.fixture?.id) || 0;
+    const idB = Number(b?.fixture?.id) || 0;
+    return idB - idA;
+  });
+}
+
 function selectFixtureCandidates(fixtures, scanLimit = 25) {
   if (!Array.isArray(fixtures)) {
     return [];
@@ -35,7 +48,7 @@ function selectFixtureCandidates(fixtures, scanLimit = 25) {
   const competitive = finished.filter((f) => !isExcludedStatsFixture(f));
   const pool = competitive.length > 0 ? competitive : finished;
 
-  return pool.slice(0, scanLimit);
+  return sortFixturesByRecency(pool).slice(0, scanLimit);
 }
 
 function resolveTeamAndRivalStats(statsData, fixture, normalizedTeamId) {
@@ -84,6 +97,68 @@ function buildPromedios(valuesFor, valuesAgainst) {
   };
 }
 
+function emptyCornersPayload() {
+  return {
+    cornersFor: [],
+    cornersAgainst: [],
+    promedioFor: 0,
+    promedioAgainst: 0,
+  };
+}
+
+function emptyTarjetasPayload() {
+  return {
+    cardsFor: [],
+    cardsAgainst: [],
+    promedioFor: 0,
+    promedioAgainst: 0,
+  };
+}
+
+async function fetchFixtureStatisticsWithRetry(fixtureId) {
+  let statsData = await getFixtureStatistics(fixtureId);
+
+  if (!statsData?.response?.length) {
+    statsData = await getFixtureStatistics(fixtureId);
+  }
+
+  return statsData;
+}
+
+function extractCornersFromResolvedStats(teamStats, rivalStats) {
+  const cornersForStat = teamStats.statistics.find(
+    (s) => s.type === 'Corner Kicks' || s.type === 'Corner kicks'
+  );
+  const cornersAgainstStat = rivalStats.statistics.find(
+    (s) => s.type === 'Corner Kicks' || s.type === 'Corner kicks'
+  );
+
+  return {
+    cornersFor: parseStatInt(cornersForStat),
+    cornersAgainst: parseStatInt(cornersAgainstStat),
+  };
+}
+
+function extractCardsFromResolvedStats(teamStats, rivalStats) {
+  const yellowCardsStat = teamStats.statistics.find(
+    (s) => s.type === 'Yellow Cards' || s.type === 'Yellow cards'
+  );
+  const redCardsStat = teamStats.statistics.find(
+    (s) => s.type === 'Red Cards' || s.type === 'Red cards'
+  );
+  const yellowCardsRivalStat = rivalStats.statistics.find(
+    (s) => s.type === 'Yellow Cards' || s.type === 'Yellow cards'
+  );
+  const redCardsRivalStat = rivalStats.statistics.find(
+    (s) => s.type === 'Red Cards' || s.type === 'Red cards'
+  );
+
+  return {
+    cardsFor: parseStatInt(yellowCardsStat) + parseStatInt(redCardsStat),
+    cardsAgainst: parseStatInt(yellowCardsRivalStat) + parseStatInt(redCardsRivalStat),
+  };
+}
+
 /**
  * Extrae los corners de un fixture obteniendo sus estadísticas
  */
@@ -94,7 +169,7 @@ export const extraerCornersDeFixture = async (fixture, teamId) => {
     }
 
     const normalizedTeamId = normalizeTeamId(teamId);
-    const statsData = await getFixtureStatistics(fixture.fixture.id);
+    const statsData = await fetchFixtureStatisticsWithRetry(fixture.fixture.id);
     const { teamStats, rivalStats, hasStats } = resolveTeamAndRivalStats(
       statsData,
       fixture,
@@ -105,16 +180,11 @@ export const extraerCornersDeFixture = async (fixture, teamId) => {
       return { cornersFor: 0, cornersAgainst: 0, hasStats: false };
     }
 
-    const cornersForStat = teamStats.statistics.find(
-      (s) => s.type === 'Corner Kicks' || s.type === 'Corner kicks'
-    );
-    const cornersAgainstStat = rivalStats.statistics.find(
-      (s) => s.type === 'Corner Kicks' || s.type === 'Corner kicks'
-    );
+    const { cornersFor, cornersAgainst } = extractCornersFromResolvedStats(teamStats, rivalStats);
 
     return {
-      cornersFor: parseStatInt(cornersForStat),
-      cornersAgainst: parseStatInt(cornersAgainstStat),
+      cornersFor,
+      cornersAgainst,
       hasStats: true,
     };
   } catch (error) {
@@ -123,42 +193,80 @@ export const extraerCornersDeFixture = async (fixture, teamId) => {
   }
 };
 
-async function collectFixtureMetricSamples(fixtures, teamId, maxFixtures, extractor) {
+/**
+ * Procesa corners y tarjetas en una sola pasada determinista por equipo.
+ * Garantiza que ambas métricas usen exactamente los mismos 5 partidos FT válidos.
+ */
+export async function procesarCornersYTarjetasDeFixtures(fixtures, teamId, maxFixtures = 5) {
   const normalizedTeamId = normalizeTeamId(teamId);
+
+  if (!Array.isArray(fixtures) || fixtures.length === 0) {
+    return {
+      corners: emptyCornersPayload(),
+      tarjetas: emptyTarjetasPayload(),
+    };
+  }
+
   const candidates = selectFixtureCandidates(fixtures);
+  const cornersFor = [];
+  const cornersAgainst = [];
+  const cardsFor = [];
+  const cardsAgainst = [];
 
-  if (candidates.length === 0) {
-    return {
-      valuesFor: [],
-      valuesAgainst: [],
-      promedioFor: 0,
-      promedioAgainst: 0,
-    };
+  for (const fixture of candidates) {
+    if (cornersFor.length >= maxFixtures) {
+      break;
+    }
+
+    try {
+      if (!fixture?.fixture?.id) {
+        continue;
+      }
+
+      const statsData = await fetchFixtureStatisticsWithRetry(fixture.fixture.id);
+      const { teamStats, rivalStats, hasStats } = resolveTeamAndRivalStats(
+        statsData,
+        fixture,
+        normalizedTeamId
+      );
+
+      if (!hasStats) {
+        continue;
+      }
+
+      const corners = extractCornersFromResolvedStats(teamStats, rivalStats);
+      const cards = extractCardsFromResolvedStats(teamStats, rivalStats);
+
+      cornersFor.push(corners.cornersFor);
+      cornersAgainst.push(corners.cornersAgainst);
+      cardsFor.push(cards.cardsFor);
+      cardsAgainst.push(cards.cardsAgainst);
+    } catch (error) {
+      console.warn(
+        `⚠️ Error extrayendo métricas del fixture ${fixture?.fixture?.id}:`,
+        error
+      );
+    }
   }
 
-  const extracted = await Promise.all(
-    candidates.map((fixture) => extractor(fixture, normalizedTeamId))
-  );
-
-  const validSamples = extracted.filter((sample) => sample.hasStats).slice(0, maxFixtures);
-
-  if (validSamples.length === 0) {
+  if (cornersFor.length === 0) {
     return {
-      valuesFor: [],
-      valuesAgainst: [],
-      promedioFor: 0,
-      promedioAgainst: 0,
+      corners: emptyCornersPayload(),
+      tarjetas: emptyTarjetasPayload(),
     };
   }
-
-  const valuesFor = validSamples.map((sample) => sample.valuesFor);
-  const valuesAgainst = validSamples.map((sample) => sample.valuesAgainst);
-  const promedios = buildPromedios(valuesFor, valuesAgainst);
 
   return {
-    valuesFor,
-    valuesAgainst,
-    ...promedios,
+    corners: {
+      cornersFor,
+      cornersAgainst,
+      ...buildPromedios(cornersFor, cornersAgainst),
+    },
+    tarjetas: {
+      cardsFor,
+      cardsAgainst,
+      ...buildPromedios(cardsFor, cardsAgainst),
+    },
   };
 }
 
@@ -166,36 +274,8 @@ async function collectFixtureMetricSamples(fixtures, teamId, maxFixtures, extrac
  * Procesa una lista de fixtures para extraer corners y calcular promedios
  */
 export const procesarCornersDeFixtures = async (fixtures, teamId, maxFixtures = 5) => {
-  const normalizedTeamId = normalizeTeamId(teamId);
-  if (!Array.isArray(fixtures) || fixtures.length === 0) {
-    return {
-      cornersFor: [],
-      cornersAgainst: [],
-      promedioFor: 0,
-      promedioAgainst: 0,
-    };
-  }
-
-  const collected = await collectFixtureMetricSamples(
-    fixtures,
-    normalizedTeamId,
-    maxFixtures,
-    async (fixture, id) => {
-      const result = await extraerCornersDeFixture(fixture, id);
-      return {
-        hasStats: result.hasStats,
-        valuesFor: result.cornersFor,
-        valuesAgainst: result.cornersAgainst,
-      };
-    }
-  );
-
-  return {
-    cornersFor: collected.valuesFor,
-    cornersAgainst: collected.valuesAgainst,
-    promedioFor: collected.promedioFor,
-    promedioAgainst: collected.promedioAgainst,
-  };
+  const { corners } = await procesarCornersYTarjetasDeFixtures(fixtures, teamId, maxFixtures);
+  return corners;
 };
 
 /**
@@ -247,7 +327,7 @@ export const extraerTarjetasDeFixture = async (fixture, teamId) => {
     }
 
     const normalizedTeamId = normalizeTeamId(teamId);
-    const statsData = await getFixtureStatistics(fixture.fixture.id);
+    const statsData = await fetchFixtureStatisticsWithRetry(fixture.fixture.id);
     const { teamStats, rivalStats, hasStats } = resolveTeamAndRivalStats(
       statsData,
       fixture,
@@ -258,21 +338,7 @@ export const extraerTarjetasDeFixture = async (fixture, teamId) => {
       return { cardsFor: 0, cardsAgainst: 0, hasStats: false };
     }
 
-    const yellowCardsStat = teamStats.statistics.find(
-      (s) => s.type === 'Yellow Cards' || s.type === 'Yellow cards'
-    );
-    const redCardsStat = teamStats.statistics.find(
-      (s) => s.type === 'Red Cards' || s.type === 'Red cards'
-    );
-    const yellowCardsRivalStat = rivalStats.statistics.find(
-      (s) => s.type === 'Yellow Cards' || s.type === 'Yellow cards'
-    );
-    const redCardsRivalStat = rivalStats.statistics.find(
-      (s) => s.type === 'Red Cards' || s.type === 'Red cards'
-    );
-
-    const cardsFor = parseStatInt(yellowCardsStat) + parseStatInt(redCardsStat);
-    const cardsAgainst = parseStatInt(yellowCardsRivalStat) + parseStatInt(redCardsRivalStat);
+    const { cardsFor, cardsAgainst } = extractCardsFromResolvedStats(teamStats, rivalStats);
 
     return { cardsFor, cardsAgainst, hasStats: true };
   } catch (error) {
@@ -285,36 +351,8 @@ export const extraerTarjetasDeFixture = async (fixture, teamId) => {
  * Procesa una lista de fixtures para extraer tarjetas y calcular promedios
  */
 export const procesarTarjetasDeFixtures = async (fixtures, teamId, maxFixtures = 5) => {
-  const normalizedTeamId = normalizeTeamId(teamId);
-  if (!Array.isArray(fixtures) || fixtures.length === 0) {
-    return {
-      cardsFor: [],
-      cardsAgainst: [],
-      promedioFor: 0,
-      promedioAgainst: 0,
-    };
-  }
-
-  const collected = await collectFixtureMetricSamples(
-    fixtures,
-    normalizedTeamId,
-    maxFixtures,
-    async (fixture, id) => {
-      const result = await extraerTarjetasDeFixture(fixture, id);
-      return {
-        hasStats: result.hasStats,
-        valuesFor: result.cardsFor,
-        valuesAgainst: result.cardsAgainst,
-      };
-    }
-  );
-
-  return {
-    cardsFor: collected.valuesFor,
-    cardsAgainst: collected.valuesAgainst,
-    promedioFor: collected.promedioFor,
-    promedioAgainst: collected.promedioAgainst,
-  };
+  const { tarjetas } = await procesarCornersYTarjetasDeFixtures(fixtures, teamId, maxFixtures);
+  return tarjetas;
 };
 
 /**

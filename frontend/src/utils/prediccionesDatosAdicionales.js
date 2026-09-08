@@ -6,9 +6,8 @@ import {
   getUpcomingFixtureWithOdds,
 } from '../api/api';
 import {
-  procesarCornersDeFixtures,
+  procesarCornersYTarjetasDeFixtures,
   expectedCorners,
-  procesarTarjetasDeFixtures,
   expectedCards,
 } from './calcularCorners';
 import { buildH2HDisplayData } from './h2hFixturesUtils';
@@ -264,20 +263,20 @@ export async function fetchPrediccionesDatosAdicionales({
   const fixturesListA = fixturesA?.response || [];
   const fixturesListB = fixturesB?.response || [];
 
-  const [cornersDataA, cornersDataB] = await Promise.all([
-    procesarCornersDeFixtures(fixturesListA, equipoNormA.id, 5),
-    procesarCornersDeFixtures(fixturesListB, equipoNormB.id, 5),
+  const [metricasEquipoA, metricasEquipoB] = await Promise.all([
+    procesarCornersYTarjetasDeFixtures(fixturesListA, equipoNormA.id, 5),
+    procesarCornersYTarjetasDeFixtures(fixturesListB, equipoNormB.id, 5),
   ]);
+
+  const cornersDataA = metricasEquipoA.corners;
+  const cornersDataB = metricasEquipoB.corners;
+  const tarjetasDataA = metricasEquipoA.tarjetas;
+  const tarjetasDataB = metricasEquipoB.tarjetas;
 
   const cornersEsperados = expectedCorners(
     { cornersFor: cornersDataA.cornersFor, cornersAgainst: cornersDataA.cornersAgainst },
     { cornersFor: cornersDataB.cornersFor, cornersAgainst: cornersDataB.cornersAgainst }
   );
-
-  const [tarjetasDataA, tarjetasDataB] = await Promise.all([
-    procesarTarjetasDeFixtures(fixturesListA, equipoNormA.id, 5),
-    procesarTarjetasDeFixtures(fixturesListB, equipoNormB.id, 5),
-  ]);
 
   const tarjetasEsperadas = expectedCards(
     { cardsFor: tarjetasDataA.cardsFor, cardsAgainst: tarjetasDataA.cardsAgainst },
