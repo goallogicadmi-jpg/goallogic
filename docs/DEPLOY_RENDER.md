@@ -22,11 +22,13 @@ No uses `node index.js` — ese archivo fue eliminado; el entry es `server.js` (
 
 1. Push a `main` en `goallogicadmi-jpg/goallogic`
 2. En Render: **Manual Deploy** → **Clear build cache & deploy**
-3. En logs de arranque debe aparecer:
-   - `Deploy ref: fb76754...` (o el commit actual)
+3. Comprobar despliegue: `GET https://goallogic.onrender.com/api/health` → campo `deployRef` debe coincidir con el commit en GitHub (`main`).
+4. `GET /api/settings/public` debe incluir `freeModeEnabled` (Modo Gratuito y ajustes recientes).
+5. En logs de arranque debe aparecer:
+   - `Deploy ref: ...` (commit actual)
    - `GET /api/health`
    - `POST /api/payments/create-checkout-session`
-4. Probar: `https://goallogic.onrender.com/api/health`  
+6. Probar: `https://goallogic.onrender.com/api/health`  
    Debe incluir `"stripe": { "secretKeyMode": "live", ... }`
 
 ## Variables de entorno Stripe (producción)

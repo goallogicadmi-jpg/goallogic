@@ -210,6 +210,11 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     uptime: process.uptime(),
     timestamp: Date.now(),
+    deployRef:
+      process.env.RENDER_GIT_COMMIT ||
+      process.env.VERCEL_GIT_COMMIT_SHA ||
+      process.env.GIT_COMMIT ||
+      null,
     stripe: {
       secretKeyMode: stripeApiModeFromEnv(),
       priceIdConfigured: Boolean(priceId),
