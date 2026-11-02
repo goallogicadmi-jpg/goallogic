@@ -7,7 +7,20 @@ import "../../styles/partidos.css";
  * @param {number} leagueId - ID de la liga
  * @param {number} season - Temporada
  */
-export default function TablaCompeticion({ leagueId, season }) {
+function isMatchTeamRow(equipo, highlightTeamIds) {
+  if (!highlightTeamIds?.length || !equipo) {
+    return false;
+  }
+
+  const normalizedIds = highlightTeamIds.map((id) => String(id));
+  if (equipo.equipoId != null && normalizedIds.includes(String(equipo.equipoId))) {
+    return true;
+  }
+
+  return false;
+}
+
+export default function TablaCompeticion({ leagueId, season, highlightTeamIds = [] }) {
   const [tabla, setTabla] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -96,8 +109,14 @@ export default function TablaCompeticion({ leagueId, season }) {
           </tr>
         </thead>
         <tbody>
-          {tabla.map((equipo, index) => (
-            <tr key={index}>
+          {tabla.map((equipo, index) => {
+            const isMatchTeam = isMatchTeamRow(equipo, highlightTeamIds);
+
+            return (
+            <tr
+              key={equipo.equipoId || index}
+              className={isMatchTeam ? "tabla-competicion-row--match-highlight" : undefined}
+            >
               <td className="tabla-posicion">{equipo.posicion || index + 1}</td>
               <td className="tabla-equipo">
                 {equipo.logo && (
@@ -120,7 +139,8 @@ export default function TablaCompeticion({ leagueId, season }) {
               </td>
               <td className="tabla-puntos">{equipo.puntos || 0}</td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>

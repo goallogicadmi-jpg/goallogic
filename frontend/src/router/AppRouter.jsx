@@ -1,5 +1,6 @@
 import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { PlatformSettingsProvider } from "../context/PlatformSettingsContext";
 import { PlanAccessProvider } from "../context/PlanAccessContext";
 import Layout from "../layout/Layout";
 import Leagues from "../pages/Leagues";
@@ -59,6 +60,7 @@ const routeFallback = (
 export default function AppRouter() {
   return (
     <BrowserRouter>
+      <PlatformSettingsProvider>
       <PlanAccessProvider>
       <Suspense fallback={routeFallback}>
         <Routes>
@@ -122,6 +124,7 @@ export default function AppRouter() {
         </Routes>
       </Suspense>
       </PlanAccessProvider>
+      </PlatformSettingsProvider>
     </BrowserRouter>
   );
 }

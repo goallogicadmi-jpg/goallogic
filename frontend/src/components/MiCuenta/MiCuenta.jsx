@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getUserIdFromToken } from '../../services/authService';
 import { useUser } from '../../context/UserContext';
+import { usePlatformSettings } from '../../context/PlatformSettingsContext';
+import { shouldSuppressPlatformUpsell } from '../../utils/planAccess';
 import Login from './Login';
 import Register from './Register';
 import ProtectedView from './ProtectedView';
@@ -16,6 +18,7 @@ import MensajesUsuario from './MensajesUsuario';
 import AnalystSubscriberMessaging from '../Analysts/AnalystSubscriberMessaging';
 import PremiumRequired from '../PremiumRequired';
 import PlansPanel from '../Freemium/PlansPanel';
+import GrowthModeAccountBenefits from './GrowthModeAccountBenefits';
 import PremiumTabs from '../ui/PremiumTabs';
 import { GoalLogicTitle } from '../GoalLogicTitle';
 import './MiCuenta.css';
@@ -55,6 +58,7 @@ const MiCuenta = () => {
   } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
+  const { freeModeEnabled } = usePlatformSettings();
   const [showLogin, setShowLogin] = useState(true);
   const [refreshHistorial, setRefreshHistorial] = useState(0);
   const [activeTab, setActiveTab] = useState(() => location.state?.micuentaTab || 'perfil');
@@ -66,8 +70,11 @@ const MiCuenta = () => {
 
   const analystProfileId =
     getUserIdFromToken() || user?.user_id || user?.id || user?._id || undefined;
+  const paymentUserId = user?.user_id || user?.id || user?._id;
+  const suppressUpsell = shouldSuppressPlatformUpsell(user, freeModeEnabled);
   const mustCompletePayment =
     user &&
+    !suppressUpsell &&
     !isAdmin &&
     !isMainAdmin &&
     !user.billingLocked &&
@@ -86,13 +93,13 @@ const MiCuenta = () => {
   }, [isAuthenticated, isAdmin, isMainAdmin, navigate]);
 
   useEffect(() => {
-    if (location.state?.showPlans) {
+    if (location.state?.showPlans && !suppressUpsell) {
       setActiveTab('perfil');
       window.setTimeout(() => {
         document.getElementById('planes-usuario')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 150);
     }
-  }, [location.state?.showPlans]);
+  }, [location.state?.showPlans, suppressUpsell]);
 
   useEffect(() => {
     if (location.state?.micuentaTab) {
@@ -239,7 +246,11 @@ const MiCuenta = () => {
                     </div>
                   )}
                   <div id="planes-usuario">
-                    <PlansPanel />
+                    {suppressUpsell ? (
+                      <GrowthModeAccountBenefits onNavigateTab={setActiveTab} />
+                    ) : (
+                      <PlansPanel />
+                    )}
                   </div>
                 </div>
 

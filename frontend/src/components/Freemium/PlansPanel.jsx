@@ -1,6 +1,12 @@
 import React from 'react';
 import { useUser } from '../../context/UserContext';
-import { getPlanLabel, hasFullProAccess, PLANS } from '../../utils/planAccess';
+import { usePlatformSettings } from '../../context/PlatformSettingsContext';
+import {
+  getPlanLabel,
+  hasFullProAccess,
+  PLANS,
+  shouldSuppressPlatformUpsell,
+} from '../../utils/planAccess';
 import PayButton from '../PayButton';
 import './PlansPanel.css';
 
@@ -8,8 +14,13 @@ const proPriceId = import.meta.env.VITE_STRIPE_PRICE_ID?.trim() || '';
 
 export default function PlansPanel() {
   const { user } = useUser();
+  const { freeModeEnabled } = usePlatformSettings();
   const currentPlan = user?.plan || PLANS.FREE;
-  const isPro = hasFullProAccess(user);
+  const isPro = hasFullProAccess(user, { freeModeEnabled });
+
+  if (shouldSuppressPlatformUpsell(user, freeModeEnabled)) {
+    return null;
+  }
 
   return (
     <section className="plans-panel" aria-labelledby="plans-panel-title">

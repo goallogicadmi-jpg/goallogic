@@ -109,21 +109,15 @@
     font-size: 1.45rem;
   }
 
+  .main-header-brand-title.goal-logic-title--md {
+    font-size: 1.52rem;
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+    filter: drop-shadow(0 1px 8px rgba(242, 138, 0, 0.18));
+  }
+
+  /* La cabecera global ya muestra marca + búsqueda */
   .goal-logic-section-header {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding: 0 4px;
-  }
-
-  .goal-logic-section-header__title,
-  .goal-logic-section-header__search,
-  .goal-logic-section-header__spacer {
-    grid-column: 1;
-    justify-self: stretch;
-  }
-
-  .goal-logic-section-header__spacer {
     display: none;
   }
 }

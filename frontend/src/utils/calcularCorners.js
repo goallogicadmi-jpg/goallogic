@@ -1,4 +1,15 @@
 import { getFixtureStatistics } from '../api/api';
+import {
+  getCachedFixtureStats,
+  setCachedFixtureStats,
+  fingerprintFixturesList,
+} from './prediccionesMetricsCache';
+
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 function normalizeTeamId(teamId) {
   const parsed = Number(teamId);
@@ -115,14 +126,42 @@ function emptyTarjetasPayload() {
   };
 }
 
-async function fetchFixtureStatisticsWithRetry(fixtureId) {
-  let statsData = await getFixtureStatistics(fixtureId);
-
-  if (!statsData?.response?.length) {
-    statsData = await getFixtureStatistics(fixtureId);
+async function fetchFixtureStatisticsWithRetry(fixtureId, maxAttempts = 3) {
+  const normalizedFixtureId = normalizeTeamId(fixtureId);
+  const cached = getCachedFixtureStats(normalizedFixtureId);
+  if (cached) {
+    return cached;
   }
 
-  return statsData;
+  let lastError = null;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    try {
+      const statsData = await getFixtureStatistics(normalizedFixtureId);
+
+      if (statsData?.response?.length) {
+        setCachedFixtureStats(normalizedFixtureId, statsData);
+        return statsData;
+      }
+
+      lastError = new Error(`Estadísticas vacías para fixture ${normalizedFixtureId}`);
+    } catch (error) {
+      lastError = error;
+    }
+
+    if (attempt < maxAttempts - 1) {
+      await delay(350 * (attempt + 1));
+    }
+  }
+
+  if (lastError) {
+    console.warn(
+      `⚠️ No se pudieron obtener estadísticas del fixture ${normalizedFixtureId} tras ${maxAttempts} intentos:`,
+      lastError
+    );
+  }
+
+  return { response: [] };
 }
 
 function extractCornersFromResolvedStats(teamStats, rivalStats) {
@@ -204,6 +243,11 @@ export async function procesarCornersYTarjetasDeFixtures(fixtures, teamId, maxFi
     return {
       corners: emptyCornersPayload(),
       tarjetas: emptyTarjetasPayload(),
+      trace: {
+        teamId: normalizedTeamId,
+        fixtureFingerprint: '',
+        selectedFixtures: [],
+      },
     };
   }
 
@@ -212,6 +256,7 @@ export async function procesarCornersYTarjetasDeFixtures(fixtures, teamId, maxFi
   const cornersAgainst = [];
   const cardsFor = [];
   const cardsAgainst = [];
+  const selectedFixtures = [];
 
   for (const fixture of candidates) {
     if (cornersFor.length >= maxFixtures) {
@@ -241,6 +286,14 @@ export async function procesarCornersYTarjetasDeFixtures(fixtures, teamId, maxFi
       cornersAgainst.push(corners.cornersAgainst);
       cardsFor.push(cards.cardsFor);
       cardsAgainst.push(cards.cardsAgainst);
+      selectedFixtures.push({
+        fixtureId: fixture.fixture.id,
+        timestamp: fixture.fixture.timestamp ?? null,
+        cornersFor: corners.cornersFor,
+        cornersAgainst: corners.cornersAgainst,
+        cardsFor: cards.cardsFor,
+        cardsAgainst: cards.cardsAgainst,
+      });
     } catch (error) {
       console.warn(
         `⚠️ Error extrayendo métricas del fixture ${fixture?.fixture?.id}:`,
@@ -253,6 +306,11 @@ export async function procesarCornersYTarjetasDeFixtures(fixtures, teamId, maxFi
     return {
       corners: emptyCornersPayload(),
       tarjetas: emptyTarjetasPayload(),
+      trace: {
+        teamId: normalizedTeamId,
+        fixtureFingerprint: fingerprintFixturesList(fixtures),
+        selectedFixtures: [],
+      },
     };
   }
 
@@ -266,6 +324,11 @@ export async function procesarCornersYTarjetasDeFixtures(fixtures, teamId, maxFi
       cardsFor,
       cardsAgainst,
       ...buildPromedios(cardsFor, cardsAgainst),
+    },
+    trace: {
+      teamId: normalizedTeamId,
+      fixtureFingerprint: fingerprintFixturesList(fixtures),
+      selectedFixtures,
     },
   };
 }

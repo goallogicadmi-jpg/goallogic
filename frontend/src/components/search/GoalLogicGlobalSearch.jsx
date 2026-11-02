@@ -16,6 +16,8 @@ function getItemLabel(categoryId, item) {
   switch (categoryId) {
     case 'teams':
       return item.name;
+    case 'players':
+      return item.name;
     case 'matches':
       return item.label;
     case 'competitions':
@@ -37,6 +39,8 @@ function getItemMeta(categoryId, item) {
   switch (categoryId) {
     case 'teams':
       return item.country || null;
+    case 'players':
+      return [item.team, item.country].filter(Boolean).join(' · ') || null;
     case 'matches':
       return item.league ? `${item.league}${item.isLive ? ' · En vivo' : ''}` : null;
     case 'competitions':
@@ -50,7 +54,7 @@ function getItemMeta(categoryId, item) {
   }
 }
 
-export default function GoalLogicGlobalSearch({ className = '' }) {
+export default function GoalLogicGlobalSearch({ className = '', onNavigate }) {
   const navigate = useNavigate();
   const listboxId = useId();
   const rootRef = useRef(null);
@@ -120,19 +124,41 @@ export default function GoalLogicGlobalSearch({ className = '' }) {
   const handleSelect = (entry) => {
     if (!entry?.item?.url) return;
 
-    if (entry.category.id === 'predictions' && entry.item.meta?.teamName) {
-      navigate(entry.item.url, {
-        state: {
-          homeTeam: { name: entry.item.meta.teamName, id: entry.item.meta.teamId },
-        },
-      });
+    const { category, item } = entry;
+
+    if (category.id === 'predictions') {
+      const { meta } = item;
+      if (meta?.homeTeam?.id && meta?.awayTeam?.id && meta?.leagueId) {
+        navigate(item.url, {
+          state: {
+            domain: meta.domain,
+            leagueId: meta.leagueId,
+            fixtureId: meta.fixtureId ?? null,
+            leagueName: meta.leagueName ?? null,
+            leagueLogo: meta.leagueLogo ?? null,
+            fromMatchesRoute: '/partidos',
+            homeTeam: meta.homeTeam,
+            awayTeam: meta.awayTeam,
+          },
+        });
+      } else if (meta?.teamName) {
+        navigate(item.url, {
+          state: {
+            domain: meta.domain,
+            homeTeam: { name: meta.teamName, id: meta.teamId },
+          },
+        });
+      } else {
+        navigate(item.url);
+      }
     } else {
-      navigate(entry.item.url);
+      navigate(item.url);
     }
 
     setOpen(false);
     setQuery('');
     setResults(null);
+    onNavigate?.();
   };
 
   const handleKeyDown = (event) => {
@@ -193,7 +219,9 @@ export default function GoalLogicGlobalSearch({ className = '' }) {
           {loading ? (
             <p className="gl-global-search__status">Buscando…</p>
           ) : flatItems.length === 0 ? (
-            <p className="gl-global-search__status">Sin resultados para “{query.trim()}”</p>
+            <p className="gl-global-search__status gl-global-search__status--empty">
+              No hemos encontrado contenido relacionado con tu búsqueda.
+            </p>
           ) : (
             results.categories.map((category) => (
               <section key={category.id} className="gl-global-search__category">

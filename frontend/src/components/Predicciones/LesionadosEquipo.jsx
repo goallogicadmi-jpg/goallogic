@@ -6,7 +6,7 @@ import AccordionPremiumLoader from './AccordionPremiumLoader';
 import { IconEstadoPlantel } from './PrediccionesIcons';
 import BrandResponsiveText from '../BrandResponsiveText';
 import { getTeamInjuries, getTeamPlayersStats } from '../../api/api';
-import { enrichTeamInjuries } from '../../utils/evaluateInjuryImpact';
+import { buildLesionesEquipoPair } from '../../utils/prediccionesDatosAdicionales';
 import {
   IMPACTO_NIVEL,
   MAX_LESIONES_VISIBLES,
@@ -243,7 +243,7 @@ function TeamInjuryColumn({ nombreEquipo, datos }) {
   );
 }
 
-export default function LesionadosEquipo({ lazyContext, nombreEquipoA, nombreEquipoB }) {
+export default function LesionadosEquipo({ lazyContext, nombreEquipoA, nombreEquipoB, lesionesPrecargadas }) {
   const [fetchState, setFetchState] = useState(INITIAL_STATE);
   const loadedRef = useRef(false);
   const loadingRef = useRef(false);
@@ -257,8 +257,16 @@ export default function LesionadosEquipo({ lazyContext, nombreEquipoA, nombreEqu
     loadedRef.current = false;
     loadingRef.current = false;
     cacheRef.current = null;
+
+    if (lesionesPrecargadas?.equipoA != null && lesionesPrecargadas?.equipoB != null) {
+      cacheRef.current = lesionesPrecargadas;
+      loadedRef.current = true;
+      setFetchState({ status: 'loaded', lesiones: lesionesPrecargadas, error: null });
+      return;
+    }
+
     setFetchState(INITIAL_STATE);
-  }, [contextKey]);
+  }, [contextKey, lesionesPrecargadas]);
 
   const loadLesiones = useCallback(async () => {
     if (!lazyContext || loadedRef.current || loadingRef.current) {
@@ -331,16 +339,12 @@ export default function LesionadosEquipo({ lazyContext, nombreEquipoA, nombreEqu
         resolvePlayersStatsB(),
       ]);
 
-      const lesiones = {
-        equipoA: {
-          ...enrichTeamInjuries(injuriesA, playersStatsA),
-          fetchMeta: injuriesA?.meta || null,
-        },
-        equipoB: {
-          ...enrichTeamInjuries(injuriesB, playersStatsB),
-          fetchMeta: injuriesB?.meta || null,
-        },
-      };
+      const lesiones = buildLesionesEquipoPair({
+        injuriesA,
+        injuriesB,
+        playersStatsA,
+        playersStatsB,
+      });
 
       cacheRef.current = lesiones;
       loadedRef.current = true;

@@ -19,6 +19,9 @@ import {
   resolveDisplayXga,
   formatXgPromedioLabel,
   formatXgaPromedioLabel,
+  resolveOffensiveEfficiencyPercent,
+  resolveDefensiveEfficiencyPercent,
+  formatEfficiencyDisplay,
 } from "../utils/xgDisplayUtils";
 import "../styles/predicciones.css";
 import { GoalLogicSectionHeader } from "../components/GoalLogicTitle";
@@ -39,7 +42,6 @@ import { buildConclusionesComparativaEquipos } from "../utils/conclusionesCopy";
 import { useUser } from "../context/UserContext";
 import { usePlanAccess } from "../context/PlanAccessContext";
 import { consumePlanUsage } from "../services/planService";
-import { hasFullProAccess } from "../utils/planAccess";
 import PremiumFeatureGate, { FEATURES } from "../components/Freemium/PremiumFeatureGate";
 import {
   fetchPredictionsLeagues,
@@ -100,7 +102,7 @@ async function fetchPreferredSeasonYearForLeague(leagueId) {
 
 export default function Predicciones() {
   const { user, isAuthenticated } = useUser();
-  const { openUpgradeModal } = usePlanAccess();
+  const { openUpgradeModal, hasFullProAccess: userHasProAccess } = usePlanAccess();
   const location = useLocation();
   const { homeTeam, awayTeam, leagueId, season: routeSeason, fixtureId: routeFixtureId, domain: routeDomainRaw, leagueName: routeLeagueName, leagueLogo: routeLeagueLogo, fromMatchesRoute } = location.state || {};
   const routePredictionDomain = normalizeRoutePredictionDomain(routeDomainRaw);
@@ -419,7 +421,7 @@ export default function Predicciones() {
       return;
     }
 
-    if (isAuthenticated && !hasFullProAccess(user)) {
+    if (isAuthenticated && !userHasProAccess) {
       try {
         await consumePlanUsage('predictions');
       } catch (usageErr) {
@@ -815,6 +817,8 @@ export default function Predicciones() {
                 equipoB={resultados.equipoB}
                 datosAdicionales={datosAdicionales}
                 loadingDatosAdicionales={loadingDatosAdicionales}
+                ligaIdA={resultados.ligaA?.id}
+                ligaIdB={resultados.ligaB?.id}
               />
             </PremiumFeatureGate>
           )}
@@ -829,6 +833,7 @@ export default function Predicciones() {
             {datosAdicionales?.accordionLazy && (
               <LesionadosEquipo
                 lazyContext={datosAdicionales.accordionLazy}
+                lesionesPrecargadas={datosAdicionales.lesiones}
                 nombreEquipoA={resultados.equipoA?.nombre}
                 nombreEquipoB={resultados.equipoB?.nombre}
               />
@@ -894,33 +899,25 @@ function ComparacionDatosReales({ predicciones, equipoA, equipoB, datosAdicional
   const xgaDisplayA = useMemo(() => resolveDisplayXga(equipoA), [equipoA]);
   const xgaDisplayB = useMemo(() => resolveDisplayXga(equipoB), [equipoB]);
 
-  const eficienciaOfensivaA = useMemo(() => {
-    const xG = xgDisplayA.value || 0;
-    const goles = equipoA?.promedioGolesFavor || 0;
-    if (xG === 0) return null;
-    return ((goles / xG) * 100).toFixed(1);
-  }, [equipoA, xgDisplayA]);
+  const eficienciaOfensivaA = useMemo(
+    () => resolveOffensiveEfficiencyPercent(equipoA, xgDisplayA),
+    [equipoA, xgDisplayA]
+  );
 
-  const eficienciaOfensivaB = useMemo(() => {
-    const xG = xgDisplayB.value || 0;
-    const goles = equipoB?.promedioGolesFavor || 0;
-    if (xG === 0) return null;
-    return ((goles / xG) * 100).toFixed(1);
-  }, [equipoB, xgDisplayB]);
+  const eficienciaOfensivaB = useMemo(
+    () => resolveOffensiveEfficiencyPercent(equipoB, xgDisplayB),
+    [equipoB, xgDisplayB]
+  );
 
-  const eficienciaDefensivaA = useMemo(() => {
-    const xGA = xgaDisplayA.value || 0;
-    const golesRecibidos = equipoA?.promedioGolesContra || 0;
-    if (xGA === 0) return null;
-    return ((golesRecibidos / xGA) * 100).toFixed(1);
-  }, [equipoA, xgaDisplayA]);
+  const eficienciaDefensivaA = useMemo(
+    () => resolveDefensiveEfficiencyPercent(equipoA, xgaDisplayA),
+    [equipoA, xgaDisplayA]
+  );
 
-  const eficienciaDefensivaB = useMemo(() => {
-    const xGA = xgaDisplayB.value || 0;
-    const golesRecibidos = equipoB?.promedioGolesContra || 0;
-    if (xGA === 0) return null;
-    return ((golesRecibidos / xGA) * 100).toFixed(1);
-  }, [equipoB, xgaDisplayB]);
+  const eficienciaDefensivaB = useMemo(
+    () => resolveDefensiveEfficiencyPercent(equipoB, xgaDisplayB),
+    [equipoB, xgaDisplayB]
+  );
 
   // Calcular tendencia de forma
   const tendenciaForma = useMemo(() => {
@@ -1113,14 +1110,21 @@ function ComparacionDatosReales({ predicciones, equipoA, equipoB, datosAdicional
               <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.over25}</span>
               <div style={metricaValorStyle}>{predicciones.over25A}%</div>
             </div>
-            {eficienciaOfensivaA && (
-              <div style={metricaStyle}>
-                <span style={metricaLabelStyle}>Eficiencia Ofensiva</span>
-                <div style={{ ...metricaValorStyle, color: parseFloat(eficienciaOfensivaA) > 100 ? tokens.colors.accentPositive : tokens.colors.accentNeutral }}>
-                  {eficienciaOfensivaA}%
-                </div>
+            <div style={metricaStyle}>
+              <span style={metricaLabelStyle}>Eficiencia Ofensiva</span>
+              <div
+                style={{
+                  ...metricaValorStyle,
+                  color: eficienciaOfensivaA
+                    ? parseFloat(eficienciaOfensivaA) > 100
+                      ? tokens.colors.accentPositive
+                      : tokens.colors.accentNeutral
+                    : metricaValorStyle.color,
+                }}
+              >
+                {formatEfficiencyDisplay(eficienciaOfensivaA)}
               </div>
-            )}
+            </div>
           </div>
           <div style={columnaStyle}>
             <div style={columnaTituloStyle}>Equipo B</div>
@@ -1142,14 +1146,21 @@ function ComparacionDatosReales({ predicciones, equipoA, equipoB, datosAdicional
               <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.over25}</span>
               <div style={metricaValorStyle}>{predicciones.over25B}%</div>
             </div>
-            {eficienciaOfensivaB && (
-              <div style={metricaStyle}>
-                <span style={metricaLabelStyle}>Eficiencia Ofensiva</span>
-                <div style={{ ...metricaValorStyle, color: parseFloat(eficienciaOfensivaB) > 100 ? tokens.colors.accentPositive : tokens.colors.accentNeutral }}>
-                  {eficienciaOfensivaB}%
-                </div>
+            <div style={metricaStyle}>
+              <span style={metricaLabelStyle}>Eficiencia Ofensiva</span>
+              <div
+                style={{
+                  ...metricaValorStyle,
+                  color: eficienciaOfensivaB
+                    ? parseFloat(eficienciaOfensivaB) > 100
+                      ? tokens.colors.accentPositive
+                      : tokens.colors.accentNeutral
+                    : metricaValorStyle.color,
+                }}
+              >
+                {formatEfficiencyDisplay(eficienciaOfensivaB)}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -1181,29 +1192,24 @@ function ComparacionDatosReales({ predicciones, equipoA, equipoB, datosAdicional
               <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.cleanSheets}</span>
               <div style={metricaValorStyle}>{predicciones.cleanSheetsA}%</div>
             </div>
-            {eficienciaDefensivaA && (() => {
-              // Usar la misma lógica que ComparacionConTabs para consistencia
-              const getDefensiveEfficiencyColor = (value) => {
-                const numValue = typeof value === 'string' ? parseFloat(value) : value;
-                if (numValue === null || numValue === undefined || isNaN(numValue)) {
-                  return tokens.colors.textPrimary;
-                }
-                if (numValue < 80) return tokens.colors.accentPositive; // Verde
-                if (numValue < 95) return tokens.colors.accentGold; // Amarillo
-                return tokens.colors.accentNegative; // Rojo
-              };
-              
-              const colorAplicado = getDefensiveEfficiencyColor(eficienciaDefensivaA);
-              
-              return (
-                <div style={metricaStyle}>
-                  <span style={metricaLabelStyle}>Eficiencia Defensiva</span>
-                  <div style={{ ...metricaValorStyle, color: colorAplicado }}>
-                    {eficienciaDefensivaA}%
-                  </div>
-                </div>
-              );
-            })()}
+            <div style={metricaStyle}>
+              <span style={metricaLabelStyle}>Eficiencia Defensiva</span>
+              <div
+                style={{
+                  ...metricaValorStyle,
+                  color: eficienciaDefensivaA
+                    ? (() => {
+                        const numValue = parseFloat(eficienciaDefensivaA);
+                        if (numValue < 80) return tokens.colors.accentPositive;
+                        if (numValue < 95) return tokens.colors.accentGold;
+                        return tokens.colors.accentNegative;
+                      })()
+                    : metricaValorStyle.color,
+                }}
+              >
+                {formatEfficiencyDisplay(eficienciaDefensivaA)}
+              </div>
+            </div>
           </div>
           <div style={columnaStyle}>
             <div style={columnaTituloStyle}>Equipo B</div>
@@ -1225,29 +1231,24 @@ function ComparacionDatosReales({ predicciones, equipoA, equipoB, datosAdicional
               <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.cleanSheets}</span>
               <div style={metricaValorStyle}>{predicciones.cleanSheetsB}%</div>
             </div>
-            {eficienciaDefensivaB && (() => {
-              // Usar la misma lógica que ComparacionConTabs para consistencia
-              const getDefensiveEfficiencyColor = (value) => {
-                const numValue = typeof value === 'string' ? parseFloat(value) : value;
-                if (numValue === null || numValue === undefined || isNaN(numValue)) {
-                  return tokens.colors.textPrimary;
-                }
-                if (numValue < 80) return tokens.colors.accentPositive; // Verde
-                if (numValue < 95) return tokens.colors.accentGold; // Amarillo
-                return tokens.colors.accentNegative; // Rojo
-              };
-              
-              const colorAplicado = getDefensiveEfficiencyColor(eficienciaDefensivaB);
-              
-              return (
-                <div style={metricaStyle}>
-                  <span style={metricaLabelStyle}>Eficiencia Defensiva</span>
-                  <div style={{ ...metricaValorStyle, color: colorAplicado }}>
-                    {eficienciaDefensivaB}%
-                  </div>
-                </div>
-              );
-            })()}
+            <div style={metricaStyle}>
+              <span style={metricaLabelStyle}>Eficiencia Defensiva</span>
+              <div
+                style={{
+                  ...metricaValorStyle,
+                  color: eficienciaDefensivaB
+                    ? (() => {
+                        const numValue = parseFloat(eficienciaDefensivaB);
+                        if (numValue < 80) return tokens.colors.accentPositive;
+                        if (numValue < 95) return tokens.colors.accentGold;
+                        return tokens.colors.accentNegative;
+                      })()
+                    : metricaValorStyle.color,
+                }}
+              >
+                {formatEfficiencyDisplay(eficienciaDefensivaB)}
+              </div>
+            </div>
           </div>
         </div>
       </div>

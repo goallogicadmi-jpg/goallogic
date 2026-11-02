@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import Toast from "../components/Toast";
 import {
   SESSION_REQUIRED_PREDICCIONES_TOAST_MESSAGE,
   SESSION_REQUIRED_TOAST_DURATION_MS,
 } from "../constants/sessionMessages";
-import { getMatchesFeed } from "../api/api";
+import { getFixtureById, getMatchesFeed } from "../api/api";
 import PartidosFilterBar from "../components/Partidos/PartidosFilterBar";
 import AgrupadorPartidos from "../components/Partidos/AgrupadorPartidos";
 import MatchCenter from "../components/Partidos/MatchCenter";
@@ -18,6 +18,7 @@ import { GoalLogicSectionHeader } from "../components/GoalLogicTitle";
 
 export default function DomainMatchesPage({ scope = "club", domain }) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated } = useUser();
   const [showSessionToast, setShowSessionToast] = useState(false);
   const [partidos, setPartidos] = useState([]);
@@ -106,6 +107,47 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
     }
   }, [loadMatches, selectedDate]);
 
+  useEffect(() => {
+    const fixtureParam = searchParams.get("fixture");
+    if (!fixtureParam) {
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const partido = await getFixtureById(fixtureParam);
+        if (cancelled || !partido?.fixture?.id) {
+          return;
+        }
+
+        setPartidoSeleccionado(partido);
+
+        const isoDate = partido.fixture?.date;
+        if (isoDate) {
+          const localDate = isoDate.slice(0, 10);
+          setSelectedDate((current) => current || localDate);
+        }
+      } catch (err) {
+        console.error("No se pudo abrir el partido desde la búsqueda:", err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams]);
+
+  const closeMatchCenter = useCallback(() => {
+    setPartidoSeleccionado(null);
+    if (searchParams.has("fixture")) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("fixture");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   const handlePrediccionesClick = useCallback((partido) => {
     if (!isAuthenticated) {
       setShowSessionToast(true);
@@ -149,8 +191,8 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
     <div className="partidos-container">
       <div className="partidos-header">
         <GoalLogicSectionHeader size="lg" className="partidos-brand-header" />
-        <div className="partidos-scope-nav">
-          {resolvedScope !== "all" && (
+        {resolvedScope !== "all" && (
+          <div className="partidos-scope-nav">
             <button
               type="button"
               className="partidos-scope-nav__btn"
@@ -158,26 +200,8 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
             >
               Ver feed global
             </button>
-          )}
-          {resolvedScope !== "club" && (
-            <button
-              type="button"
-              className="partidos-scope-nav__btn"
-              onClick={() => navigate("/clubes/partidos")}
-            >
-              Ver solo clubes
-            </button>
-          )}
-          {resolvedScope !== "selection" && (
-            <button
-              type="button"
-              className="partidos-scope-nav__btn"
-              onClick={() => navigate("/selecciones/partidos")}
-            >
-              Ver solo selecciones
-            </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div className="fechas-panel" aria-label="Seleccionar fecha">
@@ -262,7 +286,7 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
             partidoSeleccionado.competitionMeta?.domain ||
             (resolvedScope === "all" ? "club" : resolvedScope)
           }
-          onClose={() => setPartidoSeleccionado(null)}
+          onClose={closeMatchCenter}
         />
       )}
 

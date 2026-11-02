@@ -2,9 +2,15 @@ import {
   getH2H,
   getTeamStats,
   getTeamPlayersStats,
-  getTeamFixtures,
+  getTeamInjuries,
   getUpcomingFixtureWithOdds,
 } from '../api/api';
+import { enrichTeamInjuries } from './evaluateInjuryImpact';
+import { getTeamFixturesForPredicciones } from './prediccionesTeamFixtures';
+import {
+  buildPairMetricsKey,
+  recordMetricsTrace,
+} from './prediccionesMetricsCache';
 import {
   procesarCornersYTarjetasDeFixtures,
   expectedCorners,
@@ -72,6 +78,24 @@ export function buildAccordionLazyContext({
   };
 }
 
+export function buildLesionesEquipoPair({
+  injuriesA,
+  injuriesB,
+  playersStatsA,
+  playersStatsB,
+}) {
+  return {
+    equipoA: {
+      ...enrichTeamInjuries(injuriesA, playersStatsA),
+      fetchMeta: injuriesA?.meta || null,
+    },
+    equipoB: {
+      ...enrichTeamInjuries(injuriesB, playersStatsB),
+      fetchMeta: injuriesB?.meta || null,
+    },
+  };
+}
+
 export function buildSkeletonAccordionLazyContext({
   equipoA,
   equipoB,
@@ -118,8 +142,15 @@ export function buildDatosAdicionalesEstructurados({
   ligaB,
   seasonA,
   seasonB,
+  lesiones,
 }) {
   return {
+    lesiones: lesiones || buildLesionesEquipoPair({
+      injuriesA: { response: [] },
+      injuriesB: { response: [] },
+      playersStatsA,
+      playersStatsB,
+    }),
     h2h: buildH2HDisplayData(h2hData?.response || []),
     accordionLazy: buildAccordionLazyContext({
       equipoA,
@@ -228,8 +259,17 @@ export async function fetchPrediccionesDatosAdicionales({
   const upcomingFixtureId =
     fixtureConOdds?.fixture?.fixture?.id ?? fixtureConOdds?.fixture?.id ?? routeFixtureId ?? null;
 
-  const [h2hData, statsA, statsB, playersStatsA, playersStatsB, fixturesA, fixturesB] =
-    await Promise.all([
+  const [
+    h2hData,
+    statsA,
+    statsB,
+    playersStatsA,
+    playersStatsB,
+    fixturesA,
+    fixturesB,
+    injuriesA,
+    injuriesB,
+  ] = await Promise.all([
       getH2H(equipoNormA.id, equipoNormB.id).catch((err) => {
         console.warn('⚠️ Error obteniendo H2H:', err);
         return { response: [] };
@@ -250,15 +290,38 @@ export async function fetchPrediccionesDatosAdicionales({
         console.warn('⚠️ Error obteniendo estadísticas de jugadores equipo B:', err);
         return { response: [] };
       }),
-      getTeamFixtures(equipoNormA.id, 25).catch((err) => {
+      getTeamFixturesForPredicciones(equipoNormA.id, 25).catch((err) => {
         console.warn('⚠️ Error obteniendo fixtures equipo A:', err);
         return { response: [] };
       }),
-      getTeamFixtures(equipoNormB.id, 25).catch((err) => {
+      getTeamFixturesForPredicciones(equipoNormB.id, 25).catch((err) => {
         console.warn('⚠️ Error obteniendo fixtures equipo B:', err);
         return { response: [] };
       }),
+      getTeamInjuries(equipoNormA.id, {
+        leagueId: ligaA,
+        season: seasonA,
+        fixtureId: upcomingFixtureId ?? routeFixtureId ?? null,
+      }).catch((err) => {
+        console.warn('⚠️ Error obteniendo lesiones equipo A:', err);
+        return { response: [], meta: { error: err.message } };
+      }),
+      getTeamInjuries(equipoNormB.id, {
+        leagueId: ligaB,
+        season: seasonB,
+        fixtureId: upcomingFixtureId ?? routeFixtureId ?? null,
+      }).catch((err) => {
+        console.warn('⚠️ Error obteniendo lesiones equipo B:', err);
+        return { response: [], meta: { error: err.message } };
+      }),
     ]);
+
+  const lesiones = buildLesionesEquipoPair({
+    injuriesA,
+    injuriesB,
+    playersStatsA,
+    playersStatsB,
+  });
 
   const fixturesListA = fixturesA?.response || [];
   const fixturesListB = fixturesB?.response || [];
@@ -283,6 +346,13 @@ export async function fetchPrediccionesDatosAdicionales({
     { cardsFor: tarjetasDataB.cardsFor, cardsAgainst: tarjetasDataB.cardsAgainst }
   );
 
+  recordMetricsTrace(buildPairMetricsKey(equipoNormA.id, equipoNormB.id), {
+    teamA: metricasEquipoA.trace,
+    teamB: metricasEquipoB.trace,
+    cornersEsperados,
+    tarjetasEsperadas,
+  });
+
   return buildDatosAdicionalesEstructurados({
     h2hData,
     fixtureConOdds,
@@ -305,6 +375,7 @@ export async function fetchPrediccionesDatosAdicionales({
     ligaB,
     seasonA,
     seasonB,
+    lesiones,
   });
   } catch (err) {
     console.error('❌ Error crítico en fetchPrediccionesDatosAdicionales:', err);
@@ -330,6 +401,12 @@ export async function fetchPrediccionesDatosAdicionales({
       ligaB,
       seasonA,
       seasonB,
+      lesiones: buildLesionesEquipoPair({
+        injuriesA: { response: [] },
+        injuriesB: { response: [] },
+        playersStatsA: { response: [] },
+        playersStatsB: { response: [] },
+      }),
     });
   }
 }

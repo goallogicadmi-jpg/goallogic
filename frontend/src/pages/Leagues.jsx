@@ -23,6 +23,8 @@ import {
 import brandLogoUrl from "../assets/images/goal-logic-logo.png";
 import { BRAND_NAME } from "../constants/brand";
 import { canAccessPremiumModule } from "../utils/premiumModuleAccess";
+import { usePlatformSettings } from "../context/PlatformSettingsContext";
+import { hasFullProAccess } from "../utils/planAccess";
 import { usePlanAccess } from "../context/PlanAccessContext";
 
 const clubCompetitionFallback = getCompetitionsByDomainFromCatalog("club").map((competition) =>
@@ -108,13 +110,13 @@ export default function Leagues() {
     isAdmin,
     isMainAdmin,
   } = useUser();
-  const { openUpgradeModal } = usePlanAccess();
+  const { openUpgradeModal, freeModeEnabled } = usePlanAccess();
+  const platformSettings = usePlatformSettings();
+  const freeMode = freeModeEnabled || platformSettings.freeModeEnabled;
   const [prediccionesEmbedAuthToast, setPrediccionesEmbedAuthToast] = useState(false);
   const canAccessPredicciones =
     isAuthenticated &&
-    (user?.hasProAccess === true ||
-      user?.premium === true ||
-      user?.trialActive === true ||
+    (hasFullProAccess(user, { freeModeEnabled: freeMode }) ||
       user?.plan === 'free' ||
       isAdmin ||
       isMainAdmin);
@@ -132,7 +134,7 @@ export default function Leagues() {
 
   const canViewSelectedPremiumModule =
     !selectedLeagueId ||
-    canAccessPremiumModule(user, selectedLeagueId) ||
+    canAccessPremiumModule(user, selectedLeagueId, { freeModeEnabled: freeMode }) ||
     isAdmin ||
     isMainAdmin;
 

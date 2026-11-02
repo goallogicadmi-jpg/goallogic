@@ -1,5 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
+import { usePlatformSettings } from '../context/PlatformSettingsContext';
+import { isNormalConsumer } from '../utils/planAccess';
 import PremiumRequired from './PremiumRequired';
 
 /**
@@ -7,6 +9,7 @@ import PremiumRequired from './PremiumRequired';
  */
 export function ProtectedRoute({ children }) {
   const { user, loading, isAdmin, isMainAdmin, needsLegalAcceptance } = useUser();
+  const { freeModeEnabled } = usePlatformSettings();
 
   if (loading) {
     return (
@@ -42,7 +45,8 @@ export function ProtectedRoute({ children }) {
     adminBypass ||
     isFamilyAccount;
   const isFreePlan = user.plan === 'free';
-  const needsPremium = !hasProAccess && !isFreePlan && !adminBypass;
+  const growthBypass = freeModeEnabled && isNormalConsumer(user);
+  const needsPremium = !hasProAccess && !isFreePlan && !adminBypass && !growthBypass;
 
   if (needsPremium) {
     return (

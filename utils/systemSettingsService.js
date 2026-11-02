@@ -114,10 +114,15 @@ function isMaintenanceMode() {
   return getSettingBoolean('general.maintenance_mode', false);
 }
 
+function isPlatformFreeMode() {
+  return getSettingBoolean('general.free_mode_enabled', false);
+}
+
 function getPublicSettings() {
   return {
     maintenanceMode: isMaintenanceMode(),
     maintenanceMessage: getSettingString('general.maintenance_message'),
+    freeModeEnabled: isPlatformFreeMode(),
     operationalBannerEnabled: getSettingBoolean('general.operational_banner_enabled'),
     operationalBannerMessage: getSettingString('general.operational_banner_message'),
     simulatorEnabled: getSettingBoolean('simulator.enabled', true),
@@ -262,6 +267,7 @@ module.exports = {
   getSettingNumber,
   getSettingString,
   isMaintenanceMode,
+  isPlatformFreeMode,
   getPublicSettings,
   buildGroupedSettings,
   getServerStatus,

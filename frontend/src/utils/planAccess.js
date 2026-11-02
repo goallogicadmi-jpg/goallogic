@@ -35,9 +35,21 @@ export function isFamilyAccount(user) {
   );
 }
 
-export function hasFullProAccess(user) {
+export function isNormalConsumer(user) {
+  if (!user) return false;
+  const role = user?.role || 'usuario';
+  return role === 'usuario';
+}
+
+export function isGrowthModeConsumer(user, freeModeEnabled = false) {
+  return freeModeEnabled === true && isNormalConsumer(user);
+}
+
+export function hasFullProAccess(user, { freeModeEnabled = false } = {}) {
   if (!user) return false;
   if (isAdminUser(user) || isFamilyAccount(user)) return true;
+  if (isGrowthModeConsumer(user, freeModeEnabled)) return true;
+  if (user.growthModeConsumer === true) return true;
   if (user.hasProAccess === true) return true;
   if (user.trialActive === true) return true;
   if (user.premium === true && user.plan === PLANS.PRO) return true;
@@ -56,24 +68,36 @@ export function resolveEffectivePlan(user) {
   return PLANS.FREE;
 }
 
-export function getUserFeatures(user) {
+const ALL_FEATURES = {
+  advancedStats: true,
+  premiumModules: true,
+  advancedModels: true,
+  alertsNotifications: true,
+};
+
+export function getUserFeatures(user, { freeModeEnabled = false } = {}) {
   if (!user) return DEFAULT_FEATURES;
+  if (isGrowthModeConsumer(user, freeModeEnabled)) return ALL_FEATURES;
   if (user.features && typeof user.features === 'object') {
-    return { ...DEFAULT_FEATURES, ...user.features };
+    const merged = { ...DEFAULT_FEATURES, ...user.features };
+    if (hasFullProAccess(user, { freeModeEnabled })) {
+      return { ...merged, ...ALL_FEATURES };
+    }
+    return merged;
   }
-  if (hasFullProAccess(user)) {
-    return {
-      advancedStats: true,
-      premiumModules: true,
-      advancedModels: true,
-      alertsNotifications: true,
-    };
+  if (hasFullProAccess(user, { freeModeEnabled })) {
+    return ALL_FEATURES;
   }
   return DEFAULT_FEATURES;
 }
 
-export function canAccessFeature(user, feature) {
-  return getUserFeatures(user)[feature] === true;
+export function canAccessFeature(user, feature, { freeModeEnabled = false } = {}) {
+  return getUserFeatures(user, { freeModeEnabled })[feature] === true;
+}
+
+/** Ocultar upsell PRO para consumidores en Modo Gratuito (admin/analistas no aplican). */
+export function shouldSuppressPlatformUpsell(user, freeModeEnabled = false) {
+  return isGrowthModeConsumer(user, freeModeEnabled);
 }
 
 export function getPlanLabel(plan) {

@@ -2,10 +2,6 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 
 import EventosPartido from "./EventosPartido";
 
-import MatchMomentumChart from "./Cronologia/MatchMomentumChart";
-
-import TacticalView from "./Tactical/TacticalView";
-
 import Lineups from "./Lineups";
 
 import EstadisticasPartido from "./EstadisticasPartido";
@@ -36,11 +32,9 @@ import "../../styles/partidos.css";
 
 
 const MATCH_CENTER_TABS = [
+  { id: "estadisticas", label: "Estadísticas" },
   { id: "eventos", label: "Eventos" },
-  { id: "cronologia", label: "Cronología" },
-  { id: "tactica", label: "Táctica" },
   { id: "alineaciones", label: "Alineaciones" },
-  { id: "analisis", label: "Análisis" },
   { id: "clasificacion", label: "Clasificación" },
 ];
 
@@ -58,7 +52,7 @@ const MATCH_CENTER_TABS = [
 
 export default function MatchCenter({ partido, onClose, domain = "club" }) {
 
-  const [tabActiva, setTabActiva] = useState("eventos");
+  const [tabActiva, setTabActiva] = useState("estadisticas");
 
   const [equipoSeleccionado, setEquipoSeleccionado] = useState(null);
 
@@ -134,7 +128,7 @@ export default function MatchCenter({ partido, onClose, domain = "club" }) {
 
   useEffect(() => {
 
-    setTabActiva("eventos");
+    setTabActiva("estadisticas");
 
     setEquipoSeleccionado(null);
 
@@ -435,89 +429,47 @@ export default function MatchCenter({ partido, onClose, domain = "club" }) {
         >
 
           {partido.fixture?.id && (
-
             <>
+              <div
+                className={`match-center-panel${tabActiva === "estadisticas" ? " is-active" : ""}`}
+                aria-hidden={tabActiva !== "estadisticas"}
+              >
+                <EstadisticasPartido fixtureId={partido.fixture.id} partido={partido} />
+              </div>
 
               <div
-
                 className={`match-center-panel${tabActiva === "eventos" ? " is-active" : ""}`}
-
                 aria-hidden={tabActiva !== "eventos"}
-
               >
-
                 <EventosPartido
-
                   fixtureId={partido.fixture.id}
-
                   partido={partido}
-
                   timeline={timeline}
-
                 />
-
               </div>
 
               <div
-
-                className={`match-center-panel${tabActiva === "cronologia" ? " is-active" : ""}`}
-
-                aria-hidden={tabActiva !== "cronologia"}
-
+                className={`match-center-panel${tabActiva === "alineaciones" ? " is-active" : ""}`}
+                aria-hidden={tabActiva !== "alineaciones"}
               >
-
-                <MatchMomentumChart
-
+                <Lineups
                   fixtureId={partido.fixture.id}
-
                   partido={partido}
-
-                  timeline={timeline}
-
+                  onTeamClick={(teamId) => setEquipoSeleccionado(teamId)}
                 />
-
               </div>
-
             </>
-
-          )}
-
-          {tabActiva === "tactica" && partido.fixture?.id && (
-
-            <TacticalView fixtureId={partido.fixture.id} partido={partido} />
-
-          )}
-
-          {tabActiva === "alineaciones" && partido.fixture?.id && (
-
-            <Lineups
-
-              fixtureId={partido.fixture.id}
-
-              partido={partido}
-
-              onTeamClick={(teamId) => setEquipoSeleccionado(teamId)}
-
-            />
-
-          )}
-
-          {tabActiva === "analisis" && partido.fixture?.id && (
-
-            <EstadisticasPartido fixtureId={partido.fixture.id} partido={partido} />
-
           )}
 
           {tabActiva === "clasificacion" && partido.league?.id && (
-
             <TablaCompeticion
-
               leagueId={partido.league.id}
-
               season={partido.league?.season || new Date().getFullYear()}
-
+              highlightTeamIds={[
+                partido.teams?.home?.id,
+                partido.teams?.away?.id,
+              ].filter(Boolean)}
             />
-
           )}
 
           {!partido.fixture?.id && tabActiva !== "clasificacion" && (

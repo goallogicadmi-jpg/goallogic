@@ -12,6 +12,7 @@ const apiHeaders = process.env.API_KEY
 
 const CATEGORY_LABELS = {
   teams: 'Equipos',
+  players: 'Jugadores',
   matches: 'Partidos',
   competitions: 'Competiciones',
   countries: 'Países',
@@ -20,19 +21,33 @@ const CATEGORY_LABELS = {
   posts: 'Publicaciones',
 };
 
+const TEAM_RESULT_LIMIT = 8;
+const PLAYER_RESULT_LIMIT = 6;
+
 function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function teamDomainFromItem(item) {
+  const team = item?.team || item;
+  if (team?.national === true) return 'selection';
+  const country = team?.country || item?.venue?.country || '';
+  if (country === 'World') return 'selection';
+  return 'club';
 }
 
 function mapTeam(item) {
   const team = item?.team || item;
   if (!team?.id) return null;
+  const domain = teamDomainFromItem(item);
+  const pathPrefix = domain === 'selection' ? 'selecciones' : 'clubes';
   return {
     id: team.id,
     name: team.name,
     logo: team.logo || null,
     country: team.country || item?.venue?.country || null,
-    url: `/clubes/equipo/${team.id}`,
+    domain,
+    url: `/${pathPrefix}/equipo/${team.id}`,
   };
 }
 
@@ -46,18 +61,41 @@ function mapFixture(item) {
   const domain = league?.country === 'World' ? 'selection' : 'club';
   const status = fixture.status?.short || '';
 
+  const domain = league?.country === 'World' ? 'selection' : 'club';
+
   return {
     id: fixture.id,
     label: `${home.name} vs ${away.name}`,
     league: league?.name || '',
     status,
     isLive: ['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].includes(status),
-    url: '/partidos',
+    url: `/partidos?fixture=${fixture.id}`,
     meta: {
+      domain,
       homeTeamId: home.id,
       awayTeamId: away.id,
+      homeTeamName: home.name,
+      awayTeamName: away.name,
+      homeTeamLogo: home.logo || null,
+      awayTeamLogo: away.logo || null,
       leagueId: league?.id,
+      leagueName: league?.name || null,
+      leagueLogo: league?.logo || null,
+      fixtureDate: fixture.date || null,
     },
+  };
+}
+
+function mapPlayer(item) {
+  const player = item?.player;
+  if (!player?.id) return null;
+  return {
+    id: player.id,
+    name: player.name,
+    photo: player.photo || null,
+    country: player.nationality || null,
+    team: item?.team?.name || null,
+    url: `/jugador/${player.id}`,
   };
 }
 
@@ -126,7 +164,24 @@ async function searchTeams(query) {
     return (response.data?.response || [])
       .map(mapTeam)
       .filter(Boolean)
-      .slice(0, 5);
+      .slice(0, TEAM_RESULT_LIMIT);
+  } catch {
+    return [];
+  }
+}
+
+async function searchPlayers(query) {
+  if (!apiHeaders || query.length < 3) return [];
+
+  try {
+    const response = await axios.get(
+      `https://v3.football.api-sports.io/players?search=${encodeURIComponent(query)}`,
+      { headers: apiHeaders, timeout: 8000 }
+    );
+    return (response.data?.response || [])
+      .map(mapPlayer)
+      .filter(Boolean)
+      .slice(0, PLAYER_RESULT_LIMIT);
   } catch {
     return [];
   }
@@ -137,7 +192,7 @@ async function searchMatchesFromTeams(teams) {
 
   const fixtures = [];
 
-  for (const team of teams.slice(0, 2)) {
+  for (const team of teams.slice(0, 3)) {
     try {
       const response = await axios.get(
         `https://v3.football.api-sports.io/fixtures?team=${team.id}&next=3`,
@@ -183,8 +238,12 @@ async function searchPosts(query) {
   const regex = new RegExp(escapeRegex(query), 'i');
 
   const posts = await CommunityPost.find({
-    text: regex,
     deletedAt: null,
+    $or: [
+      { text: regex },
+      { 'matchInfo.homeTeam': regex },
+      { 'matchInfo.awayTeam': regex },
+    ],
   })
     .sort({ createdAt: -1 })
     .limit(5)
@@ -211,12 +270,14 @@ router.get('/', async (req, res) => {
 
     const teams = await searchTeams(query);
     const [
+      players,
       competitions,
       countries,
       matches,
       analysts,
       posts,
     ] = await Promise.all([
+      searchPlayers(query),
       Promise.resolve(searchCatalogCompetitions(query)),
       Promise.resolve(searchCatalogCountries(query)),
       searchMatchesFromTeams(teams),
@@ -224,15 +285,41 @@ router.get('/', async (req, res) => {
       searchPosts(query),
     ]);
 
-    const predictions = teams.slice(0, 5).map((team) => ({
-      id: team.id,
+    const predictionByTeam = teams.slice(0, 5).map((team) => ({
+      id: `team-${team.id}`,
       label: `Predicciones: ${team.name}`,
       url: '/predicciones',
-      meta: { teamId: team.id, teamName: team.name },
+      meta: { teamId: team.id, teamName: team.name, domain: team.domain },
     }));
+
+    const predictionByMatch = matches.slice(0, 4).map((match) => ({
+      id: `fixture-${match.id}`,
+      label: `Predicción: ${match.label}`,
+      url: '/predicciones',
+      meta: {
+        domain: match.meta?.domain,
+        fixtureId: match.id,
+        leagueId: match.meta?.leagueId,
+        leagueName: match.meta?.leagueName,
+        leagueLogo: match.meta?.leagueLogo,
+        homeTeam: {
+          id: match.meta?.homeTeamId,
+          name: match.meta?.homeTeamName,
+          logo: match.meta?.homeTeamLogo,
+        },
+        awayTeam: {
+          id: match.meta?.awayTeamId,
+          name: match.meta?.awayTeamName,
+          logo: match.meta?.awayTeamLogo,
+        },
+      },
+    }));
+
+    const predictions = [...predictionByMatch, ...predictionByTeam].slice(0, 6);
 
     const categories = [
       { id: 'teams', label: CATEGORY_LABELS.teams, items: teams },
+      { id: 'players', label: CATEGORY_LABELS.players, items: players },
       { id: 'matches', label: CATEGORY_LABELS.matches, items: matches },
       { id: 'competitions', label: CATEGORY_LABELS.competitions, items: competitions },
       { id: 'countries', label: CATEGORY_LABELS.countries, items: countries },

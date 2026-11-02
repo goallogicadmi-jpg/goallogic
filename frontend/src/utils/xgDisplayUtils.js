@@ -44,3 +44,39 @@ export function resolveDisplayXga(equipo) {
   }
   return { value: null, source: null };
 }
+
+/** Eficiencia solo cuando xG/xGA provienen de API (no estimación goles × 1.05). */
+export function isApiSourcedXgMetric(source) {
+  return source === 'api';
+}
+
+/**
+ * (goles / xG) × 100 — misma fórmula; null si xG no es de API.
+ * @returns {string|null} porcentaje con 1 decimal
+ */
+export function resolveOffensiveEfficiencyPercent(equipo, xgDisplay) {
+  if (!isApiSourcedXgMetric(xgDisplay?.source)) return null;
+  const xG = xgDisplay?.value;
+  if (xG == null || xG === 0) return null;
+  const goles = Number(equipo?.promedioGolesFavor);
+  if (!Number.isFinite(goles)) return null;
+  return ((goles / xG) * 100).toFixed(1);
+}
+
+/**
+ * (goles recibidos / xGA) × 100 — misma fórmula; null si xGA no es de API.
+ * @returns {string|null} porcentaje con 1 decimal
+ */
+export function resolveDefensiveEfficiencyPercent(equipo, xgaDisplay) {
+  if (!isApiSourcedXgMetric(xgaDisplay?.source)) return null;
+  const xGA = xgaDisplay?.value;
+  if (xGA == null || xGA === 0) return null;
+  const golesRecibidos = Number(equipo?.promedioGolesContra);
+  if (!Number.isFinite(golesRecibidos)) return null;
+  return ((golesRecibidos / xGA) * 100).toFixed(1);
+}
+
+export function formatEfficiencyDisplay(percentOneDecimal) {
+  if (percentOneDecimal == null) return 'N/D';
+  return `${percentOneDecimal}%`;
+}

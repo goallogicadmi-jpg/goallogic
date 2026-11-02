@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
+import { usePlatformSettings } from '../../context/PlatformSettingsContext';
+import { isNormalConsumer } from '../../utils/planAccess';
 import { markFamilyWelcomeShown } from '../../services/authService';
 import { acknowledgeTrialExpired } from '../../services/planService';
 import {
@@ -72,7 +74,12 @@ export default function TrialExpiredModal({ onContinueFree }) {
 
 export function TrialWelcomeGate({ children }) {
   const { loading, isAuthenticated, needsLegalAcceptance, user, updateUser } = useUser();
+  const { freeModeEnabled } = usePlatformSettings();
   const [busy, setBusy] = useState(false);
+
+  if (freeModeEnabled && isNormalConsumer(user)) {
+    return children;
+  }
 
   const isFamilyAccount =
     user?.tipo === 'familia' || user?.plan === 'free-family' || user?.billingLocked === true;
@@ -124,6 +131,11 @@ export function TrialWelcomeGate({ children }) {
 
 export function TrialExpiredGate({ children }) {
   const { loading, isAuthenticated, needsLegalAcceptance, user, updateUser } = useUser();
+  const { freeModeEnabled } = usePlatformSettings();
+
+  if (freeModeEnabled && isNormalConsumer(user)) {
+    return children;
+  }
 
   const showModal =
     isAuthenticated &&

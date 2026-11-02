@@ -55,6 +55,8 @@ function serializeAuthUserFields(user) {
     showTrialExpiredModal: planStatus.showTrialExpiredModal,
     limits: planStatus.limits,
     features: planStatus.features,
+    platformFreeMode: planStatus.platformFreeMode === true,
+    growthModeConsumer: planStatus.growthModeConsumer === true,
   };
 }
 

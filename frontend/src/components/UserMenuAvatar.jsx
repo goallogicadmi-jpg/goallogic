@@ -9,8 +9,8 @@ function PersonIcon() {
     <svg
       className="user-menu-avatar__icon-svg"
       viewBox="0 0 24 24"
-      width="20"
-      height="20"
+      width="22"
+      height="22"
       aria-hidden="true"
       focusable="false"
     >
@@ -88,11 +88,11 @@ export default function UserMenuAvatar() {
             <UserAvatar
               nombre={displayName}
               foto_perfil_url={user.foto_perfil_url}
-              size={36}
+              size={40}
               className="user-menu-avatar__photo"
             />
           ) : isAuthenticated ? (
-            <UserAvatar nombre={displayName} size={36} className="user-menu-avatar__photo" />
+            <UserAvatar nombre={displayName} size={40} className="user-menu-avatar__photo" />
           ) : (
             <PersonIcon />
           )}

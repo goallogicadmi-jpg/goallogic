@@ -1,11 +1,13 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
+import { usePlatformSettings } from './PlatformSettingsContext';
 import {
   canAccessFeature,
   getUserFeatures,
   hasFullProAccess,
   resolveEffectivePlan,
+  shouldSuppressPlatformUpsell,
 } from '../utils/planAccess';
 import PremiumUpgradeModal from '../components/Freemium/PremiumUpgradeModal';
 
@@ -22,14 +24,22 @@ export function usePlanAccess() {
 export function PlanAccessProvider({ children }) {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useUser();
+  const { freeModeEnabled } = usePlatformSettings();
   const [modalOpen, setModalOpen] = useState(false);
 
-  const features = useMemo(() => getUserFeatures(user), [user]);
+  const suppressUpsell = shouldSuppressPlatformUpsell(user, freeModeEnabled);
+  const accessOptions = useMemo(() => ({ freeModeEnabled }), [freeModeEnabled]);
+
+  const features = useMemo(
+    () => getUserFeatures(user, accessOptions),
+    [user, accessOptions]
+  );
   const effectivePlan = useMemo(() => resolveEffectivePlan(user), [user]);
 
   const openUpgradeModal = useCallback(() => {
+    if (suppressUpsell) return;
     setModalOpen(true);
-  }, []);
+  }, [suppressUpsell]);
 
   const closeUpgradeModal = useCallback(() => {
     setModalOpen(false);
@@ -41,7 +51,13 @@ export function PlanAccessProvider({ children }) {
         navigate('/ligas');
         return false;
       }
-      if (canAccessFeature(user, feature)) {
+      if (canAccessFeature(user, feature, accessOptions)) {
+        if (typeof onAllowed === 'function') {
+          onAllowed();
+        }
+        return true;
+      }
+      if (suppressUpsell) {
         if (typeof onAllowed === 'function') {
           onAllowed();
         }
@@ -50,7 +66,7 @@ export function PlanAccessProvider({ children }) {
       setModalOpen(true);
       return false;
     },
-    [isAuthenticated, navigate, user]
+    [accessOptions, isAuthenticated, navigate, suppressUpsell, user]
   );
 
   const handleViewPlans = useCallback(() => {
@@ -65,23 +81,37 @@ export function PlanAccessProvider({ children }) {
     () => ({
       features,
       effectivePlan,
-      hasFullProAccess: hasFullProAccess(user),
-      canAccessFeature: (feature) => canAccessFeature(user, feature),
+      freeModeEnabled,
+      suppressPlatformUpsell: suppressUpsell,
+      hasFullProAccess: hasFullProAccess(user, accessOptions),
+      canAccessFeature: (feature) => canAccessFeature(user, feature, accessOptions),
       requestFeature,
       openUpgradeModal,
       closeUpgradeModal,
     }),
-    [closeUpgradeModal, effectivePlan, features, openUpgradeModal, requestFeature, user]
+    [
+      accessOptions,
+      closeUpgradeModal,
+      effectivePlan,
+      features,
+      freeModeEnabled,
+      openUpgradeModal,
+      requestFeature,
+      suppressUpsell,
+      user,
+    ]
   );
 
   return (
     <PlanAccessContext.Provider value={value}>
       {children}
-      <PremiumUpgradeModal
-        open={modalOpen}
-        onClose={closeUpgradeModal}
-        onViewPlans={handleViewPlans}
-      />
+      {!suppressUpsell && (
+        <PremiumUpgradeModal
+          open={modalOpen}
+          onClose={closeUpgradeModal}
+          onViewPlans={handleViewPlans}
+        />
+      )}
     </PlanAccessContext.Provider>
   );
 }

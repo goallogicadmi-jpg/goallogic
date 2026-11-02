@@ -12,8 +12,11 @@ import {
   resolveDisplayXga,
   formatXgPromedioLabel,
   formatXgaPromedioLabel,
+  resolveOffensiveEfficiencyPercent,
+  resolveDefensiveEfficiencyPercent,
+  formatEfficiencyDisplay,
 } from '../../utils/xgDisplayUtils';
-import { buildConclusionesComparativaEquipos } from '../../utils/conclusionesCopy';
+import { buildGoalLogicConclusions } from '../../utils/buildGoalLogicConclusions';
 import { PREDICCIONES_TITLES } from '../../constants/prediccionesSectionTitles';
 import PrediccionesSectionTitle from './PrediccionesSectionTitle';
 import {
@@ -39,7 +42,15 @@ const COMPARACION_TABS = [
  * ComparacionConTabs - Reorganización visual de ComparacionDatosReales con tabs
  * Solo reorganización visual, no modifica lógica de datos
  */
-export default function ComparacionConTabs({ predicciones, equipoA, equipoB, datosAdicionales, loadingDatosAdicionales = false }) {
+export default function ComparacionConTabs({
+  predicciones,
+  equipoA,
+  equipoB,
+  datosAdicionales,
+  loadingDatosAdicionales = false,
+  ligaIdA,
+  ligaIdB,
+}) {
   const [activeTab, setActiveTab] = useState('especiales');
   const isMobile = useMediaQuery(MEDIA_QUERIES.MOBILE);
 
@@ -48,37 +59,41 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
   const xgaDisplayA = useMemo(() => resolveDisplayXga(equipoA), [equipoA]);
   const xgaDisplayB = useMemo(() => resolveDisplayXga(equipoB), [equipoB]);
 
-  const eficienciaOfensivaA = useMemo(() => {
-    const xG = xgDisplayA.value || 0;
-    const goles = equipoA?.promedioGolesFavor || 0;
-    if (xG === 0) return null;
-    return ((goles / xG) * 100).toFixed(1);
-  }, [equipoA, xgDisplayA]);
+  const eficienciaOfensivaA = useMemo(
+    () => resolveOffensiveEfficiencyPercent(equipoA, xgDisplayA),
+    [equipoA, xgDisplayA]
+  );
 
-  const eficienciaOfensivaB = useMemo(() => {
-    const xG = xgDisplayB.value || 0;
-    const goles = equipoB?.promedioGolesFavor || 0;
-    if (xG === 0) return null;
-    return ((goles / xG) * 100).toFixed(1);
-  }, [equipoB, xgDisplayB]);
+  const eficienciaOfensivaB = useMemo(
+    () => resolveOffensiveEfficiencyPercent(equipoB, xgDisplayB),
+    [equipoB, xgDisplayB]
+  );
 
-  const eficienciaDefensivaA = useMemo(() => {
-    const xGA = xgaDisplayA.value || 0;
-    const golesRecibidos = equipoA?.promedioGolesContra || 0;
-    if (xGA === 0) return null;
-    return ((golesRecibidos / xGA) * 100).toFixed(1);
-  }, [equipoA, xgaDisplayA]);
+  const eficienciaDefensivaA = useMemo(
+    () => resolveDefensiveEfficiencyPercent(equipoA, xgaDisplayA),
+    [equipoA, xgaDisplayA]
+  );
 
-  const eficienciaDefensivaB = useMemo(() => {
-    const xGA = xgaDisplayB.value || 0;
-    const golesRecibidos = equipoB?.promedioGolesContra || 0;
-    if (xGA === 0) return null;
-    return ((golesRecibidos / xGA) * 100).toFixed(1);
-  }, [equipoB, xgaDisplayB]);
+  const eficienciaDefensivaB = useMemo(
+    () => resolveDefensiveEfficiencyPercent(equipoB, xgaDisplayB),
+    [equipoB, xgaDisplayB]
+  );
 
-  const insights = useMemo(
-    () => buildConclusionesComparativaEquipos(predicciones, equipoA, equipoB),
-    [predicciones, equipoA, equipoB]
+  const phase2Complete =
+    !loadingDatosAdicionales &&
+    Boolean(datosAdicionales?.estadisticasLocalVisitante && datosAdicionales?.lesiones);
+
+  const conclusionesGoalLogic = useMemo(
+    () =>
+      buildGoalLogicConclusions({
+        equipoLocal: equipoA,
+        equipoVisitante: equipoB,
+        datosAdicionales,
+        ligaIdA,
+        ligaIdB,
+        phase2Complete,
+      }),
+    [equipoA, equipoB, datosAdicionales, ligaIdA, ligaIdB, phase2Complete]
   );
 
   const cornersEsperados = datosAdicionales?.cornersYFaltas?.cornersEsperados;
@@ -292,17 +307,19 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                 <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.over25}</span>
                 <div style={metricaValorStyle}>{predicciones.over25A}%</div>
               </div>
-              {eficienciaOfensivaA && (
-                <div style={metricaStyle}>
-                  <span style={metricaLabelStyle}>Eficiencia Ofensiva</span>
-                  <div style={{ 
-                    ...metricaValorStyle, 
-                    color: getOffensiveEfficiencyColor(parseFloat(eficienciaOfensivaA))
-                  }}>
-                    {eficienciaOfensivaA}%
-                  </div>
+              <div style={metricaStyle}>
+                <span style={metricaLabelStyle}>Eficiencia Ofensiva</span>
+                <div
+                  style={{
+                    ...metricaValorStyle,
+                    color: eficienciaOfensivaA
+                      ? getOffensiveEfficiencyColor(parseFloat(eficienciaOfensivaA))
+                      : metricaValorStyle.color,
+                  }}
+                >
+                  {formatEfficiencyDisplay(eficienciaOfensivaA)}
                 </div>
-              )}
+              </div>
             </div>
             <div className="predicciones-comparacion-column">
               <div style={columnaTituloStyle}>{equipoB?.nombre || 'Equipo B'}</div>
@@ -324,17 +341,19 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                 <span className={ADVANCED_METRIC_LABEL_CLASS} style={metricaLabelStyle}>{ML.over25}</span>
                 <div style={metricaValorStyle}>{predicciones.over25B}%</div>
               </div>
-              {eficienciaOfensivaB && (
-                <div style={metricaStyle}>
-                  <span style={metricaLabelStyle}>Eficiencia Ofensiva</span>
-                  <div style={{ 
-                    ...metricaValorStyle, 
-                    color: getOffensiveEfficiencyColor(parseFloat(eficienciaOfensivaB))
-                  }}>
-                    {eficienciaOfensivaB}%
-                  </div>
+              <div style={metricaStyle}>
+                <span style={metricaLabelStyle}>Eficiencia Ofensiva</span>
+                <div
+                  style={{
+                    ...metricaValorStyle,
+                    color: eficienciaOfensivaB
+                      ? getOffensiveEfficiencyColor(parseFloat(eficienciaOfensivaB))
+                      : metricaValorStyle.color,
+                  }}
+                >
+                  {formatEfficiencyDisplay(eficienciaOfensivaB)}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         );
@@ -411,33 +430,17 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                   {cleanSheetsA.toFixed(1)}%
                 </div>
               </div>
-              {eficienciaDefensivaA && (() => {
-                const colorAplicado = getDefensiveEfficiencyColor(eficienciaDefA);
-                const estiloFinal = { 
-                  ...metricaValorStyle, 
-                  color: colorAplicado
-                };
-                
-                // Logging detallado del estilo final (solo en desarrollo)
-                if (process.env.NODE_ENV === 'development') {
-                  console.log('[Eficiencia Defensiva - Equipo A] Estilo Final Aplicado:', {
-                    valor: eficienciaDefensivaA,
-                    valor_parseado: eficienciaDefA,
-                    color_devuelto: colorAplicado,
-                    estilo_final: estiloFinal,
-                    color_en_estilo: estiloFinal.color
-                  });
-                }
-                
-                return (
-                  <div style={metricaStyle}>
-                    <span style={metricaLabelStyle}>Eficiencia Defensiva</span>
-                    <div style={estiloFinal}>
-                      {eficienciaDefensivaA}%
-                    </div>
-                  </div>
-                );
-              })()}
+              <div style={metricaStyle}>
+                <span style={metricaLabelStyle}>Eficiencia Defensiva</span>
+                <div
+                  style={{
+                    ...metricaValorStyle,
+                    color: eficienciaDefA != null ? getDefensiveEfficiencyColor(eficienciaDefA) : metricaValorStyle.color,
+                  }}
+                >
+                  {formatEfficiencyDisplay(eficienciaDefensivaA)}
+                </div>
+              </div>
             </div>
             <div className="predicciones-comparacion-column">
               <div style={columnaTituloStyle}>{equipoB?.nombre || 'Equipo B'}</div>
@@ -470,33 +473,17 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                   {cleanSheetsB.toFixed(1)}%
                 </div>
               </div>
-              {eficienciaDefensivaB && (() => {
-                const colorAplicado = getDefensiveEfficiencyColor(eficienciaDefB);
-                const estiloFinal = { 
-                  ...metricaValorStyle, 
-                  color: colorAplicado
-                };
-                
-                // Logging detallado del estilo final (solo en desarrollo)
-                if (process.env.NODE_ENV === 'development') {
-                  console.log('[Eficiencia Defensiva - Equipo B] Estilo Final Aplicado:', {
-                    valor: eficienciaDefensivaB,
-                    valor_parseado: eficienciaDefB,
-                    color_devuelto: colorAplicado,
-                    estilo_final: estiloFinal,
-                    color_en_estilo: estiloFinal.color
-                  });
-                }
-                
-                return (
-                  <div style={metricaStyle}>
-                    <span style={metricaLabelStyle}>Eficiencia Defensiva</span>
-                    <div style={estiloFinal}>
-                      {eficienciaDefensivaB}%
-                    </div>
-                  </div>
-                );
-              })()}
+              <div style={metricaStyle}>
+                <span style={metricaLabelStyle}>Eficiencia Defensiva</span>
+                <div
+                  style={{
+                    ...metricaValorStyle,
+                    color: eficienciaDefB != null ? getDefensiveEfficiencyColor(eficienciaDefB) : metricaValorStyle.color,
+                  }}
+                >
+                  {formatEfficiencyDisplay(eficienciaDefensivaB)}
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -608,11 +595,129 @@ export default function ComparacionConTabs({ predicciones, equipoA, equipoB, dat
                 >
                   {PREDICCIONES_TITLES.conclusionesEstrategicas}
                 </PrediccionesSectionTitle>
-                {insights.map((insight, index) => (
-                  <div key={index} style={{ fontSize: tokens.typography.fontSizeSm, color: tokens.colors.textSecondary, lineHeight: tokens.typography.lineHeightRelaxed, marginBottom: tokens.spacing.xs, paddingLeft: tokens.spacing.md, borderLeft: `3px solid ${tokens.colors.accentOrange}` }}>
-                    {insight}
+                <div
+                  style={{
+                    marginBottom: tokens.spacing.md,
+                    padding: tokens.spacing.sm,
+                    backgroundColor: tokens.colors.bgCard,
+                    borderRadius: tokens.radius.sm,
+                    border: `1px solid ${tokens.colors.borderDefault}`,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: tokens.typography.fontSizeXs,
+                      fontWeight: tokens.typography.fontWeightSemibold,
+                      color: tokens.colors.accentGold,
+                      marginBottom: tokens.spacing.xs,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    Veredicto GoalLogic
                   </div>
-                ))}
+                  <div style={{ fontSize: tokens.typography.fontSizeSm, color: tokens.colors.textPrimary, lineHeight: tokens.typography.lineHeightRelaxed }}>
+                    {equipoA?.nombre || 'Local'} {conclusionesGoalLogic.veredicto.localPct}% · Empate{' '}
+                    {conclusionesGoalLogic.veredicto.empatePct}% · {equipoB?.nombre || 'Visitante'}{' '}
+                    {conclusionesGoalLogic.veredicto.visitantePct}%
+                  </div>
+                  <div style={{ fontSize: tokens.typography.fontSizeSm, color: tokens.colors.textSecondary, marginTop: tokens.spacing.xs }}>
+                    {conclusionesGoalLogic.veredicto.favoritoLabel}
+                  </div>
+                </div>
+
+                {conclusionesGoalLogic.porQue.length > 0 && (
+                  <div style={{ marginBottom: tokens.spacing.md }}>
+                    <div
+                      style={{
+                        fontSize: tokens.typography.fontSizeXs,
+                        fontWeight: tokens.typography.fontWeightSemibold,
+                        color: tokens.colors.textMuted,
+                        marginBottom: tokens.spacing.xs,
+                      }}
+                    >
+                      Por qué
+                    </div>
+                    {conclusionesGoalLogic.porQue.map((item, index) => (
+                      <div
+                        key={`${item.module}-${index}`}
+                        style={{
+                          fontSize: tokens.typography.fontSizeSm,
+                          color: tokens.colors.textSecondary,
+                          lineHeight: tokens.typography.lineHeightRelaxed,
+                          marginBottom: tokens.spacing.xs,
+                          paddingLeft: tokens.spacing.md,
+                          borderLeft: `3px solid ${tokens.colors.accentOrange}`,
+                        }}
+                      >
+                        <span style={{ color: tokens.colors.accentGold, fontWeight: tokens.typography.fontWeightSemibold }}>
+                          {item.label}{' '}
+                        </span>
+                        {item.texto}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {conclusionesGoalLogic.lesiones.length > 0 && (
+                  <div style={{ marginBottom: tokens.spacing.md }}>
+                    <div
+                      style={{
+                        fontSize: tokens.typography.fontSizeXs,
+                        fontWeight: tokens.typography.fontWeightSemibold,
+                        color: tokens.colors.textMuted,
+                        marginBottom: tokens.spacing.xs,
+                      }}
+                    >
+                      Lesiones (módulo Contexto)
+                    </div>
+                    {conclusionesGoalLogic.lesiones.map((item, index) => (
+                      <div
+                        key={`lesion-${index}`}
+                        style={{
+                          fontSize: tokens.typography.fontSizeSm,
+                          color: tokens.colors.textSecondary,
+                          lineHeight: tokens.typography.lineHeightRelaxed,
+                          marginBottom: tokens.spacing.xs,
+                          paddingLeft: tokens.spacing.md,
+                          borderLeft: `3px solid ${tokens.colors.accentNegative}`,
+                        }}
+                      >
+                        {item.texto}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {conclusionesGoalLogic.cautelas.length > 0 && (
+                  <div>
+                    <div
+                      style={{
+                        fontSize: tokens.typography.fontSizeXs,
+                        fontWeight: tokens.typography.fontWeightSemibold,
+                        color: tokens.colors.textMuted,
+                        marginBottom: tokens.spacing.xs,
+                      }}
+                    >
+                      Cautelas
+                    </div>
+                    {conclusionesGoalLogic.cautelas.map((texto, index) => (
+                      <div
+                        key={`cautela-${index}`}
+                        style={{
+                          fontSize: tokens.typography.fontSizeSm,
+                          color: tokens.colors.textMuted,
+                          lineHeight: tokens.typography.lineHeightRelaxed,
+                          marginBottom: tokens.spacing.xs,
+                          paddingLeft: tokens.spacing.md,
+                          borderLeft: `3px solid ${tokens.colors.accentNeutral}`,
+                        }}
+                      >
+                        {texto}
+                      </div>
+                    ))}
+                  </div>
+                )}
             </div>
           </div>
         );

@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useUser } from "../context/UserContext";
 import NotificationBell from "../components/NotificationBell";
@@ -17,17 +17,18 @@ import {
   SESSION_REQUIRED_PREDICCIONES_TOAST_MESSAGE,
   SESSION_REQUIRED_TOAST_DURATION_MS,
 } from "../constants/sessionMessages";
-import logoSrc from "../assets/images/goal-logic-logo.png";
-import { BRAND_NAME } from "../constants/brand";
+import { GoalLogicTitle } from "../components/GoalLogicTitle";
+import GoalLogicGlobalSearch from "../components/search/GoalLogicGlobalSearch";
+import GoalLogicGlobalSearchOverlay from "../components/search/GoalLogicGlobalSearchOverlay";
 
 export default function Layout() {
-  const [logoError, setLogoError] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [internalActiveSection, setInternalActiveSection] = useState(null);
   const { isAdmin, isMainAdmin, isAuthenticated } = useUser();
   const [showPrediccionesSessionToast, setShowPrediccionesSessionToast] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   
   // Escuchar eventos de cambio de sección interna (para "Mi Cuenta" y "Comunidad")
   useEffect(() => {
@@ -57,6 +58,7 @@ export default function Layout() {
   // Cerrar sidebar al cambiar de ruta
   useEffect(() => {
     setIsSidebarOpen(false);
+    setIsMobileSearchOpen(false);
   }, [location.pathname]);
 
   // Bloquear scroll del body cuando el drawer está abierto
@@ -130,6 +132,20 @@ export default function Layout() {
 
   const activeSection = getActiveSection();
   const navContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const isMobileNav = window.matchMedia('(max-width: 768px)').matches;
+    if (!isMobileNav || !navContainerRef.current) {
+      return;
+    }
+
+    const activeButton = navContainerRef.current.querySelector('.nav-button.active');
+    activeButton?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [activeSection, location.pathname]);
 
   // Función para manejar la navegación (memoizada para evitar recreaciones)
   const handleNavigation = useCallback((section) => {
@@ -542,10 +558,21 @@ export default function Layout() {
           <div className="main-header-start">
             <button
               type="button"
-              className={`hamburger-btn${isSidebarOpen ? ' open' : ''}`}
-              aria-label={isSidebarOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
+              className="main-header-icon-btn main-header-search-trigger"
+              aria-label="Buscar en GoalLogic"
+              onClick={() => setIsMobileSearchOpen(true)}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                <path d="M20 20L16 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className={`hamburger-btn hamburger-btn--secondary${isSidebarOpen ? ' open' : ''}`}
+              aria-label={isSidebarOpen ? 'Cerrar menú extra' : 'Abrir menú extra'}
               aria-expanded={isSidebarOpen}
-              aria-controls="main-header-nav"
+              aria-controls="main-header-secondary-panel"
               onClick={toggleSidebar}
             >
               <span className="hamburger-btn__bar bar-top" aria-hidden="true" />
@@ -553,41 +580,49 @@ export default function Layout() {
               <span className="hamburger-btn__bar bar-bottom" aria-hidden="true" />
             </button>
           </div>
-          <div className="main-header-logo-container">
-            {!logoError ? (
-              <img
-                src={logoSrc}
-                alt={`${BRAND_NAME} Logo`}
-                className="main-header-logo-img"
-                width={140}
-                height={48}
-                decoding="async"
-                fetchPriority="high"
-                onError={() => setLogoError(true)}
-              />
-            ) : null}
-            <span className={`main-header-logo-text notranslate ${logoError ? 'show' : ''}`} translate="no" lang="en">
-              {BRAND_NAME}
-            </span>
-          </div>
+
+          <Link to="/clubes" className="main-header-brand-link notranslate" translate="no" lang="en">
+            <GoalLogicTitle as="div" size="md" className="main-header-brand-title" />
+          </Link>
+
           <nav
-            className={`sidebar main-header-nav${isSidebarOpen ? ' open' : ''}`}
+            className={`main-header-nav${isSidebarOpen ? ' open' : ''}`}
             id="main-header-nav"
             ref={navContainerRef}
             aria-label="Navegación principal"
           >
-            {/* Los botones de navegación se insertarán aquí dinámicamente */}
-            {/* El botón de Comunidad se renderiza directamente como componente React */}
             <ComunidadButton />
           </nav>
+
           <div className="main-header-actions">
-            <TrialBadge />
-            <AdminLink />
-            <NotificationBell />
+            <div className="main-header-actions__tools">
+              <div className="main-header-global-search">
+                <GoalLogicGlobalSearch className="gl-global-search--header" />
+              </div>
+              <TrialBadge />
+              <AdminLink />
+              <NotificationBell />
+            </div>
             <UserMenuAvatar />
           </div>
         </div>
+
+        <aside
+          id="main-header-secondary-panel"
+          className={`main-header-secondary-panel${isSidebarOpen ? ' open' : ''}`}
+          aria-label="Accesos adicionales"
+          aria-hidden={!isSidebarOpen}
+        >
+          <TrialBadge />
+          <AdminLink />
+          <NotificationBell />
+        </aside>
       </header>
+
+      <GoalLogicGlobalSearchOverlay
+        open={isMobileSearchOpen}
+        onClose={() => setIsMobileSearchOpen(false)}
+      />
       <button
         type="button"
         className={`sidebar-overlay${isSidebarOpen ? ' visible' : ''}`}

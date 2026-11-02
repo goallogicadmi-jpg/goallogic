@@ -32,6 +32,15 @@ const SETTINGS_DEFINITIONS = [
     value: 'https://goallogic.onrender.com',
   },
   {
+    key: 'general.free_mode_enabled',
+    category: 'general',
+    type: 'boolean',
+    label: 'Modo Gratuito activado',
+    description:
+      'Usuarios normales acceden a todo el consumo sin paywall PRO. Analistas y Stripe no se modifican.',
+    value: false,
+  },
+  {
     key: 'general.operational_banner_enabled',
     category: 'general',
     type: 'boolean',

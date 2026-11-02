@@ -99,6 +99,19 @@ export default function AgrupadorPartidos({
   onPrediccionesClick,
 }) {
   const [favoritosIds, setFavoritosIds] = useState({ equipos: [], ligas: [] });
+  const [collapsedGroups, setCollapsedGroups] = useState(() => new Set());
+
+  const toggleGroup = (groupKey) => {
+    setCollapsedGroups((previous) => {
+      const next = new Set(previous);
+      if (next.has(groupKey)) {
+        next.delete(groupKey);
+      } else {
+        next.add(groupKey);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -251,52 +264,86 @@ export default function AgrupadorPartidos({
 
   return (
     <div className="agrupador-partidos">
-      {partidosAgrupados.map((grupo) => (
-        <div key={grupo.liga?.id || grupo.liga?.name} className="grupo-liga">
-          <div className="grupo-liga-header">
-            <CompetitionLogo
-              competitionId={grupo.liga?.id}
-              logoUrl={grupo.liga?.logo}
-              alt={grupo.liga?.name || "Competición"}
-              className="grupo-liga-logo"
-            />
-            <div className="grupo-liga-info">
-              <div className="grupo-liga-nombre">{grupo.liga?.name || "Competición"}</div>
-              <div className="grupo-liga-pais">{grupo.liga?.country || ""}</div>
-            </div>
-            <div className="grupo-liga-count">
-              {grupo.partidos.length} partido{grupo.partidos.length !== 1 ? "s" : ""}
-            </div>
-          </div>
+      {partidosAgrupados.map((grupo) => {
+        const groupKey = String(grupo.liga?.id || grupo.liga?.name || "unknown");
+        const isExpanded = !collapsedGroups.has(groupKey);
 
-          <div className="grupo-liga-partidos">
-            {grupo.partidos.map((partido) => (
-              <PartidoCard
-                key={partido.fixture?.id || `${grupo.liga?.id}-${partido.teams?.home?.id}-${partido.teams?.away?.id}`}
-                partido={partido}
-                domain={resolveFixtureDomain(partido, scope) || "club"}
-                onClick={() => onPartidoClick(partido)}
-                onPrediccionesClick={onPrediccionesClick}
-                onFavoritoChange={async () => {
-                  if (onFavoritoChange) {
-                    onFavoritoChange();
-                  }
-
-                  try {
-                    const favoritos = await obtenerFavoritos();
-                    setFavoritosIds({
-                      equipos: favoritos?.equipos || [],
-                      ligas: favoritos?.ligas || [],
-                    });
-                  } catch (error) {
-                    console.error("Error refrescando favoritos:", error);
-                  }
-                }}
+        return (
+          <div
+            key={groupKey}
+            className={`grupo-liga${isExpanded ? " is-expanded" : " is-collapsed"}`}
+          >
+            <button
+              type="button"
+              className="grupo-liga-header"
+              onClick={() => toggleGroup(groupKey)}
+              aria-expanded={isExpanded}
+              aria-controls={`grupo-liga-panel-${groupKey}`}
+            >
+              <CompetitionLogo
+                competitionId={grupo.liga?.id}
+                logoUrl={grupo.liga?.logo}
+                alt={grupo.liga?.name || "Competición"}
+                className="grupo-liga-logo"
               />
-            ))}
+              <div className="grupo-liga-info">
+                <div className="grupo-liga-nombre">{grupo.liga?.name || "Competición"}</div>
+                <div className="grupo-liga-pais">{grupo.liga?.country || ""}</div>
+              </div>
+              <div className="grupo-liga-count">
+                {grupo.partidos.length} partido{grupo.partidos.length !== 1 ? "s" : ""}
+              </div>
+              <span className="grupo-liga-chevron" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M6 9L12 15L18 9"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </button>
+
+            <div
+              id={`grupo-liga-panel-${groupKey}`}
+              className="grupo-liga-partidos-wrapper"
+              aria-hidden={!isExpanded}
+            >
+              <div className="grupo-liga-partidos">
+                {grupo.partidos.map((partido) => (
+                  <PartidoCard
+                    key={
+                      partido.fixture?.id ||
+                      `${grupo.liga?.id}-${partido.teams?.home?.id}-${partido.teams?.away?.id}`
+                    }
+                    partido={partido}
+                    domain={resolveFixtureDomain(partido, scope) || "club"}
+                    onClick={() => onPartidoClick(partido)}
+                    onPrediccionesClick={onPrediccionesClick}
+                    onFavoritoChange={async () => {
+                      if (onFavoritoChange) {
+                        onFavoritoChange();
+                      }
+
+                      try {
+                        const favoritos = await obtenerFavoritos();
+                        setFavoritosIds({
+                          equipos: favoritos?.equipos || [],
+                          ligas: favoritos?.ligas || [],
+                        });
+                      } catch (error) {
+                        console.error("Error refrescando favoritos:", error);
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

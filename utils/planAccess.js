@@ -17,6 +17,17 @@ const FEATURES = {
 };
 
 const { isFamilyUser, isBillingLocked } = require('./familyUser');
+const { isPlatformFreeMode } = require('./systemSettingsService');
+
+function isNormalConsumerUser(user) {
+  const role = user?.role || 'usuario';
+  return role === 'usuario';
+}
+
+function hasFreeModeConsumerAccess(user) {
+  if (!isPlatformFreeMode() || !user) return false;
+  return isNormalConsumerUser(user);
+}
 
 function addDays(date, days) {
   const result = new Date(date);
@@ -51,7 +62,9 @@ function hasFullProAccess(user) {
   if (isAdminUser(user)) return true;
   if (isFamilyUser(user) || isBillingLocked(user)) return true;
   if (hasPaidPremium(user)) return true;
-  return isTrialCurrentlyActive(user);
+  if (isTrialCurrentlyActive(user)) return true;
+  if (hasFreeModeConsumerAccess(user)) return true;
+  return false;
 }
 
 function resolveEffectivePlan(user) {
@@ -86,6 +99,8 @@ function resolveFeatureTier(user) {
 }
 
 function canAccessFeature(user, feature) {
+  if (hasFreeModeConsumerAccess(user)) return true;
+
   const tier = resolveFeatureTier(user);
 
   switch (feature) {
@@ -134,6 +149,7 @@ function buildExpiredTrialUpdate() {
 }
 
 function shouldShowTrialExpiredModal(user) {
+  if (hasFreeModeConsumerAccess(user)) return false;
   if (!user || isFamilyUser(user) || hasPaidPremium(user)) return false;
   if (user.trialExpiredAcknowledged === true) return false;
   if (!user.trialEndsAt) return false;
@@ -148,19 +164,23 @@ function resolvePlanFromStripePriceId() {
 function serializePlanStatus(user) {
   const effectivePlan = resolveEffectivePlan(user);
   const trialActive = isTrialCurrentlyActive(user);
-  const limits = hasFullProAccess(user) ? null : getPlanLimits(effectivePlan);
+  const proAccess = hasFullProAccess(user);
+  const limits = proAccess ? null : getPlanLimits(effectivePlan);
+  const freeModeConsumer = hasFreeModeConsumerAccess(user);
 
   return {
     plan: effectivePlan,
     trialActive,
     trialEndsAt: user?.trialEndsAt || null,
     trialDaysRemaining: getTrialDaysRemaining(user),
-    hasProAccess: hasFullProAccess(user),
+    hasProAccess: proAccess,
     welcomeShown: user?.welcomeShown === true,
     trialExpiredAcknowledged: user?.trialExpiredAcknowledged === true,
     showTrialExpiredModal: shouldShowTrialExpiredModal(user),
     limits,
     features: buildFeatureAccess(user),
+    platformFreeMode: isPlatformFreeMode(),
+    growthModeConsumer: freeModeConsumer,
   };
 }
 
@@ -185,4 +205,6 @@ module.exports = {
   shouldShowTrialExpiredModal,
   resolvePlanFromStripePriceId,
   serializePlanStatus,
+  isNormalConsumerUser,
+  hasFreeModeConsumerAccess,
 };
