@@ -601,9 +601,8 @@ export default function Layout() {
               </div>
               <TrialBadge />
               <AdminLink />
-              <NotificationBell />
             </div>
-            <div className="main-header-actions__mobile-bell" aria-label="Notificaciones">
+            <div className="main-header-notifications">
               <NotificationBell />
             </div>
             <UserMenuAvatar />
@@ -618,7 +617,6 @@ export default function Layout() {
         >
           <TrialBadge />
           <AdminLink />
-          <NotificationBell />
         </aside>
       </header>
 
