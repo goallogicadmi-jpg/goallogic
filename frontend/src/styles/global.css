@@ -668,6 +668,12 @@ textarea:disabled {
   gap: 8px;
 }
 
+.main-header-actions__mobile-bell {
+  display: none;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .main-header-secondary-panel {
   display: none;
 }
@@ -1083,6 +1089,14 @@ section {
   }
 
   .main-header-actions__tools {
+    display: none;
+  }
+
+  .main-header-actions__mobile-bell {
+    display: flex;
+  }
+
+  .main-header-secondary-panel .notification-bell-container {
     display: none;
   }
 

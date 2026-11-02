@@ -205,14 +205,19 @@
   }
 
   .fechas-container {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 10px;
-    justify-content: stretch;
+    overflow-x: visible;
+    width: 100%;
   }
 
   .fecha-button {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
     min-height: 58px;
-    min-width: 88px;
-    max-width: 140px;
     padding: 9px 12px;
   }
 
@@ -529,7 +534,8 @@
   background: rgba(79, 195, 247, 0.1);
   border: none;
   border-bottom: 1px solid rgba(79, 195, 247, 0.2);
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 12px;
   cursor: pointer;
@@ -558,7 +564,11 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: #9aa4b2;
+  width: 28px;
+  height: 28px;
+  color: #c9d1d9;
+  opacity: 1;
+  visibility: visible;
   transition: transform 0.28s ease, color 0.2s ease;
 }
 
@@ -589,7 +599,8 @@
 }
 
 .grupo-liga-info {
-  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .grupo-liga-nombre {

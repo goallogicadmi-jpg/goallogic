@@ -97,9 +97,14 @@ export default function AgrupadorPartidos({
   onPartidoClick,
   onFavoritoChange,
   onPrediccionesClick,
+  selectedDate = null,
 }) {
   const [favoritosIds, setFavoritosIds] = useState({ equipos: [], ligas: [] });
   const [collapsedGroups, setCollapsedGroups] = useState(() => new Set());
+
+  useEffect(() => {
+    setCollapsedGroups(new Set());
+  }, [selectedDate, scope]);
 
   const toggleGroup = (groupKey) => {
     setCollapsedGroups((previous) => {

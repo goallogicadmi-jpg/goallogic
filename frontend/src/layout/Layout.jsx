@@ -603,6 +603,9 @@ export default function Layout() {
               <AdminLink />
               <NotificationBell />
             </div>
+            <div className="main-header-actions__mobile-bell" aria-label="Notificaciones">
+              <NotificationBell />
+            </div>
             <UserMenuAvatar />
           </div>
         </div>

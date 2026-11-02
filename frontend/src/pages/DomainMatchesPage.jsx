@@ -266,8 +266,9 @@ export default function DomainMatchesPage({ scope = "club", domain }) {
 
       {!loading && partidos.length > 0 && (
         <AgrupadorPartidos
-          key={`${resolvedScope}-${favoritosActualizados}`}
+          key={`${resolvedScope}-${selectedDate}-${favoritosActualizados}`}
           partidos={partidos}
+          selectedDate={selectedDate}
           filtros={filtros}
           busqueda={busqueda}
           orden={orden}
